@@ -10,4 +10,3 @@ RUN echo 'deb http://download.fpcomplete.com/ubuntu/trusty stable main'|sudo tee
 RUN sudo apt-get update && sudo apt-get install stack -y
 RUN stack install yesod-bin cabal-install --install-ghc
 RUN stack build
-CMD stack exec -- yesod devel

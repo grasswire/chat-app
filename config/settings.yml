@@ -18,7 +18,7 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 # skip-combining: false
 
 database:
-  user:     "_env:PGUSER:postgres"
+  user:     "_env:PGUSER:levinotik"
   password: "_env:PGPASS:doesntmatter"
   host:     "_env:POSTGRES_HOST:localhost"
   port:     "_env:PGPORT:5432"
