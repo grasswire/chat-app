@@ -1,0 +1,6 @@
+<div #cool>Chatroom
+<div #output>
+  <form #form>
+    <div #footer>
+    <input #input autofocus>
+<script src="https://code.jquery.com/jquery-2.1.4.min.js">    

@@ -3,9 +3,12 @@
 module Handler.Home where
 
 import Import
-import Yesod.Form.Bootstrap3 (BootstrapFormLayout (..), renderBootstrap3,
-                              withSmallInput)
 import Yesod.WebSockets
+
+
+getHealthCheckR :: Handler Text
+getHealthCheckR = return ("all good" :: Text)
+
 
 
 chatApp :: WebSocketsT Handler ()
@@ -22,59 +25,55 @@ chatApp = do
         (sourceWS $$ mapM_C (\msg ->
             atomically $ writeTChan (appWriteChan $ app) $ name <> ": " <> msg))
 
+newtype RoomId = RoomId Integer
 
+data ChatRoom = ChatRoom { title :: Text
+                         , description :: Text}
 
-getChatR :: Handler Html
-getChatR = do
+getRoom :: RoomId -> IO (Maybe ChatRoom)
+getRoom roomId = return (Just $ ChatRoom "scifi" "all things scifi")
+
+getChatR :: Text -> Handler Html
+getChatR roomId = do
     webSockets chatApp
     defaultLayout $ do
-        [whamlet|
-            <div #output>
-            <form #form>
-                <input #input autofocus>
-        |]
-        toWidget [lucius|
-            \#output {
-                width: 600px;
-                height: 400px;
-                border: 1px solid black;
-                margin-bottom: 1em;
-                p {
-                    margin: 0 0 0.5em 0;
-                    padding: 0 0 0.5em 0;
-                    border-bottom: 1px dashed #99aa99;
-                }
-            }
-            \#input {
-                width: 900px;
-                display: block;
-            }
-        |]
-        toWidget [julius|
-            var url = document.URL,
-                output = document.getElementById("output"),
-                form = document.getElementById("form"),
-                input = document.getElementById("input"),
-                conn;
+        $(widgetFile "chat-room")
 
-            url = url.replace("http:", "ws:").replace("https:", "wss:");
-
-            conn = new WebSocket(url);
-
-            conn.onmessage = function(e) {
-                var p = document.createElement("p");
-                p.appendChild(document.createTextNode(e.data));
-                output.appendChild(p);
-            };
-
-            form.addEventListener("submit", function(e){
-                conn.send(input.value);
-                input.value = "";
-                e.preventDefault();
-            });
-        |]
-
-sampleForm :: Form (FileInfo, Text)
-sampleForm = renderBootstrap3 BootstrapBasicForm $ (,)
-    <$> fileAFormReq "Choose a file"
-    <*> areq textField (withSmallInput "What's on the file?") Nothing
+-- getChatR :: Handler Html
+-- getChatR = do
+--     webSockets chatApp
+--     defaultLayout $ do
+--         [whamlet|
+--
+--
+--                     <div #output>
+--                     <form #form>
+--                         <div #footer>
+--                         <input #input autofocus>
+--
+--
+--
+--         |]
+--         toWidget [julius|
+--             var url = document.URL,
+--                 output = document.getElementById("output"),
+--                 form = document.getElementById("form"),
+--                 input = document.getElementById("input"),
+--                 conn;
+--
+--             url = url.replace("http:", "ws:").replace("https:", "wss:");
+--
+--             conn = new WebSocket(url);
+--
+--             conn.onmessage = function(e) {
+--                 var p = document.createElement("p");
+--                 p.appendChild(document.createTextNode(e.data));
+--                 output.appendChild(p);
+--             };
+--
+--             form.addEventListener("submit", function(e){
+--                 conn.send(input.value);
+--                 input.value = "";
+--                 e.preventDefault();
+--             });
+--         |]

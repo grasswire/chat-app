@@ -18,6 +18,7 @@ $newline never
 
     \<!--[if lt IE 9]>
     \<script src="http://html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    \<script src="//netdna.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
     \<![endif]-->
 
     <script>
@@ -28,7 +29,6 @@ $newline never
       <div id="main" role="main">
         ^{pageBody pc}
       <footer>
-        #{appCopyright $ appSettings master}
 
     $maybe analytics <- appAnalytics $ appSettings master
       <script>

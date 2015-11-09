@@ -56,7 +56,7 @@ library
                  , yesod-websockets              >= 0.2.4
                  , conduit-combinators           >= 1.0.3
                  , stm-lifted                    >= 0.1.0.0
-                 , transformers                  >= 0.4.2.0 
+                 , transformers                  >= 0.4.2.0
                  , classy-prelude                >= 0.10.2
                  , classy-prelude-conduit        >= 0.10.2
                  , classy-prelude-yesod          >= 0.10.2

@@ -121,9 +121,9 @@ instance YesodAuth App where
     type AuthId App = UserId
 
     -- Where to send a user after successful login
-    loginDest _ = ChatR
+    loginDest _ = HealthCheckR
     -- Where to send a user after logout
-    logoutDest _ = ChatR
+    logoutDest _ = HealthCheckR 
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
