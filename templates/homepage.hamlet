@@ -1,1 +1,5 @@
 <h1>Taplike
+  <ul>
+    $forall room <- chatRooms
+      <li><p>title: #{title room}
+          <p> description: #{description room}

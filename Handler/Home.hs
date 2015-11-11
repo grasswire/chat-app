@@ -47,7 +47,10 @@ getChatR roomId = do
     defaultLayout $ do
         $(widgetFile "chat-room")
 
+
+
 getHomeR :: Handler Html
 getHomeR = do
+    let chatRooms = [ChatRoom "NFL showdown" "all things foootball", ChatRoom "sunday funday" "chill on a sunday"]
     defaultLayout $ do
         $(widgetFile "homepage")
