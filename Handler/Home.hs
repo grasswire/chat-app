@@ -4,12 +4,9 @@ module Handler.Home where
 
 import Import
 import Yesod.WebSockets
-import Data.Maybe
 import Server
 import Network.Wai (remoteHost)
-import Yesod.Core.Types
 import qualified Data.Text.Lazy as TL
-import Types
 
 
 getHealthCheckR :: Handler Text
@@ -53,4 +50,5 @@ getHomeR :: Handler Html
 getHomeR = do
     let chatRooms = [ChatRoom "NFL showdown" "all things foootball", ChatRoom "sunday funday" "chill on a sunday"]
     defaultLayout $ do
+        setTitle "Taplike / Home"
         $(widgetFile "homepage")
