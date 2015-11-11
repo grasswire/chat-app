@@ -29,7 +29,7 @@ chatApp channelName = do
           race_
               (forever $ atomically (readTChan inChan) >>= sendTextData)
               (sourceWS $$ mapM_C (\msg ->
-                  atomically $ writeTChan outChan $  (Broadcast "channel" "client" (clientHost)) <> ": " <> msg))
+                  atomically $ writeTChan outChan $  msg))
       Nothing -> notAuthenticated
 
 -- placeholder for user auth/fetching username stuff

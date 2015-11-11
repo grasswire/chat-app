@@ -10,13 +10,15 @@ $(function(){
   conn = new WebSocket(url);
 
   conn.onmessage = function(e) {
+     console.log(e.data)
      var p = document.createElement("p");
      p.appendChild(document.createTextNode(e.data));
      output.appendChild(p);
   };
 
   form.addEventListener("submit", function(e){
-     conn.send(input.value);
+    var message = JSON.stringify({message: input.value})
+     conn.send(message);
      input.value = "";
      e.preventDefault();
   });

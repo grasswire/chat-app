@@ -23,6 +23,8 @@ import Data.Maybe
 import qualified Data.Text.Lazy as T
 import Data.Text.Lazy (Text)
 import Data.Monoid ((<>))
+import Data.Aeson (Value(..))
+
 
 {-|
   As part of creating our App, we initialize a new "Server", which begins with
@@ -72,23 +74,23 @@ newClient name  = do
 data Channel = Channel
     { channelName          :: ChannelName
     , channelClients       :: TVar (S.Set ClientName)
-    , channelBroadcastChan :: TChan Message
+    , channelBroadcastChan :: TChan Value
     }
 
 newChannel :: ChannelName -> STM Channel
 newChannel name = Channel name <$> newTVar S.empty <*> newBroadcastTChan
 
 -- Send a Notice to the channel.
-chanNotify :: Channel -> Text -> STM ()
-chanNotify chan = chanMessage chan . (Broadcast "random" "levi")
+chanNotify :: Channel -> Value -> STM ()
+chanNotify chan value = chanMessage chan value
 
 -- Send a Message to the channel.
-chanMessage :: Channel -> Message -> STM ()
+chanMessage :: Channel -> Value -> STM ()
 chanMessage = writeTChan . channelBroadcastChan
 
 -- Notify the channel a client has connected.
 chanNotifyHasConnected :: Channel -> ClientName -> STM ()
-chanNotifyHasConnected chan name = chanNotify chan (name <> " has connected.")
+chanNotifyHasConnected chan name = chanNotify chan Null
 
 data Server = Server
     { serverChannels :: TVar (Map ChannelName Channel)
@@ -152,12 +154,12 @@ chanAddClient' notifyAction chan@Channel{..} name = do
 
 -- Notify the channel a client has left.
 chanNotifyHasLeft :: Channel -> ClientName -> STM ()
-chanNotifyHasLeft chan name = chanNotify chan (name <> " has left the channel.")
+chanNotifyHasLeft chan name = chanNotify chan Null
 
 -- Notify the channel a client has disconnected.
 chanNotifyHasDisconnected :: Channel -> ClientName -> STM ()
-chanNotifyHasDisconnected chan name = chanNotify chan (name <> " has disconnected.")
+chanNotifyHasDisconnected chan name = chanNotify chan Null
 
 -- Notify the channel a client has joined.
 chanNotifyHasJoined :: Channel -> ClientName -> STM ()
-chanNotifyHasJoined chan name = chanNotify chan (name <> " has joined the channel.")
+chanNotifyHasJoined chan name = chanNotify chan Null

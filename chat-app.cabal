@@ -24,6 +24,10 @@ library
                      Handler.Home
                      Types
                      Server
+                     Taplike.Shared
+                     Taplike.Incoming
+                     Taplike.Outgoing
+                     Extra.JSON
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -93,6 +97,7 @@ library
                  , websockets
                  , semigroups
                  , wai
+                 , text-show
 
 executable         chat-app
     if flag(library-only)
