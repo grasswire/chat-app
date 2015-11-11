@@ -1,5 +1,10 @@
 $(function(){
 
+  var idSeq = 1;
+  function getNextIdSeq() {
+    idSeq += 1;
+    return idSeq;
+  }
   var url = document.URL,
     output = document.getElementById("output"),
     form = document.getElementById("form"),
@@ -17,7 +22,7 @@ $(function(){
   };
 
   form.addEventListener("submit", function(e){
-    var message = JSON.stringify({message: input.value})
+    var message = JSON.stringify({message: input.value, id: getNextIdSeq()})
      conn.send(message);
      input.value = "";
      e.preventDefault();

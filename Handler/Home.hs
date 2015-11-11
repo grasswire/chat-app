@@ -46,3 +46,8 @@ getChatR roomId = do
     webSockets $ chatApp roomId
     defaultLayout $ do
         $(widgetFile "chat-room")
+
+getHomeR :: Handler Html
+getHomeR = do
+    defaultLayout $ do
+        $(widgetFile "homepage")
