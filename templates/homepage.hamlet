@@ -1,5 +1,25 @@
-<h1>Taplike
-  <ul>
+<div class="navbar navbar-inverse navbar-static-top">
+  <div class="container-fluid">
+    <a href="#" class="navbar-brand">TapLike
+
+<section class="jumbotron">
+  <div class="container">
+    <div class="col-md-8">
+      <h1 class="jumbotron-heading">Bacon ipsum dolor
+      <p class="lead text-muted">Salami pork chop picanha t-bone tri-tip beef ribs cow, meatloaf sausage.
+    <div class="col-md-4">
+      <img src="http://dummyimage.com/16:9x200/cfcfcf&text=+">
+
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+        <h2>Happening Now
+
+<div class="container">
+  <div class="flex-row">
     $forall room <- chatRooms
-      <li><p>title: #{title room}
-          <p> description: #{description room}
+        <div class="card card-inverse">
+          <div class="card-block">
+            <h3 class="card-title">#{title room}
+            <p class="card-text">#{description room}
+            <a href="#" class="btn btn-primary">Go

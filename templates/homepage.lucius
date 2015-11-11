@@ -1,18 +1,21 @@
-h1 {
-    text-align: center;
-    margin-bottom: 30px
-}
+body {
+    .flex-row {
+        display: flex;
+        align-content: stretch;
+        align-items: stretch;
+        justify-content: space-around;
+        flex-wrap: wrap;
 
-li {
-    line-height: 2em;
-    font-size: 16px
-}
-ol {
-    margin-bottom: 30px
-}
-footer {
-    text-align: center
-}
-.input-sm {
-    margin-left: 20px
+    }
+    .card {
+        flex-grow: 1;
+        margin: 0 0.5em 0.5em 0;
+        background-color: #333;
+        border-color: #333;
+        width: 30%;
+    }
+
+    .jumbotron {
+        background: transparent;
+    }
 }
