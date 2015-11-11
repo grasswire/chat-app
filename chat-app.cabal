@@ -22,6 +22,8 @@ library
                      Settings.StaticFiles
                      Handler.Common
                      Handler.Home
+                     Types
+                     Server
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -86,6 +88,11 @@ library
                  , containers
                  , vector
                  , time
+                 , async
+                 , stm
+                 , websockets
+                 , semigroups
+                 , wai
 
 executable         chat-app
     if flag(library-only)

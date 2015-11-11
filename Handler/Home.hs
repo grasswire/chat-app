@@ -4,76 +4,45 @@ module Handler.Home where
 
 import Import
 import Yesod.WebSockets
+import Data.Maybe
+import Server
+import Network.Wai (remoteHost)
+import Yesod.Core.Types
+import qualified Data.Text.Lazy as TL
+import Types
 
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return ("all good" :: Text)
 
+chatApp :: Text -> WebSocketsT Handler ()
+chatApp channelName = do
+    sendTextData ("Welcome to #" <> channelName)
+    -- name <- receiveData :: IO Message
+    hostname <- getUsername <$> getRequest
+    case hostname of
+      Just clientHost -> do
+          app <- getYesod
+          outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
+          inChan <- atomically $ do
+              dupTChan outChan
+          race_
+              (forever $ atomically (readTChan inChan) >>= sendTextData)
+              (sourceWS $$ mapM_C (\msg ->
+                  atomically $ writeTChan outChan $  (Broadcast "channel" "client" (clientHost)) <> ": " <> msg))
+      Nothing -> notAuthenticated
 
-
-chatApp :: WebSocketsT Handler ()
-chatApp = do
-    sendTextData ("Welcome to the chat server, please enter your name." :: Text)
-    name <- receiveData
-    sendTextData $ "Welcome, " <> name
-    app <- getYesod
-    inChan <- atomically $ do
-        writeTChan (appWriteChan $ app) $ name <> " has joined the chat"
-        dupTChan (appWriteChan $ app)
-    race_
-        (forever $ atomically (readTChan inChan) >>= sendTextData)
-        (sourceWS $$ mapM_C (\msg ->
-            atomically $ writeTChan (appWriteChan $ app) $ name <> ": " <> msg))
+-- placeholder for user auth/fetching username stuff
+getUsername :: YesodRequest -> Maybe TL.Text
+getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
 data ChatRoom = ChatRoom { title :: Text
                          , description :: Text}
 
-getRoom :: RoomId -> IO (Maybe ChatRoom)
-getRoom roomId = return (Just $ ChatRoom "scifi" "all things scifi")
-
 getChatR :: Text -> Handler Html
 getChatR roomId = do
-    webSockets chatApp
+    webSockets $ chatApp roomId
     defaultLayout $ do
         $(widgetFile "chat-room")
-
--- getChatR :: Handler Html
--- getChatR = do
---     webSockets chatApp
---     defaultLayout $ do
---         [whamlet|
---
---
---                     <div #output>
---                     <form #form>
---                         <div #footer>
---                         <input #input autofocus>
---
---
---
---         |]
---         toWidget [julius|
---             var url = document.URL,
---                 output = document.getElementById("output"),
---                 form = document.getElementById("form"),
---                 input = document.getElementById("input"),
---                 conn;
---
---             url = url.replace("http:", "ws:").replace("https:", "wss:");
---
---             conn = new WebSocket(url);
---
---             conn.onmessage = function(e) {
---                 var p = document.createElement("p");
---                 p.appendChild(document.createTextNode(e.data));
---                 output.appendChild(p);
---             };
---
---             form.addEventListener("submit", function(e){
---                 conn.send(input.value);
---                 input.value = "";
---                 e.preventDefault();
---             });
---         |]

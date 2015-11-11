@@ -1,3 +1,5 @@
+{-# LANGUAGE RecordWildCards #-}
+
 module Foundation where
 
 import Import.NoFoundation
@@ -10,6 +12,11 @@ import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 
+import           Data.Map                 (Map)
+import qualified Data.Map                 as M
+import qualified Data.Set                 as S
+import Server
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
@@ -20,8 +27,9 @@ data App = App
     , appConnPool    :: ConnectionPool -- ^ Database connection pool.
     , appHttpManager :: Manager
     , appLogger      :: Logger
-    , appWriteChan    :: (TChan Text)
+    , chatServer     :: Server
     }
+
 
 instance HasHttpManager App where
     getHttpManager = appHttpManager
@@ -123,7 +131,7 @@ instance YesodAuth App where
     -- Where to send a user after successful login
     loginDest _ = HealthCheckR
     -- Where to send a user after logout
-    logoutDest _ = HealthCheckR 
+    logoutDest _ = HealthCheckR
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
