@@ -14,7 +14,7 @@ $newline never
       <div class="pull-right">
         <ul class="nav masthead__nav">
           <li class="nav-item">
-            <a href="#" class="btn btn-default">Sign In
+            <a href="@{TwitterAuthR}" class="btn btn-default">Sign In
 
     ^{pageBody pc}
 

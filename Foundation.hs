@@ -12,23 +12,30 @@ import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Yesod.Auth.OAuth (authTwitter)
+import Web.Authenticate.OAuth (OAuth(..), Credential(..))
+import qualified Data.ByteString as BS
+
 
 import           Data.Map                 (Map)
 import qualified Data.Map                 as M
 import qualified Data.Set                 as S
 import Server
 
+type OAuthToken = BS.ByteString
+
+
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
 -- starts running, such as database connections. Every handler will have
 -- access to the data present here.
 data App = App
-    { appSettings    :: AppSettings
-    , appStatic      :: Static -- ^ Settings for static file serving.
-    , appConnPool    :: ConnectionPool -- ^ Database connection pool.
-    , appHttpManager :: Manager
-    , appLogger      :: Logger
-    , chatServer     :: Server
+    { appSettings       :: AppSettings
+    , appStatic         :: Static -- ^ Settings for static file serving.
+    , appConnPool       :: ConnectionPool -- ^ Database connection pool.
+    , appHttpManager    :: Manager
+    , appLogger         :: Logger
+    , chatServer        :: Server
+    , twitterTokenStore :: IORef (M.Map OAuthToken Credential)
     }
 
 
@@ -149,7 +156,8 @@ instance YesodAuth App where
     -- You can add other plugins like BrowserID, email or OAuth here
 --    authPlugins _ = [authBrowserId def]
 
-    authPlugins _ = [authTwitter "jQLyz9tL4N1dH3JgoRjt7oXJd" "xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"]
+    -- authPlugins _ = [authTwitter "jQLyz9tL4N1dH3JgoRjt7oXJd" "xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"]
+    authPlugins _ = []
 
 
     authHttpManager = getHttpManager
