@@ -1,0 +1,25 @@
+.content-container {
+    @include container();
+    margin: 0 auto;
+    max-width: $max-page-width;
+    padding: 0 10px;
+}
+
+.content-flex-wrapper {
+    align-content: center;
+    align-items: stretch;
+    flex-wrap: wrap;
+    display: flex;
+    max-width: $max-page-width;
+}
+
+.content-wrapper {
+    @include container();
+}
+
+.main {
+   &__headline {
+      @include font-size(30px);
+      padding-bottom: 22px;
+   }
+}

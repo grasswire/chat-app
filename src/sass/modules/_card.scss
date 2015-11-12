@@ -1,0 +1,25 @@
+.card {
+   flex-grow: 1;
+   margin: 0 0.5em 0.5em 0;
+   background-color: get-color(catskill-white);
+   border-radius: 4px;
+   padding: 20px 30px;
+   width: 30%;
+   color: get-color(charcoal);
+
+   &__button {
+      @include button();
+   }
+
+   &__title {
+      @include font-size(24px);
+      padding: 10px 0;
+   }
+
+   &__text {
+      @include font-size(18px);
+      padding: 0 0 10px 0;
+   }
+}
+
+

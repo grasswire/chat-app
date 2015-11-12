@@ -1,0 +1,43 @@
+.masthead {
+   @include container();
+   background: get-color(mercury);
+   font-weight: get-font-weight(light);
+   height: 50px;
+}
+
+.logo {
+   @include font-size(22px);
+   @include span(2 of 16);
+   line-height: 2;
+   text-decoration: none;
+}
+
+.nav {
+   &__main {
+      @include span(last 8 of 16);
+   }
+
+   &__list {
+      text-align: right;
+   }
+
+   &__item {
+      @include font-size(16px);
+      display: inline-block;
+      margin: 0 5px;
+
+      a {
+         text-decoration: none;
+      }
+
+      @include last {
+         margin: 0;
+      }
+   }
+
+   &__signin {
+      @include button();
+      margin: 4px 0 0 0;
+      display: inline-block;
+   }
+}

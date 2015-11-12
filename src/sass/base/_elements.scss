@@ -23,6 +23,7 @@ html {
 }
 
 body {
+   color: get-color(charcoal);
    height: 100%;
    margin: 0;
    -webkit-font-smoothing: antialiased !important;
@@ -57,6 +58,7 @@ a {
       family: inherit;
       weight: inherit;
    }
+   text-decoration: none;
 }
 
 p {
@@ -68,6 +70,7 @@ nav {
    ol, ul {
       list-style-type: none;
       margin: 0;
+      padding: 0;
 
       li {
          margin: 0;

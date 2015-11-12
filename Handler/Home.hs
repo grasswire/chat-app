@@ -148,7 +148,7 @@ getChatR roomId = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    let chatRooms = [ChatRoom "NFL showdown" "all things foootball", ChatRoom "sunday funday" "chill on a sunday"]
+    let chatRooms = [ChatRoom "NFL showdown" "all things foootball", ChatRoom "sunday funday" "chill on a sunday", ChatRoom "Rangers Rant" "Live! Let's talk about the game tonight", ChatRoom "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")
