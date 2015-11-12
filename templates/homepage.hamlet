@@ -22,4 +22,4 @@
           <div class="card-block">
             <h3 class="card-title">#{title room}
             <p class="card-text">#{description room}
-            <a href="#" class="btn btn-primary">Go
+            <a href="@{ChatR $ title room}" class="btn btn-primary">Go
