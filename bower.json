@@ -1,0 +1,32 @@
+{
+  "name": "HisenbergToolkit",
+  "version": "0.7.0",
+  "homepage": "https://github.com/joecianflone/heisenberg-toolkit",
+  "authors": [
+    "Joe Cianflone <joe@cianflone.co>"
+  ],
+  "dependencies": {
+    "amplify": "~1.1.2",
+    "fontawesome": "~4.4.0",
+    "handlebars": "~4.0.2",
+    "include-media": "~1.4.1",
+    "jquery": "~2.1.4",
+    "jquery-validation": "~1.14.0",
+    "modernizr": "~3.2.0",
+    "momentjs": "~2.10.6",
+    "normalize-scss": "~3.0.3",
+    "susy": "~2.2.6",
+    "underscore": "~1.8.3",
+    "underscore.string": "~3.2.2"
+  },
+  "license": "MIT",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "src/bower",
+    "test",
+    "tests"
+  ]
+}

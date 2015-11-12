@@ -1,0 +1,11 @@
+#!/bin/bash
+
+
+npm install
+npm prune
+
+gulp boot
+gulp &
+
+stack build
+stack exec -- yesod devel

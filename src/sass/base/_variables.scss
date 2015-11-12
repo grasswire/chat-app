@@ -1,0 +1,67 @@
+/**
+ * Fonts
+ * ----------------------------------------------------------------------------
+ * I'm a simple guy with simple needs, I don't like to mix a lot of different
+ * fonts in my designs.  To keep it simple, I have two different font types:
+ * copy and headlines.  They are exactly what they sound like.
+ *
+ * Make sure you also define "fallbacks" on the off chance Google fonts goes
+ * down or your user is on a crappy connection.
+ *
+ */
+
+$stack-settings: (
+   serif:          #{"Roboto", "Helvetica Neue", sans-serif},
+   sans-serif:     #{"Patua One", Georgia, serif},
+   base-size:      62.5%,
+   letter-spacing: 0.1em,
+   line-height:    1.3
+);
+
+$font-weights: (
+   ultra-thin: 100,
+   thin:       200,
+   light:      300,
+   regular:    400,
+   strong:     500,
+   stronger:   600,
+   bold:       700,
+   bolder:     800,
+   ultra-bold: 900
+);
+
+$breakpoints: (
+   'puny':         240px,
+   'tiny':         320px,
+   'bitty':        480px,
+   'small':        640px,
+   'bantam':       768px,
+   'medium':       980px,
+   'large':        1024px,
+   'xlarge':       1160px,
+   'xxlarge':      1280px,
+   'jumbo':        1440px,
+   'hulking':      1600px,
+   'titanic':      1920px
+);
+
+$colors: (
+   white:          #fff,
+   charcoal:       #444,
+   mercury:        #e8e8e8,
+   dove-gray:      #6f6e6e,
+   gallery:        #eeeeee,
+   picton-blue:    #68aad5,
+   silver-chalice: #a6a5a5
+);
+
+@include layout((
+  columns: 16,
+  gutter-position: no-gutter,
+  gutters: 0,
+  global-box-sizing: border-box
+));
+
+$current-zindex: 100;
+$max-page-width: 1200px;
+
