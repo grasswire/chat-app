@@ -18,14 +18,14 @@ import qualified Network.HTTP.Conduit as HTTP
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
-callback :: String
-callback = "http://localhost:3000/callback"
+-- callback :: String
+-- callback = "http://localhost:3000/callback"
 
-getRequestToken :: TwitterConf -> OAuth
-getRequestToken (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
+getRequestToken :: Text -> TwitterConf -> OAuth
+getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
         { oauthConsumerKey = S8.pack $ unpack consumerKey
         , oauthConsumerSecret = S8.pack $ unpack secret
-        , oauthCallback = Just $ S8.pack $ callback
+        , oauthCallback = Just $ S8.pack $ unpack $ callback
         }
 
 storeCredential :: OAuthToken -> Credential -> App -> IO ()
@@ -51,8 +51,9 @@ getTwitterAuthR :: Handler Text
 getTwitterAuthR = do
   app <- getYesod
   let conf = twitterConf . appSettings $ app
-  liftIO $ print (getRequestToken conf)
-  let token = getRequestToken conf
+  renderFunc <- getUrlRender
+  let callback = renderFunc $ TwitterCallbackR
+  let token = getRequestToken callback conf
   cred <- liftIO $ HTTP.withManager $ OA.getTemporaryCredential token
   case lookup "oauth_token" $ unCredential cred of
      Just temporaryToken -> do
@@ -68,7 +69,9 @@ getTwitterCallbackR = do
    oauthVerifier <-  lookupGetParam "oauth_verifier"
    let tokenStore = twitterTokenStore app
    let conf = twitterConf . appSettings $ app
-   let tokens = getRequestToken conf
+   renderFunc <- getUrlRender
+   let callback = renderFunc $ TwitterCallbackR
+   let tokens = getRequestToken callback conf
    mcred <- case temporaryToken of
               Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
               Nothing -> return Nothing
