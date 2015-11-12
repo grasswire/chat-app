@@ -7,34 +7,37 @@ import Yesod.WebSockets
 import Server
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
+import qualified Data.ByteString.Char8 as S8
+import Web.Twitter.Conduit hiding (lookup)
+import Web.Authenticate.OAuth (OAuth(..), Credential(..))
+import qualified Data.ByteString as S
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
--- callback :: String
--- callback = "http://localhost:3000/callback"
+callback :: String
+callback = "http://localhost:3000/callback"
 
--- getRequestToken :: IO OAuth
--- getRequestToken = do
---     consumerKey <- getEnv "OAUTH_CONSUMER_KEY"
---     consumerSecret <- getEnv "OAUTH_CONSUMER_SECRET"
+-- getRequestToken :: TwitterConf -> IO OAuth
+-- getRequestToken conf = do
+--     consumerKey <- consumerKey conf
+--     consumerSecret <- consumerSecret conf
 --     return $
 --         twitterOAuth
 --         { oauthConsumerKey = S8.pack consumerKey
 --         , oauthConsumerSecret = S8.pack consumerSecret
 --         , oauthCallback = Just $ S8.pack callback
 --         }
---
--- type OAuthToken = S.ByteString
---
--- getTwitterAuthR :: Handler ()
--- getTwitterAuthR = do
---   twitterConf <- twitterConf . appSettings <$> getYesod
---   token <- getRequestToken "some callback"
---   redirect "https://api.twitter.com/oauth/authenticate?oauth_token"
---   where
---     -- gives us oauth token and oauth token secret
---     getRequestToken oauthCallback = _
+
+type OAuthToken = S.ByteString
+
+getTwitterAuthR :: Handler Text
+getTwitterAuthR = do
+  -- conf <- twitterConf . appSettings <$> getYesod
+  -- token <- getRequestToken conf
+  return "hi"
+  -- return redirect "https://api.twitter.com/oauth/authenticate?oauth_token=" <>
+
 
 chatApp :: Text -> WebSocketsT Handler ()
 chatApp channelName = do
