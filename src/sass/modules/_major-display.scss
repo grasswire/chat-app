@@ -1,0 +1,22 @@
+.major-display {
+   padding: 60px 0;
+
+   &__textblock {
+      @include span(8 of 16);
+   }
+
+   &__visual {
+      @include span(last 4 of 16);
+   }
+
+   &__headline {
+      @include font-size(45px);
+      line-height: 1;
+   }
+
+   &__lead {
+      @include font-size(18px);
+      padding: 15px 0;
+      line-height: 1.4;
+   }
+}

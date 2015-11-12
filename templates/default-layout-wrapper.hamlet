@@ -5,16 +5,16 @@ $newline never
     <meta charset="UTF-8">
     <title>#{pageTitle pc}
     <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="https://cdn.rawgit.com/twbs/bootstrap/v4-dev/dist/css/bootstrap.css">
     ^{pageHead pc}
 
   <body>
-    <div class="masthead navbar navbar-light bg-faded">
-      <a href="#" class="navbar-brand">TapLike
-      <div class="pull-right">
-        <ul class="nav masthead__nav">
-          <li class="nav-item">
-            <a href="#" class="btn btn-default">Sign In
+    <section class="masthead">
+      <div class="content-container">
+        <a href="#" class="logo">TapLike
+        <nav class="nav__main">
+          <ul class="nav__list">
+            <li class="nav__item">
+              <a href="#" class="nav__signin">Sign In
 
     ^{pageBody pc}
 

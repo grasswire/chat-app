@@ -1,0 +1,13 @@
+#!/bin/bash
+
+
+npm install
+npm prune
+
+gulp boot
+gulp &
+
+touch ./Settings/StaticFiles.hs
+
+stack build
+stack exec -- yesod devel

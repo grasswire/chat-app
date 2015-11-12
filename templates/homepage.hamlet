@@ -1,21 +1,17 @@
-<section class="jumbotron">
-  <div class="container">
-    <div class="col-md-8">
-      <h1 class="jumbotron-heading">Chat with other people about _________.
-      <p class="lead text-muted">TapLike is the easiest way to chat with other people about anything at all. Join a live conversation or start your own.
-    <div class="col-md-4">
+<header class="major-display">
+  <div class="content-container">
+    <div class="major-display__textblock">
+      <h1 class="major-display__headline">Chat with other people about _________.
+      <p class="major-display__lead">TapLike is the easiest way to chat with other people about anything at all. Join a live conversation or start your own.
+    <div class="major-display__visual">
       <img src="static/images/screenshot.png">
 
-<div class="container">
-  <div class="row">
-    <div class="col-md-12">
-        <h2>Live
-
-<div class="container">
-  <div class="flex-row">
-    $forall room <- chatRooms
-        <div class="card card-inverse">
-          <div class="card-block">
-            <h3 class="card-title">#{title room}
-            <p class="card-text">#{description room}
-            <a href="@{ChatR $ title room}" class="btn btn-primary">Go
+<main role="main">
+  <div class="content-container">
+    <h2 class="main__headline">Live Now
+    <div class="content-flex-wrapper">
+      $forall room <- chatRooms
+        <div class="card">
+          <h3 class="card__title">#{title room}
+          <p class="card__text">#{description room}
+          <a href="@{ChatR $ title room}" class="card__button">Enter
