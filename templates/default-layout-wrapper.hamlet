@@ -14,7 +14,7 @@ $newline never
         <nav class="nav__main">
           <ul class="nav__list">
             <li class="nav__item">
-              <a href="#" class="nav__signin">Sign In
+              <a href="@{TwitterAuthR}" class="nav__signin">Sign In
 
     ^{pageBody pc}
 

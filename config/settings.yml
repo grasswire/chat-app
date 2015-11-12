@@ -26,10 +26,10 @@ database:
   poolsize: "_env:PGPOOLSIZE:10"
 
 twitter:
-  accessKey:      "_env:TWITTER_ACCESS_KEY:495464885-8CW0LlG7moshhBOSLSy5TK25v6BTmjWgfib5pJ2T"
-  accessSecret:   "_env:TWITTER_ACCESS_SECRET:1QT6jFWFdGSPq0CLRo9epVvNZLdSca0DUoKg1qu8sMQKE"
-  consumerKey:    "_env:TWITTER_CONSUMER_KEY:qXeZrucRFtt8Lg21saVIQr2Lh"
-  consumerSecret: "_env:TWITTER_CONSUMER_SECRET:Fvb5rdmwY62vhSxNE0e0h7HPbFrZ9ErkEppci4lwRcyVpsHeSW"
+  accessKey:      "_env:TWITTER_ACCESS_KEY:4148784514-UJWayNsMMrHUaFYQu9KjiKoE9BMimidVhrvxJqV"
+  accessSecret:   "_env:TWITTER_ACCESS_SECRET:0dfZvs2dCNCjVCLftq2xP8aYjkAPrIRd5hnZS2OoxYSAr"
+  consumerKey:    "_env:TWITTER_CONSUMER_KEY:jQLyz9tL4N1dH3JgoRjt7oXJd"
+  consumerSecret: "_env:TWITTER_CONSUMER_SECRET:xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

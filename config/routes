@@ -9,3 +9,7 @@
 /healthcheck HealthCheckR GET
 
 / HomeR GET
+
+/login TwitterAuthR GET
+
+/callback TwitterCallbackR GET
