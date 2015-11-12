@@ -1,0 +1,82 @@
+/**
+ * Resize font from one type to another
+ * @param  {[type]} $fontSize               the font size that you want
+ * @param  {[type]} $toUnit:           rem  the unit you want to convert to
+ * @param  {[type]} $fromUnitSpecific: px   default unit we're going to convert from (if you don't set it)
+ *
+ * Example 1:
+ *    @include  font-size(22px);
+ *    Result
+ *    font-size: 22px; // generates a fallback for rems
+ *    font-size: 2.2rem
+ *
+ * Example 2:
+ *    @include  font-size(22em, "px");
+ *    Result:
+ *    font-size: 22px;
+ *
+ */
+@mixin font-size($fontSize, $toUnit: rem, $fromUnitSpecific: px) {
+    $currentUnit: unit($fontSize);
+    $currentValue: getValue($fontSize);
+
+    @if $currentUnit == "" {
+        $currentUnit: $fromUnitSpecific;
+    }
+
+    @if $currentUnit == "px" {
+        @if $toUnit == "rem" {
+            font-size: unquote(($currentValue) + px);
+            font-size: unquote(($currentValue / 10) + $toUnit);
+        }
+        @else if $toUnit == "em" {
+            font-size: unquote(($currentValue / 10) + $toUnit);
+        }
+    }
+    @else if $currentUnit == "rem" or $currentUnit == "em" {
+        @if $toUnit == "px" {
+            font-size: unquote(($currentValue * 10) + px);
+        }
+        @else {
+            font-size: unquote(($currentValue) + $toUnit);
+        }
+    }
+}
+
+/**
+ * font-face mixin
+ * @param  {[type]} $font-family                   Name of the font
+ * @param  {[type]} $font-file-name: false         If the name of the font differs from the name of the familiy
+ * @param  {[type]} $weight:         normal        Font weight
+ * @param  {[type]} $style:          normal        Font style
+ * @param  {[type]} $otf:            false         If you aren't using a TTF, but OTF set to true
+ *
+ */
+@mixin font-face($font-family, $font-file-name: false, $weight: normal, $style: normal, $otf: false) {
+    @font-face {
+        $font: $font-family;
+        $ottf: ttf;
+        $ottf-format: truetype;
+
+        @if $font-file-name {
+            $font: $font-file-name;
+        }
+
+        @if $otf {
+            $ottf: otf;
+            $ottf-format: OpenType;
+        }
+
+        font: {
+            family: $font-family;
+            weight: $weight;
+            style: $style;
+        }
+
+        src: font-url('#{$font}.eot');
+        src: font-url('#{$font}.eot?#iefix')          format('embedded-opentype'),
+        font-url('#{$font}.woff')                     format('woff'),
+        font-url('#{$font}.#{$ottf}')                 format('#{$ottf-format}'),
+        font-url('#{$font}.svg##{$font-family}')      format('svg');
+    }
+}

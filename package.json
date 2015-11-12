@@ -1,0 +1,42 @@
+{
+  "name": "HeisenbergToolkit",
+  "version": "0.7.0",
+  "description": "A project base for building large apps with lots of JavaScript and Sass but no framework",
+  "main": "index.html",
+  "dependencies": {
+    "del": "^1.2.0",
+    "gulp": "^3.9.0",
+    "gulp-autoprefixer": "^2.3.1",
+    "gulp-bower": "0.0.10",
+    "gulp-concat": "^2.6.0",
+    "gulp-declare": "^0.3.0",
+    "gulp-handlebars": "^4.0.0",
+    "gulp-if": "^1.2.5",
+    "gulp-imagemin": "^2.3.0",
+    "gulp-livereload": "^3.8.0",
+    "gulp-plumber": "^1.0.1",
+    "gulp-sass": "^2.0.4",
+    "gulp-sourcemaps": "^1.5.0",
+    "gulp-uglify": "^1.1.0",
+    "gulp-wrap": "^0.11.0",
+    "imagemin-pngquant": "^4.1.2",
+    "yargs": "^3.15.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "gulp": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/joecianflone/heisenberg-toolkit.git"
+  },
+  "author": "Joe Cianflone <joe@cianflone.co>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/joecianflone/heisenberg-toolkit/issues"
+  },
+  "homepage": "https://github.com/joecianflone/heisenberg-toolkit",
+  "devDependencies": {
+    "gulp-notify": "^2.2.0"
+  }
+}

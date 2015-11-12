@@ -1,0 +1,80 @@
+
+/**
+ * Delete/Addition friendly.  These are different libraries that I like and use
+ * but don't use things you hate, remove what you don't want.
+ *
+ * If you want to use Bootstrap strip out all of these guys.  Normalize is
+ * redundant (it's included in bootstrap) and Bootstrap comes with a grid.
+ * Font awesome isn't needed either, so you can strip that out too, but I
+ * personally like those fonts better and I know most developers end up putting
+ * that in at some point anyway.  Include-media is a great tool for working
+ * with media queries, I think you should look into it, but again, with Bootstrap
+ * it may not be needed.
+ *
+ */
+// Vendor .....................................................................
+@import "../bower/normalize-scss/_normalize";
+@import "../bower/fontawesome/scss/font-awesome";
+@import "../bower/susy/sass/_susy";
+@import "../bower/include-media/dist/_include-media";
+
+/**
+ * These are just some functions and mixins that I end up bringing into
+ * every project I create.  Particulary I use the @include font-size() mixin
+ * everwhere.
+ */
+// Functions & Mixins .........................................................
+@import "functions/getters-setters";
+@import "mixins/font";
+@import "mixins/pseudo-elements";
+@import "mixins/flexbox";
+@import "mixins/form-elements";
+
+/**
+ * This is where you start editing.  We don't make any assumptions so these are
+ * all just bare files.  With a little text to explain the thoughts behind it all/
+ */
+// Base .......................................................................
+@import "base/variables";
+@import "base/elements";
+
+/**
+ * Most of your code *should* nicely fit into modules, but I'd the truth is that
+ * not everything is a module.  Sometimes, things are really related to a specific
+ * page. So, when you have content that is only for a specific page, it should go
+ * into this section.
+ *
+ * Now, if you have a small site one single _page.scss file should be enough.
+ * However, if you've got a big site, don't try and cram everythning into one
+ * file.  Break your _page.scss up into logical page modules:
+ *
+ * pages/_login
+ * pages/_landing
+ *
+ * Now this might seem silly to say, but try very hard to *not* use pages.
+ * You want your CSS to be like little legos that can move from page-to-page
+ * and section-to-section.  When you find yourself dumping stuff in the
+ * page section, ask yourself, "would this be better as a module?"
+ *
+ */
+@import "pages/page";
+
+/**
+ * This is Sass, don't just dump eveything in a file called "styles" or "main" FFS.
+ * Break your code up into individual modules.  You'll be able to maintain it better
+ * later on in life...you know...like 6 months from now once you have no idea
+ * of how you put together and the client calls you needed help...your future
+ * self will thank you.
+ *
+ * Important thing to note about modules: they're discrete objects.  They should
+ * not rely on any other module.  Someone should be able to come into this file
+ * and move all the modules around and your site should work fine.  No cascade.
+ */
+// Modules ....................................................................
+
+
+/**
+ * I use a BEM style of CSS development, so sometimes I have classes that don't
+ * really fit or span multiple modules.  Those go here.
+ */
+// Utility Classes ............................................................

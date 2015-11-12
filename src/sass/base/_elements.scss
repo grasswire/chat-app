@@ -1,0 +1,77 @@
+/**
+ * Elements are global styles.  They are very generic, in fact, you
+ * should think long and hard before adding anything to this stylesheet.
+ * Do not add font sizes or colors in here...yes even if it's global
+ * because the truth is it probably isn't as global as you think.
+ */
+html {
+   box-sizing: border-box;
+   font: {
+      family: get-stack(sans-serif);
+      size: get-stack(base-size);
+      weight: get-weight(light);
+   }
+   letter-spacing: get-stack(letter-spacing);
+}
+
+* {
+   box-sizing: inherit;
+   -webkit-overflow-scrolling: touch;
+   &:before, &:after {
+      box-sizing: inherit;
+   }
+}
+
+body {
+   height: 100%;
+   margin: 0;
+   -webkit-font-smoothing: antialiased !important;
+   -moz-osx-font-smoothing: grayscale !important;
+}
+
+img {
+   height: 100%;
+   width: 100%;
+}
+
+h1, h2, h3, h4, h5, h6 {
+   font: {
+      family: get-stack(serif);
+      weight: get-weight(bold);
+   }
+   letter-spacing: 0;
+   margin: 0;
+}
+
+b, strong {
+   font-weight: get-weight(bold);
+}
+
+p, ul, ol {
+   font-size: inherit;
+}
+
+a {
+   color: inherit;
+   font: {
+      family: inherit;
+      weight: inherit;
+   }
+}
+
+p {
+   margin: 0;
+   padding: 0;
+}
+
+nav {
+   ol, ul {
+      list-style-type: none;
+      margin: 0;
+
+      li {
+         margin: 0;
+         padding: 0;
+      }
+   }
+}
