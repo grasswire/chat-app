@@ -99,9 +99,9 @@ library
                  , wai
                  , text-show
                  , yesod-auth-oauth
-                 , twitter-conduit
-                 , twitter-types
-                 , twitter-types-lens
+                --  , twitter-conduit
+                --  , twitter-types
+                --  , twitter-types-lens
 
 executable         chat-app
     if flag(library-only)
