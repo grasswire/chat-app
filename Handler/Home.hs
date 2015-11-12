@@ -5,17 +5,42 @@ module Handler.Home where
 import Import
 import Yesod.WebSockets
 import Server
-import Settings.StaticFiles
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return ("all good" :: Text)
 
+
+-- callback :: String
+-- callback = "http://localhost:3000/callback"
+--
+-- getRequestToken :: IO OAuth
+-- getRequestToken = do
+--     consumerKey <- getEnv "OAUTH_CONSUMER_KEY"
+--     consumerSecret <- getEnv "OAUTH_CONSUMER_SECRET"
+--     return $
+--         twitterOAuth
+--         { oauthConsumerKey = S8.pack consumerKey
+--         , oauthConsumerSecret = S8.pack consumerSecret
+--         , oauthCallback = Just $ S8.pack callback
+--         }
+--
+-- type OAuthToken = S.ByteString
+--
+-- getTwitterAuthR :: Handler ()
+-- getTwitterAuthR = do
+--   twitterConf <- twitterConf . appSettings <$> getYesod
+--   token <- getRequestToken "some callback"
+--   redirect "https://api.twitter.com/oauth/authenticate?oauth_token"
+--   where
+--     -- gives us oauth token and oauth token secret
+--     getRequestToken oauthCallback = _
+
 chatApp :: Text -> WebSocketsT Handler ()
 chatApp channelName = do
     sendTextData ("Welcome to #" <> channelName)
-    -- name <- receiveData :: IO Message
+-- name <- receiveData :: IO Message
     hostname <- getUsername <$> getRequest
     case hostname of
       Just clientHost -> do
