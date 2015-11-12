@@ -1,21 +1,19 @@
-body {
-    .flex-row {
-        display: flex;
-        align-content: stretch;
-        align-items: stretch;
-        justify-content: space-around;
-        flex-wrap: wrap;
+.flex-row {
+    display: flex;
+    align-content: stretch;
+    align-items: stretch;
+    justify-content: space-around;
+    flex-wrap: wrap;
+}
 
-    }
-    .card {
-        flex-grow: 1;
-        margin: 0 0.5em 0.5em 0;
-        background-color: #333;
-        border-color: #333;
-        width: 30%;
-    }
+.card {
+    flex-grow: 1;
+    margin: 0 0.5em 0.5em 0;
+    background-color: #333;
+    border-color: #333;
+    width: 30%;
+}
 
-    .jumbotron {
-        background: transparent;
-    }
+.jumbotron {
+    background: transparent;
 }
