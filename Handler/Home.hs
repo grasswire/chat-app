@@ -8,7 +8,6 @@ import Server
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 
-
 getHealthCheckR :: Handler Text
 getHealthCheckR = return ("all good" :: Text)
 
