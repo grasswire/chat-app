@@ -1,7 +1,9 @@
 User
-    ident Text
-    password Text Maybe
-    UniqueUser ident
+    twitterUserId Word64
+    twitterScreenName Text
+    profileImageUrl Text
+    emailAddress Text Maybe
+    UniqueTwitterUserId twitterUserId
     deriving Typeable
 Email
     email Text
