@@ -5,6 +5,7 @@ module Handler.Home where
 import Import
 import Yesod.WebSockets
 import Server
+import Settings.StaticFiles
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 
