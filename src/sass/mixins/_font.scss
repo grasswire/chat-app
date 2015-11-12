@@ -18,7 +18,7 @@
  */
 @mixin font-size($fontSize, $toUnit: rem, $fromUnitSpecific: px) {
     $currentUnit: unit($fontSize);
-    $currentValue: getValue($fontSize);
+    $currentValue: get-value($fontSize);
 
     @if $currentUnit == "" {
         $currentUnit: $fromUnitSpecific;

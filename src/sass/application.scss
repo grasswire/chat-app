@@ -71,7 +71,9 @@
  * and move all the modules around and your site should work fine.  No cascade.
  */
 // Modules ....................................................................
-
+@import "modules/major-display";
+@import "modules/masthead";
+@import "modules/card";
 
 /**
  * I use a BEM style of CSS development, so sometimes I have classes that don't
