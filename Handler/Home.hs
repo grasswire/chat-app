@@ -11,10 +11,9 @@ import qualified Data.Text.Lazy as TL
 getHealthCheckR :: Handler Text
 getHealthCheckR = return ("all good" :: Text)
 
-
 -- callback :: String
 -- callback = "http://localhost:3000/callback"
---
+
 -- getRequestToken :: IO OAuth
 -- getRequestToken = do
 --     consumerKey <- getEnv "OAUTH_CONSUMER_KEY"

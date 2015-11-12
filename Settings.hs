@@ -1,3 +1,6 @@
+{-# LANGUAGE DeriveGeneric #-}
+{-# LANGUAGE DefaultSignatures #-}
+{-# LANGUAGE GeneralizedNewtypeDeriving #-}
 -- | Settings are centralized, as much as possible, into this file. This
 -- includes database connection settings, static file locations, etc.
 -- In addition, you can configure a number of different aspects of Yesod
@@ -52,6 +55,8 @@ data AppSettings = AppSettings
     -- ^ Copyright text to appear in the footer of the page
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
+    , twitterConf               :: TwitterConf
+-- ^ Twitter API credentials
     }
 
 instance FromJSON AppSettings where
@@ -77,8 +82,27 @@ instance FromJSON AppSettings where
 
         appCopyright              <- o .: "copyright"
         appAnalytics              <- o .:? "analytics"
+        twitterConf               <- o .: "twitter"
 
         return AppSettings {..}
+
+newtype TwitterAccessKey = TwitterAccessKey Text deriving (Show, Generic)
+newtype TwitterAccessSecret = TwitterAccessSecret Text deriving (Show, Generic)
+newtype TwitterConsumerKey = TwitterConsumerKey Text deriving (Show, Generic)
+newtype TwitterConsumerSecret = TwitterConsumerSecret Text deriving (Show, Generic)
+
+data TwitterConf = TwitterConf
+  { accessKey  :: TwitterAccessKey
+  , accessSecret :: TwitterAccessSecret
+  , consumerKey  ::  TwitterConsumerKey
+  , consumerSecret :: TwitterConsumerSecret
+  } deriving (Show, Generic)
+
+instance FromJSON TwitterConf
+instance FromJSON TwitterAccessSecret
+instance FromJSON TwitterAccessKey
+instance FromJSON TwitterConsumerKey
+instance FromJSON TwitterConsumerSecret
 
 -- | Settings for 'widgetFile', such as which template languages to support and
 -- default Hamlet settings.

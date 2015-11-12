@@ -25,5 +25,11 @@ database:
   database: "_env:PGDATABASE:taplike"
   poolsize: "_env:PGPOOLSIZE:10"
 
+twitter:
+  accessKey:      "_env:TWITTER_ACCESS_KEY:495464885-8CW0LlG7moshhBOSLSy5TK25v6BTmjWgfib5pJ2T"
+  accessSecret:   "_env:TWITTER_ACCESS_SECRET:1QT6jFWFdGSPq0CLRo9epVvNZLdSca0DUoKg1qu8sMQKE"
+  consumerKey:    "_env:TWITTER_CONSUMER_KEY:qXeZrucRFtt8Lg21saVIQr2Lh"
+  consumerSecret: "_env:TWITTER_CONSUMER_SECRET:Fvb5rdmwY62vhSxNE0e0h7HPbFrZ9ErkEppci4lwRcyVpsHeSW"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

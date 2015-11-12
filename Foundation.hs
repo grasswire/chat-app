@@ -11,6 +11,7 @@ import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
+import Yesod.Auth.OAuth (authTwitter)
 
 import           Data.Map                 (Map)
 import qualified Data.Map                 as M
@@ -57,6 +58,8 @@ instance Yesod App where
     -- see: https://github.com/yesodweb/yesod/wiki/Overriding-approot
     approot = ApprootMaster $ appRoot . appSettings
 
+
+
     -- Store session data on the client in encrypted cookies,
     -- default session idle timeout is 120 minutes
     makeSessionBackend _ = Just <$> defaultClientSessionBackend
@@ -87,7 +90,7 @@ instance Yesod App where
     isAuthorized FaviconR _ = return Authorized
     isAuthorized RobotsR _ = return Authorized
     -- Default to Authorized for now.
-    isAuthorized _ _ = return Authorized
+    isAuthorized _ _ = return $ AuthenticationRequired
 
     -- This function creates static content files in the static folder
     -- and names them based on a hash of their content. This allows
@@ -144,7 +147,10 @@ instance YesodAuth App where
     authenticate creds = lift $ return (UserError InvalidLogin)
 
     -- You can add other plugins like BrowserID, email or OAuth here
-    authPlugins _ = [authBrowserId def]
+--    authPlugins _ = [authBrowserId def]
+
+    authPlugins _ = [authTwitter "jQLyz9tL4N1dH3JgoRjt7oXJd" "xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"]
+
 
     authHttpManager = getHttpManager
 
