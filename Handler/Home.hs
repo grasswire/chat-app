@@ -14,6 +14,8 @@ import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.ByteString as S
 import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
+import qualified Web.Twitter.Types as TT
+
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -83,9 +85,30 @@ getTwitterCallbackR = do
           liftIO $ print accessTokens
           let message = makeMessage tokens accessTokens
           liftIO . S8.putStrLn $ message
+          renderFunc <- getUrlRender
+          let callback = renderFunc $ TwitterCallbackR
+          let token = getRequestToken callback conf
+          user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token cred
           return (pack . S8.unpack $ message)
         Nothing -> return "temporary token is not found"
     Nothing -> return "temporary token is not found"
+
+verifyTwitterCreds :: TWInfo -> IO TT.User
+verifyTwitterCreds twInfo =  do
+  manager <- HTTP.newManager defaultManagerSettings
+  runResourceT (call twInfo manager accountVerifyCredentials)
+
+-- type BearerToken = ByteString
+--
+-- genBearerToken :: OAuth -> Credential -> Maybe BearerToken
+
+mkTwitterInfo :: OAuth -> Credential -> TWInfo
+mkTwitterInfo tokens credential = setCredential tokens credential def
+
+mkCredential :: TwitterToken -> TwitterSecret -> Credential
+mkCredential (TwitterToken key) (TwitterSecret secret) = Credential
+      [ ("oauth_token", encodeUtf8 key)
+      , ("oauth_token_secret", encodeUtf8 secret)]
 
 chatApp :: Text -> WebSocketsT Handler ()
 chatApp channelName = do
@@ -103,6 +126,8 @@ chatApp channelName = do
               (sourceWS $$ mapM_C (\msg ->
                   atomically $ writeTChan outChan $  msg))
       Nothing -> notAuthenticated
+
+
 
 -- placeholder for user auth/fetching username stuff
 getUsername :: YesodRequest -> Maybe TL.Text

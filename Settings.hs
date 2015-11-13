@@ -91,6 +91,9 @@ newtype TwitterAccessSecret = TwitterAccessSecret Text deriving (Show, Generic)
 newtype TwitterConsumerKey = TwitterConsumerKey Text deriving (Show, Generic)
 newtype TwitterConsumerSecret = TwitterConsumerSecret Text deriving (Show, Generic)
 
+newtype TwitterToken = TwitterToken Text deriving Show
+newtype TwitterSecret = TwitterSecret Text deriving Show
+
 data TwitterConf = TwitterConf
   { accessKey  :: TwitterAccessKey
   , accessSecret :: TwitterAccessSecret
