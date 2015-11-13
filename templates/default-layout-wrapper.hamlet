@@ -15,10 +15,27 @@ $newline never
           <ul class="nav__list">
             <li class="nav__item">
               <a href="@{TwitterAuthR}" class="nav__signin">Sign In
-
+            <li class="nav__item">
+              <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
     ^{pageBody pc}
 
     <footer>
+
+    <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">
+      <div class="content-container">
+        <header class="modal__header">
+          <a href="#" class="js-trigger-modal-close">
+            <span class="modal__close fa fa-times">
+        <section class="modal__body">
+          <h1 class="modal__title">Create
+          <form method="post" class="js-create create">
+            <label class="js-create-title create__label">
+              Title
+              <input type="text" name="" class="create__title">
+            <label class="js-create-description create__label">
+              Description
+              <input type="text" name="" class="create__description">
+            <button type="submit" class="create__button">GO
 
     $maybe analytics <- appAnalytics $ appSettings master
       <script>

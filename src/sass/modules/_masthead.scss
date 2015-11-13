@@ -1,6 +1,6 @@
 .masthead {
    @include container();
-   background: get-color(mercury);
+   background: get-color(gallery);
    font-weight: get-font-weight(light);
    height: 50px;
 }

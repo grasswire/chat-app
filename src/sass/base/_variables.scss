@@ -46,15 +46,16 @@ $breakpoints: (
 );
 
 $colors: (
-   white:          #fff,
    black:          #000,
-   charcoal:       #444,
-   mercury:        #e8e8e8,
-   dove-gray:      #6f6e6e,
+   white:          #fff,
+   rhino:          #293C5B,
+   shark:          #222627,
    gallery:        #eeeeee,
-   picton-blue:    #68aad5,
+   charcoal:       #444,
+   dove-gray:      #6f6e6e,
+   aqua-island:    #A6CADC,
+   chalet-green:   #64733E,
    catskill-white: #DFEBF2,
-   silver-chalice: #a6a5a5,
 );
 
 @include layout((

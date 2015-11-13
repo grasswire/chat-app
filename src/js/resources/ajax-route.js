@@ -8,7 +8,7 @@ var AjaxRoute = (function() {
       callType: "",
       userData: {},
       useQueryParams: false,
-      extraAjaxParams: null;
+      extraAjaxParams: null,
    };
 
    var mergeParams = function(response, userData) {

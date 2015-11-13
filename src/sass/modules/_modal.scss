@@ -1,0 +1,27 @@
+.modal {
+
+   &--full-screen {
+      background: get-color(white);
+      bottom: 0;
+      left: 0;
+      position: absolute;
+      right: 0;
+      top: 0;
+      z-index: get-z-index(10);
+   }
+
+   &__header {
+      padding: 40px 0;
+      text-align: right;
+   }
+
+   &__close {
+      @include font-size(33px);
+      color: get-color(charcoal);
+   }
+
+   &__title {
+      @include font-size(45px);
+      text-align: center;
+   }
+}

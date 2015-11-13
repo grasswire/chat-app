@@ -1,0 +1,26 @@
+.create {
+   text-align: center;
+
+   &__label {
+      @include font-size(20px);
+      display: block;
+      text-align: left;
+      width: 100%;
+   }
+
+   &__title,
+   &__description {
+      @include font-size(18px);
+      border: none;
+      border-bottom: 1px solid get-color(charcoal);
+      margin: 2em 0;
+      outline: none;
+      width: 100%;
+   }
+
+   &__button {
+      @include button(22px);
+      padding: 10px 30px;
+      text-align: center;
+   }
+}

@@ -40,7 +40,7 @@
 
 @mixin button($size: 16px) {
     @include font-size($size);
-    background: get-color(dove-gray);
+    background: get-color(rhino);
     border: none;
     border-radius: 2px;
     color: get-color(white);
@@ -50,7 +50,7 @@
     text-decoration: none;
     transition: background 0.3s ease-out;
     &:hover {
-        background: get-color(black);
+        background: get-color(shark);
         transition: background 0.3s ease-in;
     }
 }
