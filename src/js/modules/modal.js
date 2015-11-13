@@ -8,6 +8,9 @@ App.Modules.Modal = function () {
 
    var closeModal = function(data) {
       data.eventElement.closest(".js-modal").fadeOut(50);
+      Events.publish("tl/modal/closed", {
+         modal: data.eventElement.closest(".js-modal")
+      })
    };
 
    return {
