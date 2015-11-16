@@ -2,7 +2,9 @@
    @include container();
    background: get-color(gallery);
    font-weight: get-font-weight(light);
-   height: 50px;
+   position: fixed;
+   height: $masthead-height;
+   width: 100%;
 }
 
 .logo {

@@ -1,6 +1,33 @@
-<div #cool>Chatroom
-<div #output>
-  <form #form>
-    <div #footer>
-    <input #input autofocus>
-<script src="https://code.jquery.com/jquery-2.1.4.min.js">
+
+<main role="main">
+  <div class="content-flex-container room">
+    <div class="room__metadata">
+      <h2 class="panel__title--main">Title
+      <p class="panel__description">This is a description of the room
+      <ul class="chat__list">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+        <li class="chat__items">
+          <a href="#">
+            <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+    <div class="room__highlights">
+      <h2 class="panel__title">Most Liked
+      metadata
+    <div class="room__realtime">
+      <h2 class="panel__title">Chat
+      <div #output>
+        <form #form class="js-chat-form">
+          <input #input class="js-chat-input" autofocus>

@@ -19,8 +19,6 @@ $newline never
               <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
     ^{pageBody pc}
 
-    <footer>
-
     <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">
       <div class="content-container">
         <header class="modal__header">

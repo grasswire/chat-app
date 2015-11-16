@@ -1,0 +1,59 @@
+@mixin room-block {
+   padding: 10px 20px;
+   width: 33%;
+   border-right: 1px solid #ddd;
+   @include last() {
+      border: none;
+   }
+}
+
+.room {
+   &__metadata {
+      @include room-block;
+   }
+
+   &__highlights {
+      @include room-block;
+   }
+
+   &__realtime {
+      @include room-block;
+      width: 34%;
+   }
+}
+
+.panel {
+   &__title {
+      @include font-size(24px);
+      text-align: center;
+
+      &--main {
+         @include font-size(24px);
+         text-align: left;
+      }
+   }
+
+   &__description {
+      @include font-size(20px);
+   }
+}
+
+.chat {
+   &__list {
+      margin: 10px 0 0 0;
+      padding: 0;
+      list-style-type: none;
+   }
+
+   &__items {
+      margin: 0;
+      padding: 4px;
+      display: inline-block;
+
+      img {
+         width: 25px;
+         height: 25px;
+         border-radius: 50%;
+      }
+   }
+}

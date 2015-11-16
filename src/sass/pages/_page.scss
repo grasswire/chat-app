@@ -5,12 +5,17 @@
     padding: 0 10px;
 }
 
+.content-flex-container {
+   align-content: center;
+   align-items: stretch;
+   flex-wrap: wrap;
+   display: flex;
+   height: 100%;
+}
+
 .content-flex-wrapper {
-    align-content: center;
-    align-items: stretch;
-    flex-wrap: wrap;
-    display: flex;
-    max-width: $max-page-width;
+   @extend .content-flex-wrapper;
+   max-width: $max-page-width;
 }
 
 .content-wrapper {
@@ -22,4 +27,9 @@
       @include font-size(30px);
       padding-bottom: 22px;
    }
+}
+
+main {
+   height: 100%;
+   padding-top: $masthead-height;
 }
