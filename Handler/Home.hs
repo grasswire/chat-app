@@ -1,4 +1,4 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings #-}
+{-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
 module Handler.Home where
 
@@ -15,13 +15,15 @@ import qualified Data.ByteString as S
 import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
+import Database.Persist.TH
+import qualified Data.Text.IO as TIO
+import Data.Int
+import Database.Persist.Types()
+import Database.Persist.Sql (toSqlKey)
 
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
-
--- callback :: String
--- callback = "http://localhost:3000/callback"
 
 getRequestToken :: Text -> TwitterConf -> OAuth
 getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
@@ -82,14 +84,23 @@ getTwitterCallbackR = do
       case oauthVerifier of
         Just authVer -> do
           accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
-          liftIO $ print accessTokens
-          let message = makeMessage tokens accessTokens
-          liftIO . S8.putStrLn $ message
           renderFunc <- getUrlRender
           let callback = renderFunc $ TwitterCallbackR
           let token = getRequestToken callback conf
-          user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token cred
-          return (pack . S8.unpack $ message)
+          user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
+          maybePersistedUser <- getUser (fromIntegral $ TT.userId user )
+          case maybePersistedUser of
+            Nothing -> do
+              bearerToken <- genBearerToken user
+              setSession "twitter-user-id" (pack . show $ TT.userId user)
+              setSession "Bearer-Token" (decodeUtf8 bearerToken)
+              setSession "twitter-profile-image-url" (fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
+              bToken <- lookupSession "Bearer-Token"
+              case bToken of
+                Just t -> liftIO $ TIO.putStrLn t >> return "ok"
+                Nothing -> liftIO $ putStrLn "shit" >> return "not ok"
+            Just u -> return "ok"
+          -- return (pack . show $ user)
         Nothing -> return "temporary token is not found"
     Nothing -> return "temporary token is not found"
 
@@ -98,9 +109,13 @@ verifyTwitterCreds twInfo =  do
   manager <- HTTP.newManager defaultManagerSettings
   runResourceT (call twInfo manager accountVerifyCredentials)
 
--- type BearerToken = ByteString
---
--- genBearerToken :: OAuth -> Credential -> Maybe BearerToken
+type BearerToken = ByteString
+
+genBearerToken :: TT.User -> Handler BearerToken
+genBearerToken twttrUser = return $ S8.pack "random BearerToken"
+
+getUser :: Int64 -> Handler (Maybe User)
+getUser twttrUserId = return Nothing -- runDB $ get $ (toSqlKey twttrUserId :: Key User)
 
 mkTwitterInfo :: OAuth -> Credential -> TWInfo
 mkTwitterInfo tokens credential = setCredential tokens credential def
@@ -127,9 +142,6 @@ chatApp channelName = do
                   atomically $ writeTChan outChan $  msg))
       Nothing -> notAuthenticated
 
-
-
--- placeholder for user auth/fetching username stuff
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
@@ -143,8 +155,6 @@ getChatR roomId = do
     webSockets $ chatApp roomId
     defaultLayout $ do
         $(widgetFile "chat-room")
-
-
 
 getHomeR :: Handler Html
 getHomeR = do
