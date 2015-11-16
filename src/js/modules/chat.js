@@ -26,7 +26,7 @@ App.Modules.Chat = function () {
    var displayMessage = function(data) {
      var p = document.createElement("p");
      p.appendChild(document.createTextNode(data.e.data));
-     $("#output").append(p);
+     $(".js-chat-output").append(p);
      return false;
   };
 
