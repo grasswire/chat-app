@@ -5,6 +5,7 @@ module Handler.Home where
 import Import
 import Yesod.WebSockets
 import Server
+
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.ByteString.Char8 as S8
@@ -75,9 +76,11 @@ getTwitterCallbackR = do
           renderFunc <- getUrlRender
           let token = getRequestToken callback conf
           user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
-          maybePersistedUser <- getUser (fromIntegral $ TT.userId user )
+          let twitterUserId = (fromIntegral $ TT.userId user)
+          maybePersistedUser <- getUser twitterUserId
           case maybePersistedUser of
             Nothing -> do
+              userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing -- $ Just 26
               hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
               setSession "twitter-user-id" (pack . show $ TT.userId user)
               setSession "Bearer-Token" (decodeUtf8 hashedToken)
@@ -117,7 +120,7 @@ hashToken :: ByteString -> IO ByteString
 hashToken token = makePassword token 17
 
 getUser :: Int64 -> Handler (Maybe User)
-getUser twttrUserId = return Nothing
+getUser userKey = runDB $ get $ UserKey userKey
 
 mkTwitterInfo :: OAuth -> Credential -> TWInfo
 mkTwitterInfo tokens credential = setCredential tokens credential def
@@ -159,7 +162,10 @@ getChatR roomId = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    let chatRooms = [ChatRoom "NFL showdown" "all things foootball", ChatRoom "sunday funday" "chill on a sunday", ChatRoom "Rangers Rant" "Live! Let's talk about the game tonight", ChatRoom "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
+    let chatRooms = [ChatRoom "NFL showdown" "all things foootball"
+                    , ChatRoom "sunday funday" "chill on a sunday"
+                    , ChatRoom "Rangers Rant" "Live! Let's talk about the game tonight"
+                    , ChatRoom "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")

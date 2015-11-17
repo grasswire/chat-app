@@ -1,4 +1,4 @@
-User
+User sql=taplike_users
     twitterUserId Int64
     twitterScreenName Text
     profileImageUrl Text
