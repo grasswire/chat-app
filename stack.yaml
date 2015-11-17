@@ -11,6 +11,7 @@ extra-deps:
 - twitter-types-0.7.1.1
 - twitter-types-lens-0.7.1
 - yesod-websockets-0.2.4
+- pwstore-fast-2.4.4
 flags:
   twitter-types:
     time15: true

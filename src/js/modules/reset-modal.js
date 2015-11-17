@@ -18,4 +18,3 @@ App.Modules.ResetModal = function () {
    };
 
 }();
-

@@ -15,12 +15,10 @@ import qualified Data.ByteString as S
 import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
-import Database.Persist.TH
 import qualified Data.Text.IO as TIO
-import Data.Int
-import Database.Persist.Types()
-import Database.Persist.Sql (toSqlKey)
-
+-- import Database.Persist.Types()
+import System.Random.MWC
+import Crypto.PasswordStore
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -41,15 +39,6 @@ takeCredential k ioref =
     atomicModifyIORef ioref $ \m ->
         let (res, newm) = M.updateLookupWithKey (\_ _ -> Nothing) k m in
         (newm, res)
-
-makeMessage :: OAuth -> Credential -> S.ByteString
-makeMessage tokens (Credential cred) =
-    S8.intercalate "\n"
-        [ "export OAUTH_CONSUMER_KEY=\"" <> oauthConsumerKey tokens <> "\""
-        , "export OAUTH_CONSUMER_SECRET=\"" <> oauthConsumerSecret tokens <> "\""
-        , "export OAUTH_ACCESS_TOKEN=\"" <> fromMaybe "" (lookup "oauth_token" cred) <> "\""
-        , "export OAUTH_ACCESS_SECRET=\"" <> fromMaybe "" (lookup "oauth_token_secret" cred) <> "\""
-        ]
 
 getTwitterAuthR :: Handler Text
 getTwitterAuthR = do
@@ -85,15 +74,14 @@ getTwitterCallbackR = do
         Just authVer -> do
           accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
           renderFunc <- getUrlRender
-          let callback = renderFunc $ TwitterCallbackR
           let token = getRequestToken callback conf
           user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
           maybePersistedUser <- getUser (fromIntegral $ TT.userId user )
           case maybePersistedUser of
             Nothing -> do
-              bearerToken <- genBearerToken user
+              hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
               setSession "twitter-user-id" (pack . show $ TT.userId user)
-              setSession "Bearer-Token" (decodeUtf8 bearerToken)
+              setSession "Bearer-Token" (decodeUtf8 hashedToken)
               setSession "twitter-profile-image-url" (fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
               bToken <- lookupSession "Bearer-Token"
               case bToken of
@@ -111,8 +99,24 @@ verifyTwitterCreds twInfo =  do
 
 type BearerToken = ByteString
 
-genBearerToken :: TT.User -> Handler BearerToken
-genBearerToken twttrUser = return $ S8.pack "random BearerToken"
+c2w8 :: Char -> Word8
+c2w8 = fromIntegral . fromEnum
+
+charRangeStart :: Word8
+charRangeStart = c2w8 'a'
+
+charRangeEnd :: Word8
+charRangeEnd = c2w8 'z'
+
+-- http://www.alfredodinapoli.com/posts/2012-10-18-fast-random-strings-generation-in-haskell.html
+genRandomToken :: Gen (PrimState IO) -> IO ByteString
+genRandomToken g = do
+    randomLen <- uniformR (50 :: Int, 255 :: Int) g
+    str <- replicateM randomLen $ uniformR (charRangeStart, charRangeEnd) g
+    return $ S.pack str
+
+hashToken :: ByteString -> IO ByteString
+hashToken token = makePassword token 17
 
 getUser :: Int64 -> Handler (Maybe User)
 getUser twttrUserId = return Nothing -- runDB $ get $ (toSqlKey twttrUserId :: Key User)

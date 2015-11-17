@@ -24,4 +24,3 @@ App.Modules.Modal = function () {
    };
 
 }();
-

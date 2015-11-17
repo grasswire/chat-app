@@ -103,6 +103,10 @@ library
                  , twitter-types
                  , twitter-types-lens
                  , authenticate-oauth
+                 , crypto-api
+                 , primitive
+                 , mwc-random
+                 , pwstore-fast
 
 
 executable         chat-app
