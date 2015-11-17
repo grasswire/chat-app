@@ -69,10 +69,8 @@ getTwitterCallbackR = do
    mcred <- case temporaryToken of
               Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
               Nothing -> return Nothing
-   case mcred of
-    Just cred -> do
-      case oauthVerifier of
-        Just authVer -> do
+   case (mcred, oauthVerifier) of
+    (Just cred, Just authVer) -> do
           accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
           renderFunc <- getUrlRender
           let token = getRequestToken callback conf
@@ -91,8 +89,7 @@ getTwitterCallbackR = do
                 Just t -> (liftIO $ TIO.putStrLn t) >> redirect homeR
                 Nothing -> (liftIO $ putStrLn "shit") >> redirect homeR
             Just u -> redirect homeR
-        Nothing -> redirect homeR
-    Nothing -> redirect homeR
+    _ -> redirect homeR
 
 verifyTwitterCreds :: TWInfo -> IO TT.User
 verifyTwitterCreds twInfo =  do
