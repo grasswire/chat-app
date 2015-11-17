@@ -55,7 +55,7 @@ getTwitterAuthR = do
          redirect $  (pack url :: Text)
      Nothing -> redirect (pack "http://disney.com" :: Text)
 
-getTwitterCallbackR :: Handler Text
+getTwitterCallbackR :: Handler Html
 getTwitterCallbackR = do
    app <- getYesod
    temporaryToken <- lookupGetParam "oauth_token"
@@ -64,6 +64,7 @@ getTwitterCallbackR = do
    let conf = twitterConf . appSettings $ app
    renderFunc <- getUrlRender
    let callback = renderFunc $ TwitterCallbackR
+   let homeR = renderFunc $ HomeR
    let tokens = getRequestToken callback conf
    mcred <- case temporaryToken of
               Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
@@ -77,7 +78,7 @@ getTwitterCallbackR = do
           let token = getRequestToken callback conf
           user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
           let twitterUserId = (fromIntegral $ TT.userId user)
-          maybePersistedUser <- getUser twitterUserId
+          maybePersistedUser <- getUser $ UserKey twitterUserId
           case maybePersistedUser of
             Nothing -> do
               userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing -- $ Just 26
@@ -87,11 +88,11 @@ getTwitterCallbackR = do
               setSession "twitter-profile-image-url" (fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
               bToken <- lookupSession "Bearer-Token"
               case bToken of
-                Just t -> liftIO $ TIO.putStrLn t >> return "ok"
-                Nothing -> liftIO $ putStrLn "shit" >> return "not ok"
-            Just u -> return "ok"
-        Nothing -> return "temporary token is not found"
-    Nothing -> return "temporary token is not found"
+                Just t -> (liftIO $ TIO.putStrLn t) >> redirect homeR
+                Nothing -> (liftIO $ putStrLn "shit") >> redirect homeR
+            Just u -> redirect homeR
+        Nothing -> redirect homeR
+    Nothing -> redirect homeR
 
 verifyTwitterCreds :: TWInfo -> IO TT.User
 verifyTwitterCreds twInfo =  do
@@ -119,8 +120,8 @@ genRandomToken g = do
 hashToken :: ByteString -> IO ByteString
 hashToken token = makePassword token 17
 
-getUser :: Int64 -> Handler (Maybe User)
-getUser userKey = runDB $ get $ UserKey userKey
+getUser :: Key User -> Handler (Maybe User)
+getUser userKey = runDB $ get $ userKey
 
 mkTwitterInfo :: OAuth -> Credential -> TWInfo
 mkTwitterInfo tokens credential = setCredential tokens credential def
