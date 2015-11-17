@@ -16,7 +16,6 @@ import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
 import qualified Data.Text.IO as TIO
--- import Database.Persist.Types()
 import System.Random.MWC
 import Crypto.PasswordStore
 
