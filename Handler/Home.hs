@@ -87,7 +87,6 @@ getTwitterCallbackR = do
                 Just t -> liftIO $ TIO.putStrLn t >> return "ok"
                 Nothing -> liftIO $ putStrLn "shit" >> return "not ok"
             Just u -> return "ok"
-          -- return (pack . show $ user)
         Nothing -> return "temporary token is not found"
     Nothing -> return "temporary token is not found"
 
@@ -118,7 +117,7 @@ hashToken :: ByteString -> IO ByteString
 hashToken token = makePassword token 17
 
 getUser :: Int64 -> Handler (Maybe User)
-getUser twttrUserId = return Nothing -- runDB $ get $ (toSqlKey twttrUserId :: Key User)
+getUser twttrUserId = return Nothing
 
 mkTwitterInfo :: OAuth -> Credential -> TWInfo
 mkTwitterInfo tokens credential = setCredential tokens credential def
@@ -131,7 +130,6 @@ mkCredential (TwitterToken key) (TwitterSecret secret) = Credential
 chatApp :: Text -> WebSocketsT Handler ()
 chatApp channelName = do
     sendTextData ("Welcome to #" <> channelName)
--- name <- receiveData :: IO Message
     hostname <- getUsername <$> getRequest
     case hostname of
       Just clientHost -> do
