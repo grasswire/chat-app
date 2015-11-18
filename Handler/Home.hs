@@ -158,9 +158,6 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
--- data ChatRoom = ChatRoom { title :: Text
---                          , description :: Text}
-
 getChatR :: Text -> Handler Html
 getChatR roomId = do
     webSockets $ chatApp roomId
@@ -186,8 +183,3 @@ getLogOutR = do
                 ]
   sequence_ ((\cookie -> deleteCookie cookie "") <$> cookies)
   getHomeR
-
--- redirectHome :: Handler Html
--- redirectHome = do
---   renderFunc <- getUrlRender
---   redirect (renderFunc HomeR)
