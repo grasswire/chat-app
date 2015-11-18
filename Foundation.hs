@@ -163,7 +163,7 @@ instance YesodAuth App where
 
     maybeAuthId = do
         headers <- (NW.requestHeaders . reqWaiRequest) <$> getRequest
-        userIdFromSession <- lookupSession "twitter-user-id"
+        userIdFromSession <- lookupSession sessionUserIdKey
         return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
       where
         getHeader :: RequestHeaders -> HeaderName -> Maybe BS.ByteString
