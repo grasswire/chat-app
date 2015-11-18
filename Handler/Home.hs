@@ -145,10 +145,11 @@ postNewChatR = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    let chatRooms = [ ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
-                    , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
-                    , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
-                    , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
+    -- let chatRooms = [ ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
+                    -- , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
+                    -- , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
+                    -- , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
+    chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
     renderer <- getUrlRenderParams
     defaultLayout $ do
         setTitle "Taplike / Home"
