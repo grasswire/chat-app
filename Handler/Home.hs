@@ -139,7 +139,9 @@ postNewChatR = do
     chatRoom <- requireJsonBody :: Handler Incoming.ChatRoom
     authId <- maybeAuthId
     case authId of
-      Just i -> runDB $ insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom)) >> sendResponseStatus status201 ("CREATED" :: Text)
+      Just i -> do
+        iId <- runDB $ insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom))
+        sendResponseStatus status201 ("CREATED" :: Text)
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 
