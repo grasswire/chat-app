@@ -15,3 +15,5 @@
 /callback TwitterCallbackR GET
 
 /logout LogOutR GET
+
+/foo FooR POST

@@ -181,5 +181,14 @@ getLogOutR = do
                 , "Bearer-Token"
                 , "twitter-profile-image-url"
                 ]
-  sequence_ ((\cookie -> deleteCookie cookie "") <$> cookies)
+  sequence_ ((\cookie -> deleteCookie cookie "localhost") <$> cookies)
   getHomeR
+
+postFooR :: Handler ()
+postFooR = do
+    chatRoom <- requireJsonBody :: Handler ChatRoom
+    --  _    <- runDB $ insert chatRoom
+
+    sendResponseStatus status201 ("CREATED" :: Text)
+
+-- postChatR :: Handler JSON
