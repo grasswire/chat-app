@@ -21,21 +21,8 @@ import Server
 
 type OAuthToken = BS.ByteString
 
-data APICreds = APICreds
-  { token   :: BS.ByteString
-  , tokenId :: Key UserToken
-  , userId  :: Key User
-  }
-
-bearerTokenHeader :: CI ByteString
-bearerTokenHeader = "TapLike-Bearer-Token"
-
-userIdHeader :: CI ByteString
-userIdHeader = "TapLike-User-Id"
-
-bearerTokenIdHeader :: CI ByteString
-bearerTokenIdHeader = "TapLike-Bearer-Token-Id"
-
+sessionUserIdKey :: Text
+sessionUserIdKey = "user-id"
 
 -- | The foundation datatype for your application. This can be a good place to
 -- keep settings and values requiring initialization before your application
@@ -177,8 +164,7 @@ instance YesodAuth App where
     maybeAuthId = do
         headers <- (NW.requestHeaders . reqWaiRequest) <$> getRequest
         userIdFromSession <- lookupSession "twitter-user-id"
-        -- return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
-        return $ (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64)) <|> (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+        return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
       where
         getHeader :: RequestHeaders -> HeaderName -> Maybe BS.ByteString
         getHeader headers name = snd <$> find (\kv -> fst kv == name) headers

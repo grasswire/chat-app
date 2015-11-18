@@ -14,4 +14,4 @@
         <div class="card">
           <h3 class="card__title">#{chatRoomTitle room}
           <p class="card__text">#{chatRoomDescription room}
-          <a href="@{ChatR $ chatRoomTitle room}" class="card__button">Enter
+          <a href="#{renderer ChatR [("roomId", chatRoomTitle room)]}" class="card__button">Enter

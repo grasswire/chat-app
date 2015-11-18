@@ -28,6 +28,7 @@ library
                      Taplike.Incoming
                      Taplike.Outgoing
                      Extra.JSON
+                     Model.Incoming
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

@@ -16,10 +16,10 @@ import qualified Data.ByteString as S
 import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
-import qualified Data.Text.IO as TIO
 import System.Random.MWC
 import Crypto.PasswordStore
 import Web.Cookie
+import qualified Model.Incoming as Incoming
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -80,51 +80,17 @@ getTwitterCallbackR = do
           case maybePersistedUser of
             Nothing -> do
               userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing -- $ Just 26
-              hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
-              setSessionAndCookies user hashedToken
-              bToken <- lookupSession "Bearer-Token"
-              case bToken of
-                Just t -> (liftIO $ TIO.putStrLn t) >> redirect homeR
-                Nothing -> (liftIO $ putStrLn "shit") >> redirect homeR
-            Just u -> do
-              hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
-              setSessionAndCookies user hashedToken
+              setSession sessionUserIdKey (pack . show $ userId)
               redirect homeR
-            where
-              setSessionAndCookies user token = do
-                let vars = [("twitter-user-id", (pack . show $ TT.userId user))
-                           , ("Bearer-Token", (decodeUtf8 token))
-                           , ("twitter-profile-image-url", fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
-                           ]
-                sequence_  $ (\(k, v) -> setSession k v >> setCookie def {setCookieName = encodeUtf8 k, setCookieValue = encodeUtf8 v} ) <$> vars
+            Just u -> do
+              setSession sessionUserIdKey (pack . show $ userTwitterUserId u)
+              redirect homeR
     _ -> redirect homeR
-
 
 verifyTwitterCreds :: TWInfo -> IO TT.User
 verifyTwitterCreds twInfo =  do
   manager <- HTTP.newManager defaultManagerSettings
   runResourceT (call twInfo manager accountVerifyCredentials)
-
-type BearerToken = ByteString
-
-c2w8 :: Char -> Word8
-c2w8 = fromIntegral . fromEnum
-
-charRangeStart :: Word8
-charRangeStart = c2w8 'a'
-
-charRangeEnd :: Word8
-charRangeEnd = c2w8 'z'
-
--- http://www.alfredodinapoli.com/posts/2012-10-18-fast-random-strings-generation-in-haskell.html
-genRandomToken :: Gen (PrimState IO) -> IO ByteString
-genRandomToken g = do
-    randomLen <- uniformR (50 :: Int, 255 :: Int) g
-    str <- replicateM randomLen $ uniformR (charRangeStart, charRangeEnd) g
-    return $ S.pack str
-
-hashToken :: ByteString -> IO ByteString
-hashToken token = makePassword token 17
 
 getUser :: Key User -> Handler (Maybe User)
 getUser userKey = runDB $ get $ userKey
@@ -158,37 +124,35 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
-getChatR :: Text -> Handler Html
-getChatR roomId = do
-    webSockets $ chatApp roomId
-    defaultLayout $ do
-        $(widgetFile "chat-room")
+getChatR :: Handler Html
+getChatR = do
+    mparam <- lookupGetParam "roomId"
+    case mparam of
+      Just p -> do
+        webSockets $ chatApp p
+        defaultLayout $ do
+          $(widgetFile "chat-room")
+      Nothing -> getHomeR
+
+postNewChatR :: Handler ()
+postNewChatR = do
+    chatRoom <- requireJsonBody :: Handler Incoming.ChatRoom
+    authId <- maybeAuthId
+    case authId of
+      Just i -> runDB $ insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom)) >> sendResponseStatus status201 ("CREATED" :: Text)
+      Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
+
 
 getHomeR :: Handler Html
 getHomeR = do
-    let chatRooms = [ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
+    let chatRooms = [ ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
                     , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
                     , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
                     , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
+    renderer <- getUrlRenderParams
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")
 
 getLogOutR :: Handler Html
-getLogOutR = do
-  clearSession
-  let cookies = ["twitter-user-id"
-                , "Bearer-Token"
-                , "twitter-profile-image-url"
-                ]
-  sequence_ ((\cookie -> deleteCookie cookie "localhost") <$> cookies)
-  getHomeR
-
-postFooR :: Handler ()
-postFooR = do
-    chatRoom <- requireJsonBody :: Handler ChatRoom
-    --  _    <- runDB $ insert chatRoom
-
-    sendResponseStatus status201 ("CREATED" :: Text)
-
--- postChatR :: Handler JSON
+getLogOutR = clearSession >> getHomeR

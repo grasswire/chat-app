@@ -45,4 +45,3 @@ App.Modules.Chat = function () {
    };
 
 }();
-

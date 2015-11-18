@@ -4,7 +4,9 @@
 /favicon.ico FaviconR GET
 /robots.txt RobotsR GET
 
-/room/#Text ChatR GET
+/room ChatR GET
+
+/newchat NewChatR POST
 
 /healthcheck HealthCheckR GET
 
@@ -15,5 +17,3 @@
 /callback TwitterCallbackR GET
 
 /logout LogOutR GET
-
-/foo FooR POST
