@@ -6,21 +6,35 @@ import Import.NoFoundation
 import Database.Persist.Sql (ConnectionPool, runSqlPool)
 import Text.Hamlet          (hamletFile)
 import Text.Jasmine         (minifym)
-import Yesod.Auth.BrowserId (authBrowserId)
 import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
 import Yesod.Default.Util   (addStaticContentExternal)
 import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
-import Web.Authenticate.OAuth (OAuth(..), Credential(..))
+import Web.Authenticate.OAuth (Credential(..))
 import qualified Data.ByteString as BS
+import qualified Network.Wai as NW
+import qualified Data.ByteString.Char8 as S8
+import           Data.CaseInsensitive  ( CI )
 
-
-import           Data.Map                 (Map)
 import qualified Data.Map                 as M
-import qualified Data.Set                 as S
 import Server
 
 type OAuthToken = BS.ByteString
+
+data APICreds = APICreds
+  { token   :: BS.ByteString
+  , tokenId :: Key UserToken
+  , userId  :: Key User
+  }
+
+bearerTokenHeader :: CI ByteString
+bearerTokenHeader = "TapLike-Bearer-Token"
+
+userIdHeader :: CI ByteString
+userIdHeader = "TapLike-User-Id"
+
+bearerTokenIdHeader :: CI ByteString
+bearerTokenIdHeader = "TapLike-Bearer-Token-Id"
 
 
 -- | The foundation datatype for your application. This can be a good place to
@@ -138,6 +152,7 @@ instance YesodPersistRunner App where
 
 instance YesodAuth App where
     type AuthId App = UserId
+    -- type AuthId App = (Key UserToken, Key User, ByteString)
 
     -- Where to send a user after successful login
     loginDest _ = HealthCheckR
@@ -158,11 +173,26 @@ instance YesodAuth App where
 
     authPlugins _ = []
 
+    maybeAuthId = do
+        headers <- (NW.requestHeaders . reqWaiRequest) <$> getRequest
+        -- let creds = APICreds <$> getHeader headers bearerTokenHeader <*> (UserTokenKey <$> (getHeader headers bearerTokenIdHeader >>= bs2Int64)) <*> (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64))
+        let creds = APICreds <$> getHeader headers bearerTokenHeader <*> Nothing <*> (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64))
+        case creds of
+          Just token -> return Nothing -- checkAuthHeaders token
+          Nothing -> do
+            userIdFromSession <- lookupSession "twitter-user-id"
+            return $ UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64)
+      where
+        getHeader :: RequestHeaders -> HeaderName -> Maybe BS.ByteString
+        getHeader headers name = snd <$> find (\kv -> fst kv == name) headers
+        bs2Int64 :: BS.ByteString -> Maybe Int64
+        bs2Int64 bs = (fromIntegral . fst <$> (S8.readInt bs) :: Maybe Int64)
+
+
 
     authHttpManager = getHttpManager
 
 instance YesodAuthPersist App
-
 -- This instance is required to use forms. You can modify renderMessage to
 -- achieve customized and internationalized form validation messages.
 instance RenderMessage App FormMessage where

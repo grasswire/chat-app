@@ -107,6 +107,8 @@ library
                  , primitive
                  , mwc-random
                  , pwstore-fast
+                 , http-types
+                 , case-insensitive
 
 
 executable         chat-app

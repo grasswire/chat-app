@@ -72,7 +72,6 @@ getTwitterCallbackR = do
    case (mcred, oauthVerifier) of
     (Just cred, Just authVer) -> do
           accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
-          renderFunc <- getUrlRender
           let token = getRequestToken callback conf
           user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
           let twitterUserId = (fromIntegral $ TT.userId user)
