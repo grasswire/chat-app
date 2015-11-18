@@ -12,6 +12,6 @@
     <div class="content-flex-container">
       $forall room <- chatRooms
         <div class="card">
-          <h3 class="card__title">#{title room}
-          <p class="card__text">#{description room}
-          <a href="@{ChatR $ title room}" class="card__button">Enter
+          <h3 class="card__title">#{chatRoomTitle room}
+          <p class="card__text">#{chatRoomDescription room}
+          <a href="@{ChatR $ chatRoomTitle room}" class="card__button">Enter

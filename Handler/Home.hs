@@ -158,8 +158,8 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
-data ChatRoom = ChatRoom { title :: Text
-                         , description :: Text}
+-- data ChatRoom = ChatRoom { title :: Text
+--                          , description :: Text}
 
 getChatR :: Text -> Handler Html
 getChatR roomId = do
@@ -169,10 +169,25 @@ getChatR roomId = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    let chatRooms = [ChatRoom "NFL showdown" "all things foootball"
-                    , ChatRoom "sunday funday" "chill on a sunday"
-                    , ChatRoom "Rangers Rant" "Live! Let's talk about the game tonight"
-                    , ChatRoom "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
+    let chatRooms = [ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
+                    , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
+                    , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
+                    , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")
+
+getLogOutR :: Handler Html
+getLogOutR = do
+  clearSession
+  let cookies = ["twitter-user-id"
+                , "Bearer-Token"
+                , "twitter-profile-image-url"
+                ]
+  sequence_ ((\cookie -> deleteCookie cookie "") <$> cookies)
+  getHomeR
+
+-- redirectHome :: Handler Html
+-- redirectHome = do
+--   renderFunc <- getUrlRender
+--   redirect (renderFunc HomeR)

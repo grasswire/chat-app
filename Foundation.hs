@@ -89,6 +89,7 @@ instance Yesod App where
     defaultLayout widget = do
         master <- getYesod
         mmsg <- getMessage
+        authId <- maybeAuthId
 
         -- We break up the default layout into two components:
         -- default-layout is the contents of the body tag, and
@@ -175,20 +176,14 @@ instance YesodAuth App where
 
     maybeAuthId = do
         headers <- (NW.requestHeaders . reqWaiRequest) <$> getRequest
-        -- let creds = APICreds <$> getHeader headers bearerTokenHeader <*> (UserTokenKey <$> (getHeader headers bearerTokenIdHeader >>= bs2Int64)) <*> (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64))
-        let creds = APICreds <$> getHeader headers bearerTokenHeader <*> Nothing <*> (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64))
-        case creds of
-          Just token -> return Nothing -- checkAuthHeaders token
-          Nothing -> do
-            userIdFromSession <- lookupSession "twitter-user-id"
-            return $ UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64)
+        userIdFromSession <- lookupSession "twitter-user-id"
+        return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+        -- return $ (UserKey <$> (getHeader headers userIdHeader >>= bs2Int64)) <|> (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
       where
         getHeader :: RequestHeaders -> HeaderName -> Maybe BS.ByteString
         getHeader headers name = snd <$> find (\kv -> fst kv == name) headers
         bs2Int64 :: BS.ByteString -> Maybe Int64
         bs2Int64 bs = (fromIntegral . fst <$> (S8.readInt bs) :: Maybe Int64)
-
-
 
     authHttpManager = getHttpManager
 

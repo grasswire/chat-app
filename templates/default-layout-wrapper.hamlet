@@ -14,7 +14,11 @@ $newline never
         <nav class="nav__main">
           <ul class="nav__list">
             <li class="nav__item">
-              <a href="@{TwitterAuthR}" class="nav__signin">Sign In
+              $maybe userId <- authId
+                <a href="@{LogOutR}" class="nav__signin">Sign Out
+              $nothing
+                <a href="@{TwitterAuthR}" class="nav__signin">Sign In
+
             <li class="nav__item">
               <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
     ^{pageBody pc}

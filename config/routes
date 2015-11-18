@@ -13,3 +13,5 @@
 /login TwitterAuthR GET
 
 /callback TwitterCallbackR GET
+
+/logout LogOutR GET
