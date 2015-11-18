@@ -7,6 +7,10 @@ App.Modules.Chat = function () {
    };
 
    var send = function(data) {
+      var url = document.location.href;
+
+      o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""))
+
       var message = {
             message: $(".js-chat-input").val(),
             id: o.id++
@@ -32,14 +36,14 @@ App.Modules.Chat = function () {
 
    return {
       init: function() {
-         var url = document.location.href;
-         o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""))
+
 
          return this;
       },
       events: function() {
          Events.bind("submit", ".js-chat-form").to(send, this);
          Events.subscribe("tl/chat/message/sent", displayMessage);
+
          return this;
       }
    };

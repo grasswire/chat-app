@@ -13,14 +13,15 @@ $newline never
         <a href="#" class="logo">TapLike
         <nav class="nav__main">
           <ul class="nav__list">
-            <li class="nav__item">
-              $maybe userId <- authId
-                <a href="@{LogOutR}" class="nav__signin">Sign Out
-              $nothing
+            $maybe userId <- authId
+              <li class="nav__item">
+                <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
+              <li class="nav__item">
+                  <a href="@{LogOutR}" class="nav__signin">Sign Out
+            $nothing
+              <li class="nav__item">
                 <a href="@{TwitterAuthR}" class="nav__signin">Sign In
 
-            <li class="nav__item">
-              <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
     ^{pageBody pc}
 
     <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">

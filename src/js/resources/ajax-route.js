@@ -72,7 +72,7 @@ var AjaxRoute = (function() {
       },
 
       to: function(url, data) {
-         ro.name = Utilities.generateEventName();
+         ro.name = Utils.generateEventName();
          ro.url = url;
          ro.data = JSON.stringify(data);
 
