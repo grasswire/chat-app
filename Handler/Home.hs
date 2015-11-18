@@ -19,6 +19,7 @@ import qualified Web.Twitter.Types as TT
 import qualified Data.Text.IO as TIO
 import System.Random.MWC
 import Crypto.PasswordStore
+import Web.Cookie
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -80,15 +81,24 @@ getTwitterCallbackR = do
             Nothing -> do
               userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing -- $ Just 26
               hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
-              setSession "twitter-user-id" (pack . show $ TT.userId user)
-              setSession "Bearer-Token" (decodeUtf8 hashedToken)
-              setSession "twitter-profile-image-url" (fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
+              setSessionAndCookies user hashedToken
               bToken <- lookupSession "Bearer-Token"
               case bToken of
                 Just t -> (liftIO $ TIO.putStrLn t) >> redirect homeR
                 Nothing -> (liftIO $ putStrLn "shit") >> redirect homeR
-            Just u -> redirect homeR
+            Just u -> do
+              hashedToken <- liftIO $ ((withSystemRandom $ \gen -> genRandomToken gen) >>= hashToken)
+              setSessionAndCookies user hashedToken
+              redirect homeR
+            where
+              setSessionAndCookies user token = do
+                let vars = [("twitter-user-id", (pack . show $ TT.userId user))
+                           , ("Bearer-Token", (decodeUtf8 token))
+                           , ("twitter-profile-image-url", fromMaybe (pack "default image") (TT.userProfileImageURLHttps user))
+                           ]
+                sequence_  $ (\(k, v) -> setSession k v >> setCookie def {setCookieName = encodeUtf8 k, setCookieValue = encodeUtf8 v} ) <$> vars
     _ -> redirect homeR
+
 
 verifyTwitterCreds :: TWInfo -> IO TT.User
 verifyTwitterCreds twInfo =  do

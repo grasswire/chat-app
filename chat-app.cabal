@@ -109,6 +109,7 @@ library
                  , pwstore-fast
                  , http-types
                  , case-insensitive
+                 , cookie
 
 
 executable         chat-app
