@@ -20,6 +20,8 @@ import System.Random.MWC
 import Crypto.PasswordStore
 import Web.Cookie
 import qualified Model.Incoming as Incoming
+import Text.Lucius (luciusFile)
+
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -147,10 +149,6 @@ postNewChatR = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    -- let chatRooms = [ ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
-                    -- , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
-                    -- , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
-                    -- , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
     chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
     renderer <- getUrlRenderParams
     defaultLayout $ do
@@ -159,3 +157,12 @@ getHomeR = do
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR
+
+getBlueR :: Handler Html
+getBlueR = do
+  chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
+  renderer <- getUrlRenderParams
+  defaultLayout $ do
+      let myWidget = $(luciusFile "templates/foobarblue.lucius")
+      setTitle "Taplike / Blue"
+      $(widgetFile "blue")

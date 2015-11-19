@@ -17,3 +17,5 @@
 /callback TwitterCallbackR GET
 
 /logout LogOutR GET
+
+/blue BlueR GET 
