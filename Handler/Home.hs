@@ -16,6 +16,8 @@ import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
 import qualified Model.Incoming as Incoming
+import Data.Maybe (fromMaybe)
+import Data.Aeson (decode)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -99,16 +101,18 @@ mkCredential (TwitterToken key) (TwitterSecret secret) = Credential
       [ ("oauth_token", encodeUtf8 key)
       , ("oauth_token_secret", encodeUtf8 secret)]
 
-chatApp :: Text -> WebSocketsT Handler ()
-chatApp channelName = do
+chatApp :: Text -> Maybe User -> WebSocketsT Handler ()
+chatApp channelName user = do
     sendTextData ("Welcome to #" <> channelName)
     hostname <- getUsername <$> getRequest
     case hostname of
       Just clientHost -> do
           app <- getYesod
           outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
+
           inChan <- atomically $ do
               dupTChan outChan
+          atomically $ writeTChan outChan $ fromMaybe Null $ decode "{\"foo\": 123}"
           race_
               (forever $ atomically (readTChan inChan) >>= sendTextData)
               (sourceWS $$ mapM_C (\msg ->
@@ -123,9 +127,13 @@ newtype RoomId = RoomId Integer
 getChatR :: Key ChatRoom -> Handler Html
 getChatR chatId = do
     chatRoom <- runDB (get chatId)
+    authId <- maybeAuthId
+    chatUser <- case authId of
+                  Just uId -> runDB $ get uId
+                  _        -> return Nothing
     case chatRoom of
       Just chat -> do
-        webSockets $ chatApp "fpp"
+        webSockets $ chatApp (chatRoomTitle chat) chatUser
         defaultLayout $ do
           $(widgetFile "chat-room")
       Nothing -> getHomeR
