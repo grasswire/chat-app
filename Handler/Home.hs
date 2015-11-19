@@ -21,6 +21,8 @@ import Crypto.PasswordStore
 import Web.Cookie
 import qualified Model.Incoming as Incoming
 import Text.Lucius (luciusFile)
+import Text.Julius (juliusFile)
+
 
 
 getHealthCheckR :: Handler Text
@@ -163,6 +165,7 @@ getBlueR = do
   chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
   renderer <- getUrlRenderParams
   defaultLayout $ do
-      let myWidget = $(luciusFile "templates/foobarblue.lucius")
+      let myCssWidget = $(luciusFile "templates/foobarblue.lucius")
+      let myJsWidget = $(juliusFile "templates/rando.julius")
       setTitle "Taplike / Blue"
       $(widgetFile "blue")

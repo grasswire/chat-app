@@ -1,0 +1,1 @@
+alert('added this widget by exposing a widget var and rendering in template!')
