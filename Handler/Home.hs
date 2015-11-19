@@ -116,6 +116,9 @@ chatApp channelName user = do
       Nothing -> ingest inChan
     where ingest chan = (forever $ atomically (readTChan chan) >>= sendTextData)
 
+-- processIncoming :: Value -> Value
+-- processIncoming inMsg = _
+
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 

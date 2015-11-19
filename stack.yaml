@@ -12,6 +12,7 @@ extra-deps:
 - twitter-types-lens-0.7.1
 - yesod-websockets-0.2.4
 - pwstore-fast-2.4.4
+- netwire-5.0.0
 flags:
   twitter-types:
     time15: true
