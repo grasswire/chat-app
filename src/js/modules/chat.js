@@ -1,15 +1,16 @@
 App.Modules = App.Modules || {};
 App.Modules.Chat = function () {
 
-   var o = {
-      connection: null,
-      id: 1
-   };
+  var o = {
+     connection: null,
+     id: 1
+  };
 
-   var send = function(data) {
-      var url = document.location.href;
+  var url = document.location.href;
 
-      o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""))
+  o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""))
+
+  var send = function(data) {
 
       var message = {
             message: $(".js-chat-input").val(),

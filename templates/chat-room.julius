@@ -1,1 +1,2 @@
-App.routes.chatRoom = "@{ChatR}";
+App.routes.chatRoom = "@{ChatR chatId}";
+console.log(App.routes.chatRoom);

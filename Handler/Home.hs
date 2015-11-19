@@ -120,12 +120,12 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
-getChatR :: Handler Html
-getChatR = do
-    mparam <- lookupGetParam "roomId"
-    case mparam of
-      Just p -> do
-        webSockets $ chatApp p
+getChatR :: Key ChatRoom -> Handler Html
+getChatR chatId = do
+    chatRoom <- runDB (get chatId)
+    case chatRoom of
+      Just chat -> do
+        webSockets $ chatApp "fpp"
         defaultLayout $ do
           $(widgetFile "chat-room")
       Nothing -> getHomeR
