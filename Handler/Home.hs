@@ -104,18 +104,17 @@ mkCredential (TwitterToken key) (TwitterSecret secret) = Credential
 chatApp :: Text -> Maybe User -> WebSocketsT Handler ()
 chatApp channelName user = do
     sendTextData ("Welcome to #" <> channelName)
-    hostname <- getUsername <$> getRequest
-    case hostname of
-      Just clientHost -> do
-          app <- getYesod
-          outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
-          inChan <- atomically $ do
-              dupTChan outChan
-          race_
-              (forever $ atomically (readTChan inChan) >>= sendTextData)
-              (sourceWS $$ mapM_C (\msg ->
-                  atomically $ writeTChan outChan $  msg))
-      Nothing -> notAuthenticated
+    app <- getYesod
+    outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
+    inChan <- atomically $ do
+        dupTChan outChan
+    case user of
+      Just _ ->
+        race_
+          (ingest inChan)
+          (sourceWS $$ mapM_C (\msg -> atomically $ writeTChan outChan $  msg))
+      Nothing -> ingest inChan
+    where ingest chan = (forever $ atomically (readTChan chan) >>= sendTextData)
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req

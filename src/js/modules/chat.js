@@ -13,11 +13,7 @@ App.Modules.Chat = function () {
       };
 
       o.connection.send(JSON.stringify(message));
-      o.connection.onmessage = function(e) {
-         Events.publish("tl/chat/message/sent", {
-            e: e
-         });
-      };
+
 
       $(".js-chat-input").val("");
       return false;
@@ -33,6 +29,11 @@ App.Modules.Chat = function () {
    var setup = function() {
       var url = App.routes.chatRoom
       o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""));
+      o.connection.onmessage = function(e) {
+         Events.publish("tl/chat/message/sent", {
+            e: e
+         });
+      };
    }
 
    return {
