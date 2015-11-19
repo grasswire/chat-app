@@ -11,7 +11,7 @@ App.Modules.Modal = function () {
       openModal.fadeOut(50).attr('data-modal-open', false);
       Events.publish("tl/modal/closed", {
          modal: openModal
-      })
+      });
    };
 
    return {

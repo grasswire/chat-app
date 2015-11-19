@@ -34,10 +34,10 @@ $newline never
           <form method="post" class="js-create create">
             <label class="js-create-title create__label">
               Title
-              <input type="text" name="" class="create__title">
+              <input type="text" name="" class="create__title js-create-title-input">
             <label class="js-create-description create__label">
               Description
-              <input type="text" name="" class="create__description">
+              <input type="text" name="" class="create__description js-create-description-input">
             <button type="submit" class="create__button">GO
 
     $maybe analytics <- appAnalytics $ appSettings master

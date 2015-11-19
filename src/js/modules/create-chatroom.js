@@ -6,8 +6,8 @@ App.Modules.CreateChatroom = function () {
    var createNewRoom = function() {
       AjaxRoute.as("post")
          .to(App.routes.newChat, {
-            title: $('.js-create-title').val(),
-            description: $('.js-create-description').val()
+            title: $('.js-create-title-input').val(),
+            description: $('.js-create-description-input').val()
          })
          .on({
             complete: finished

@@ -6,12 +6,7 @@ App.Modules.Chat = function () {
      id: 1
   };
 
-  var url = document.location.href;
-
-  o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""))
-
-  var send = function(data) {
-
+   var chat = function(data) {
       var message = {
             message: $(".js-chat-input").val(),
             id: o.id++
@@ -33,16 +28,19 @@ App.Modules.Chat = function () {
      p.appendChild(document.createTextNode(data.e.data));
      $(".js-chat-output").append(p);
      return false;
-  };
+   };
+
+   var setup = function() {
+      var url = App.routes.chatRoom
+      o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""));
+   }
 
    return {
-      init: function() {
-
-
-         return this;
-      },
+      init: function() { return this; },
       events: function() {
-         Events.bind("submit", ".js-chat-form").to(send, this);
+         Events.bind("load").where('div', 'page-chat-room').to(setup, this);
+         Events.bind("submit", ".js-chat-form").to(chat, this);
+
          Events.subscribe("tl/chat/message/sent", displayMessage);
 
          return this;
