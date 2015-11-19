@@ -75,7 +75,7 @@ getTwitterCallbackR = do
           maybePersistedUser <- getUser $ UserKey twitterUserId
           case maybePersistedUser of
             Nothing -> do
-              userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing -- $ Just 26
+              userId <- runDB $ insert $ User twitterUserId (TT.userName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
               setSession sessionUserIdKey (pack . show $ userId)
               redirect homeR
             Just u -> do
