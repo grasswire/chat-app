@@ -157,3 +157,11 @@ getHomeR = do
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR
+
+-- do aChan <- liftIO . atomically $ newTChan -- of a
+--    bChan <- liftIO . atomically $ newTChan -- of b
+--    race_ (writer aChan)
+--          (writer bChan)
+-- where
+--   writer :: ToJSON a => TChan a -> WebSocketsT Handler
+--   writer chan = forever $ readTChan chan >>= sendTextData . Aeson.encode . Aeson.toJSON

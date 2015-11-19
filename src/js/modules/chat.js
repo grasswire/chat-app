@@ -8,8 +8,10 @@ App.Modules.Chat = function () {
 
    var chat = function(data) {
       var message = {
-            message: $(".js-chat-input").val(),
-            id: o.id++
+            text: $(".js-chat-input").val(),
+            id: o.id++,
+            channel: 9,
+            type: "incoming_message"
       };
 
       o.connection.send(JSON.stringify(message));

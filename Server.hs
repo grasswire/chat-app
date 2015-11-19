@@ -25,6 +25,8 @@ import Data.Text.Lazy (Text)
 import Data.Monoid ((<>))
 import Data.Aeson (Value(..))
 
+import Taplike.Shared (RtmEvent(..))
+
 
 {-|
   As part of creating our App, we initialize a new "Server", which begins with
@@ -74,23 +76,23 @@ newClient name  = do
 data Channel = Channel
     { channelName          :: ChannelName
     , channelClients       :: TVar (S.Set ClientName)
-    , channelBroadcastChan :: TChan Value
+    , channelBroadcastChan :: TChan RtmEvent
     }
 
 newChannel :: ChannelName -> STM Channel
 newChannel name = Channel name <$> newTVar S.empty <*> newBroadcastTChan
 
 -- Send a Notice to the channel.
-chanNotify :: Channel -> Value -> STM ()
-chanNotify chan value = chanMessage chan value
+chanNotify :: Channel -> RtmEvent -> STM ()
+chanNotify chan event = chanMessage chan event
 
 -- Send a Message to the channel.
-chanMessage :: Channel -> Value -> STM ()
+chanMessage :: Channel -> RtmEvent -> STM ()
 chanMessage = writeTChan . channelBroadcastChan
 
 -- Notify the channel a client has connected.
 chanNotifyHasConnected :: Channel -> ClientName -> STM ()
-chanNotifyHasConnected chan name = chanNotify chan Null
+chanNotifyHasConnected chan name = chanNotify chan RtmHello
 
 data Server = Server
     { serverChannels :: TVar (Map ChannelName Channel)
@@ -154,12 +156,12 @@ chanAddClient' notifyAction chan@Channel{..} name = do
 
 -- Notify the channel a client has left.
 chanNotifyHasLeft :: Channel -> ClientName -> STM ()
-chanNotifyHasLeft chan name = chanNotify chan Null
+chanNotifyHasLeft chan name = chanNotify chan RtmHello
 
 -- Notify the channel a client has disconnected.
 chanNotifyHasDisconnected :: Channel -> ClientName -> STM ()
-chanNotifyHasDisconnected chan name = chanNotify chan Null
+chanNotifyHasDisconnected chan name = chanNotify chan RtmHello
 
 -- Notify the channel a client has joined.
 chanNotifyHasJoined :: Channel -> ClientName -> STM ()
-chanNotifyHasJoined chan name = chanNotify chan Null
+chanNotifyHasJoined chan name = chanNotify chan RtmHello

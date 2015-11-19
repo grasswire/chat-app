@@ -10,6 +10,7 @@ import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
+import           Control.Applicative (empty)
 
 import           Taplike.TextShowOrphans ()
 
@@ -168,7 +169,7 @@ data Message = Message
 
 data IncomingMessage = IncomingMessage
  { _sendMessageSeqnum :: Word64
- , _sendMessageChat   :: ID Chat
+ , _sendMessageChat   :: Int64
  , _sendMessageText   :: Text
 }
 
@@ -874,6 +875,13 @@ instance FromJSON RtmEvent where
               "incoming_message"        -> RtmSendMessage <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
+instance ToJSON RtmEvent where
+  toJSON (RtmSendMessage msg) = object
+      [ "type"    .= ("incoming_message" :: Text)
+      , "id"      .= _sendMessageSeqnum msg
+      , "channel" .= _sendMessageChat msg
+      , "text"    .= _sendMessageText msg
+      ]
 
 instance FromJSON (ChatMarked a) where
   parseJSON = withObject "channel / im / group marked event" $ \ o -> ChatMarked

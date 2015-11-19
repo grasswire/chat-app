@@ -29,6 +29,7 @@ library
                      Taplike.Outgoing
                      Extra.JSON
                      Model.Incoming
+                     Taplike.TextShowOrphans
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -118,6 +119,7 @@ library
                  , lens
                  , scientific
                  , netwire
+                --  , text-icu
 
 
 executable         chat-app
