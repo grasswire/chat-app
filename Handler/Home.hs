@@ -12,13 +12,9 @@ import qualified Data.ByteString.Char8 as S8
 import Web.Twitter.Conduit hiding (lookup)
 import qualified Web.Authenticate.OAuth as OA
 import Web.Authenticate.OAuth (OAuth(..), Credential(..))
-import qualified Data.ByteString as S
 import qualified Data.Map as M
 import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
-import System.Random.MWC
-import Crypto.PasswordStore
-import Web.Cookie
 import qualified Model.Incoming as Incoming
 
 getHealthCheckR :: Handler Text
@@ -139,18 +135,12 @@ postNewChatR = do
     chatRoom <- requireJsonBody :: Handler Incoming.ChatRoom
     authId <- maybeAuthId
     case authId of
-      Just i -> do
-        iId <- runDB $ insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom))
-        sendResponseStatus status201 ("CREATED" :: Text)
+      Just i -> runDB (insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom))) >> sendResponseStatus status201 ("CREATED" :: Text)
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 
 getHomeR :: Handler Html
 getHomeR = do
-    -- let chatRooms = [ ChatRoom (UserKey 1) "NFL showdown" "all things foootball"
-                    -- , ChatRoom (UserKey 1) "sunday funday" "chill on a sunday"
-                    -- , ChatRoom (UserKey 1) "Rangers Rant" "Live! Let's talk about the game tonight"
-                    -- , ChatRoom (UserKey 1) "Tinfoil" "The earth is hollow! We all know it's true so lets discuss"]
     chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
     renderer <- getUrlRenderParams
     defaultLayout $ do
