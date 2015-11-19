@@ -109,10 +109,8 @@ chatApp channelName user = do
       Just clientHost -> do
           app <- getYesod
           outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
-
           inChan <- atomically $ do
               dupTChan outChan
-          atomically $ writeTChan outChan $ fromMaybe Null $ decode "{\"foo\": 123}"
           race_
               (forever $ atomically (readTChan inChan) >>= sendTextData)
               (sourceWS $$ mapM_C (\msg ->
