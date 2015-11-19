@@ -1,14 +1,39 @@
-using psql, do the following 
+# Dependencies
+
+## Mac
 
 ```
-levinotik=# create user taplike with password 'taplike';
+brew install postgresql
+```
+
+## Ubuntu
+
+```
+sudo apt-get install libpq-dev
+```
+
+# Building
+
+```
+stack build
+```
+
+# Prepping the database
+
+Using psql, do the following
+
+```
+$ psql -d template1
+you=# create user taplike with password 'taplike';
 CREATE ROLE
-levinotik=# create database taplike;
+you=# create database taplike;
 CREATE DATABASE
-levinotik=# create database taplike_test;
+you=# create database taplike_test;
 CREATE DATABASE
-levinotik=# grant all privileges on database taplike to taplike;
+you=# create database chat-app_test;
+CREATE DATABASE
+you=# grant all privileges on database taplike to taplike;
 GRANT
-levinotik=# grant all privileges on database taplike_test to taplike;
+you=# grant all privileges on database taplike_test to taplike;
 GRANT
 ```
