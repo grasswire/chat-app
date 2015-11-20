@@ -13,6 +13,7 @@ import           TextShow.TH (deriveTextShow)
 import           Control.Applicative (empty)
 
 import           Taplike.TextShowOrphans ()
+import Model (User, User(..))
 
 newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 instance FromJSON TS where
@@ -44,30 +45,14 @@ data RtmStartRequest = RtmStartRequest { rtmStartToken :: Text }
 data RtmStartRp = RtmStartRp
   { _rtmStartUrl      :: Text
   , _rtmStartSelf     :: Self
-  , _rtmStartTeam     :: Team
   , _rtmStartUsers    :: [User]
-  , _rtmStartChannels :: [Channel]
-  , _rtmStartGroups   :: [Group]
-  , _rtmStartIMs      :: [IM]
-  , _rtmStartBots     :: [Bot] }
-
-testRtmStartRp :: RtmStartRp
-testRtmStartRp = RtmStartRp
-  { _rtmStartUrl      = "url"
-  , _rtmStartSelf     = Self (ID "UEMBOT") "Embot" mempty (Time 0) PresenceActive
-  , _rtmStartTeam     = Team (ID "TTEAM") "Team" Nothing "domain" Nothing False mempty
-  , _rtmStartUsers    = []
-  , _rtmStartChannels = []
-  , _rtmStartGroups   = []
-  , _rtmStartIMs      = []
-  , _rtmStartBots     = [] }
+  }
 
 data Self = Self
-  { _selfID             :: ID User
-  , _selfName           :: Text
-  , _selfPrefs          :: Object
-  , _selfCreated        :: Time
-  , _selfManualPresence :: Presence }
+  { _selfID               :: Int64
+  , _selfName             :: Text
+  , _selfProfileImageUrl  :: Text
+  }
 
 data Presence = PresenceActive | PresenceAway
 
@@ -79,23 +64,6 @@ data Team = Team
   , _teamMsgEditWindowMins :: Maybe Int
   , _teamOverStorageLimit  :: Bool
   , _teamPrefs             :: Object }
-
-data User = User
-  { _userID                :: ID User
-  , _userName              :: Text
-  , _userRealName          :: Text
-  , _userDeleted           :: Bool
-  , _userColor             :: Text
-  , _userProfile           :: Profile
-  , _userIsAdmin           :: Bool
-  , _userIsOwner           :: Bool
-  , _userIsPrimaryOwner    :: Bool
-  , _userIsRestricted      :: Bool
-  , _userIsUltraRestricted :: Bool
-  , _userHas2fa            :: Bool
-  , _userTwoFactorType     :: Maybe Text
-  , _userHasFiles          :: Bool
-  , _userPresence          :: Maybe Presence }
 
 data Profile = Profile
   { _profileFirstName :: Maybe Text
@@ -567,20 +535,28 @@ instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
     <$> o .: "url"
     <*> o .: "self"
-    <*> o .: "team"
     <*> o .: "users"
-    <*> o .: "channels"
-    <*> o .: "groups"
-    <*> o .: "ims"
-    <*> o .: "bots"
+
+instance ToJSON RtmStartRp where
+  toJSON (RtmStartRp url self users) = object
+    [ "url"   .= url
+    , "self"  .= self
+    , "users" .= users
+    ]
+
 
 instance FromJSON Self where
   parseJSON = withObject "self object" $ \ o -> Self
     <$> o .: "id"
     <*> o .: "name"
-    <*> o .: "prefs"
-    <*> o .: "created"
-    <*> o .: "manual_presence"
+    <*> o .: "profile_image_url"
+
+instance ToJSON Self where
+  toJSON (Self sId name profileImageUrl) = object
+    [ "id"                .= sId
+    , "name"              .= name
+    , "profile_image_url" .= profileImageUrl
+    ]
 
 instance FromJSON Presence where
   parseJSON = withText "presence value" $ \ case
@@ -604,23 +580,23 @@ instance FromJSON Team where
     <*> o .: "over_storage_limit"
     <*> o .: "prefs"
 
-instance FromJSON User where
-  parseJSON = withObject "user object" $ \ o -> User
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> o .: "real_name"
-    <*> o .: "deleted"
-    <*> o .: "color"
-    <*> o .: "profile"
-    <*> o .: "is_admin"
-    <*> o .: "is_owner"
-    <*> o .: "is_primary_owner"
-    <*> o .: "is_restricted"
-    <*> o .: "is_ultra_restricted"
-    <*> o .:? "has_2fa" .!= False
-    <*> o .:? "two_factor_type"
-    <*> o .:? "has_files" .!= False
-    <*> o .:? "presence"
+-- instance FromJSON User where
+--   parseJSON = withObject "user object" $ \ o -> User
+--     <$> o .: "id"
+--     <*> o .: "name"
+--     <*> o .: "real_name"
+--     <*> o .: "deleted"
+--     <*> o .: "color"
+--     <*> o .: "profile"
+--     <*> o .: "is_admin"
+--     <*> o .: "is_owner"
+--     <*> o .: "is_primary_owner"
+--     <*> o .: "is_restricted"
+--     <*> o .: "is_ultra_restricted"
+--     <*> o .:? "has_2fa" .!= False
+--     <*> o .:? "two_factor_type"
+--     <*> o .:? "has_files" .!= False
+--     <*> o .:? "presence"
 
 instance FromJSON Profile where
   parseJSON = withObject "user profile object" $ \ o -> Profile

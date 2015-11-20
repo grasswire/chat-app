@@ -140,7 +140,6 @@ instance YesodPersistRunner App where
 
 instance YesodAuth App where
     type AuthId App = UserId
-    -- type AuthId App = (Key UserToken, Key User, ByteString)
 
     -- Where to send a user after successful login
     loginDest _ = HealthCheckR
@@ -162,14 +161,8 @@ instance YesodAuth App where
     authPlugins _ = []
 
     maybeAuthId = do
-        headers <- (NW.requestHeaders . reqWaiRequest) <$> getRequest
         userIdFromSession <- lookupSession sessionUserIdKey
         return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
-      where
-        getHeader :: RequestHeaders -> HeaderName -> Maybe BS.ByteString
-        getHeader headers name = snd <$> find (\kv -> fst kv == name) headers
-        bs2Int64 :: BS.ByteString -> Maybe Int64
-        bs2Int64 bs = (fromIntegral . fst <$> (S8.readInt bs) :: Maybe Int64)
 
     authHttpManager = getHttpManager
 
