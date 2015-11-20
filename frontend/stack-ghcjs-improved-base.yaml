@@ -2,6 +2,9 @@ flags: {}
 
 packages:
 - '.'
+# uncomment and build to see something less trivial.
+# open with: google-chrome /home/callen/work/grasswire/chat-app/frontend/.stack-work/install/x86_64-linux/lts-3.10/ghcjs-0.2.0.20151001_ghc-7.10.2/bin/reflex-todomvc.jsexe/index.html
+# after it builds.
 # - location: # assume this is your main project
 #     git: https://github.com/ryantrinkle/reflex-todomvc.git
 #     commit: 9355d48f1fbdd8a5d09289a7d1ff12108e9a8f77 # improved-base
