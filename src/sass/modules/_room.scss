@@ -17,7 +17,8 @@
    }
    &__metadata {
       border-right: 1px solid get-color(dove-gray);
-         padding: 10px 20px;
+      height: 100%;
+      padding: 10px 20px;
       width: 50%;
 
       @include media("<=bantam") {
@@ -28,8 +29,8 @@
    }
 
    &__highlights {
+      height: 100%;
       padding: 10px 20px;
-
       width: 50%;
 
       @include media("<=bantam") {
