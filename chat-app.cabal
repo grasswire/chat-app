@@ -23,6 +23,7 @@ library
                      Handler.Common
                      Handler.Home
                      Handler.Rtm
+                     Handler.Auth
                      Types
                      Server
                      Taplike.Shared

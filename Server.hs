@@ -54,7 +54,7 @@ data JoinReason
 -- Note there is no notion of DMs here. That would have to be a specific, fixed channel
 data Client = Client
     { clientName          :: ClientName
-    , clientKicked        :: TVar (Maybe (String,String)) -- should be Map String String since multiple channels
+    , clientKicked        :: TVar (Maybe (String, String)) -- should be Map String String since multiple channels
     , clientChans         :: TVar (Map Channel (TChan Message)) -- client can be in multiple channels
     }
 

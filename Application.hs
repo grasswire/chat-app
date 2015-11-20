@@ -35,6 +35,7 @@ import System.Log.FastLogger                (defaultBufSize, newStdoutLoggerSet,
 import Handler.Common
 import Handler.Home
 import Handler.Rtm
+import Handler.Auth
 import qualified Data.Map as Map
 import Server
 -- This line actually creates our YesodDispatch instance. It is the second half

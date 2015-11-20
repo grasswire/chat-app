@@ -102,16 +102,6 @@ data Group = Group
   , _groupLatest      :: Maybe Message
   , _groupUnreadCount :: Maybe Int }
 
-data IM = IM
-  { _imID            :: ID IM
-  , _imUser          :: ID User
-  , _imCreated       :: Time
-  , _imIsUserDeleted :: Bool
-  , _imIsOpen        :: Bool
-  , _imLastRead      :: Maybe TS
-  , _imLatest        :: Maybe Message
-  , _imUnreadCount   :: Maybe Int }
-
 data Bot = Bot
   { _botID    :: ID Bot
   , _botName  :: Text
@@ -120,8 +110,7 @@ data Bot = Bot
 data Chat
 
 data Message = Message
-  { _messageChat         :: Maybe (ID Chat)
-  , _messageUser         :: ID User
+  { _messageUser         :: Int64
   , _messageSubtype      :: Maybe MessageSubtype
   , _messageText         :: Text
   , _messageTS           :: TS
@@ -129,11 +118,9 @@ data Message = Message
   , _messageDeletedTS    :: Maybe TS
   , _messageEventTS      :: Maybe TS
   , _messageHidden       :: Bool
-  , _messageAttachments  :: [Attachment]
-  , _messageInviter      :: Maybe (ID User)
   , _messageIsStarred    :: Maybe Bool
   , _messagePinnedTo     :: [ID Channel]
-  , _messageReactions    :: [MessageReaction] }
+  }
 
 data IncomingMessage = IncomingMessage
  { _sendMessageSeqnum :: Word64
@@ -141,10 +128,9 @@ data IncomingMessage = IncomingMessage
  , _sendMessageText   :: Text
 }
 
-testMessage :: ID Chat -> ID User -> Text -> Message
+testMessage :: Int64 -> Int64 -> Text -> Message
 testMessage chat from text = Message
-  { _messageChat         = Just chat
-  , _messageUser         = from
+  { _messageUser         = from
   , _messageSubtype      = Nothing
   , _messageText         = text
   , _messageTS           = TS "0"
@@ -152,20 +138,16 @@ testMessage chat from text = Message
   , _messageDeletedTS    = Nothing
   , _messageEventTS      = Nothing
   , _messageHidden       = False
-  , _messageAttachments  = []
-  , _messageInviter      = Nothing
   , _messageIsStarred    = Nothing
   , _messagePinnedTo     = []
-  , _messageReactions    = [] }
+ }
 
 data MessageSubtype
   = BotMS | MeMS | ChangedMS | DeletedMS
   | ChannelJoinMS | ChannelLeaveMS | ChannelTopicMS | ChannelPurposeMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
-  | GroupJoinMS   | GroupLeaveMS   | GroupTopicMS   | GroupPurposeMS   | GroupNameMS   | GroupArchiveMS   | GroupUnarchiveMS
-  | FileShareMS | FileCommentMS | FileMentionMS
 
 data MessageEdited = MessageEdited
-  { _messageEditedUser :: ID User
+  { _messageEditedUser :: Int64
   , _messageEditedTS   :: TS }
 
 data MessageReaction = MessageReaction
@@ -173,74 +155,11 @@ data MessageReaction = MessageReaction
   , _messageReactionCount :: Int
   , _messageReactionUsers :: [ID User] }
 
-data Attachment = Attachment
-  { _attachmentFallback   :: Text
-  , _attachmentColor      :: Maybe Text
-  , _attachmentPretext    :: Maybe Text
-  , _attachmentAuthorName :: Maybe Text
-  , _attachmentAuthorLink :: Maybe Text
-  , _attachmentAuthorIcon :: Maybe Text
-  , _attachmentTitle      :: Maybe Text
-  , _attachmentTitleLink  :: Maybe Text
-  , _attachmentText       :: Maybe Text
-  , _attachmentFields     :: [AttachmentField] }
-
-data AttachmentField = AttachmentField
-  { _fieldTitle :: Text
-  , _fieldValue :: Text
-  , _fieldShort :: Bool }
-
 data TapLikeTracked a = TapLikeTracked
   { _trackedValue   :: a
   , _trackedCreator :: ID User
-  , _trackedLastSet :: Time }
-
-data File = File
-  { _fileID                 :: ID File
-  , _fileCreated            :: Time
-  , _fileTimestamp          :: Time
-  , _fileName               :: Text
-  , _fileTitle              :: Text
-  , _fileMimeType           :: Text
-  , _fileFileType           :: Text
-  , _filePrettyType         :: Text
-  , _fileUser               :: ID User
-  , _fileMode               :: FileMode
-  , _fileEditable           :: Bool
-  , _fileIsExternal         :: Bool
-  , _fileExternalType       :: Text
-  , _fileSize               :: Word64
-  , _fileURL                :: Text
-  , _fileURLDownload        :: Text
-  , _fileURLPrivate         :: Text
-  , _fileURLPrivateDownload :: Text
-  , _fileThumb              :: HM.HashMap Text Text
-  , _filePermalink          :: Text
-  , _fileEditLink           :: Text
-  , _filePreview            :: Text
-  , _filePreviewHighlight   :: Text
-  , _fileLines              :: Int
-  , _fileLinesMore          :: Int
-  , _fileIsPublic           :: Bool
-  , _filePublicURLShared    :: Bool
-  , _fileChannels           :: [ID Channel]
-  , _fileGroups             :: [ID Group]
-  , _fileIMs                :: [ID IM]
-  , _fileInitialComment     :: Maybe Message
-  , _fileNumStars           :: Int
-  , _fileIsStarred          :: Bool }
-
-data FileMode
-  = FileHosted
-  | FileExternal
-  | FileSnippet
-  | FilePost
-
-data FileComment = FileComment
-  { _fileCommentID        :: ID FileComment
-  , _fileCommentTimestamp :: Time
-  , _fileCommentUser      :: ID User
-  , _fileCommentComment   :: Text }
+  , _trackedLastSet :: Time
+  }
 
 data RtmEvent
   = RtmHello
@@ -249,29 +168,16 @@ data RtmEvent
   | RtmMessage Message
   | RtmChannelMarked (ChatMarked Channel)
   | RtmChannelCreated Channel
-  | RtmChannelJoined Channel
-  | RtmChannelLeft (ID Channel)
   | RtmChannelDeleted (ID Channel)
   | RtmChannelRenamed (ChatRenamed Channel)
   | RtmChannelArchive (ChatUser Channel)
   | RtmChannelUnarchive (ChatUser Channel)
   | RtmChannelHistoryChanged (ChatHistoryChanged Channel)
-  | RtmFileCreated File
-  | RtmFileShared File
-  | RtmFileUnshared File
-  | RtmFilePublic File
-  | RtmFilePrivate (ID File)
-  | RtmFileChange File
-  | RtmFileDeleted FileDeleted
-  | RtmFileCommentAdded FileCommentUpdated
-  | RtmFileCommentEdited FileCommentUpdated
-  | RtmFileCommentDeleted FileCommentDeleted
   | RtmPresenceChange PresenceChange
   | RtmManualPresenceChange Presence
   | RtmPrefChange PrefChange
   | RtmUserChange User
   | RtmUserTyping UserTyping
-  | RtmTeamJoin User
   | RtmStarAdded Star
   | RtmStarRemoved Star
   | RtmEmojiChanged TS
@@ -299,21 +205,7 @@ data ChatHistoryChanged a = ChatHistoryChanged
   , _chatHistoryChangedTS      :: TS
   , _chatHistoryChangedEventTS :: TS }
 
-data IMCreated = IMCreated
-  { _imCreatedUser    :: Text
-  , _imCreatedChannel :: IM }
 
-data FileDeleted = FileDeleted
-  { _fileDeletedFileID  :: Text
-  , _fileDeletedEventTS :: Text }
-
-data FileCommentUpdated = FileCommentUpdated
-  { _fileCommentUpdatedFile    :: File
-  , _fileCommentUpdatedComment :: FileComment }
-
-data FileCommentDeleted = FileCommentDeleted
-  { _fileCommentDeletedFile    :: File
-  , _fileCommentDeletedComment :: ID FileComment }
 
 data PresenceChange = PresenceChange
   { _presenceChangeUser     :: ID User
@@ -334,11 +226,7 @@ data Star = Star
 
 data StarItem
   = StarItemMessage Message
-  | StarItemFile File
-  | StarItemFileComment File FileComment
   | StarItemChannel (ID Channel)
-  | StarItemIM (ID IM)
-  | StarItemGroup (ID Group)
 
 data TeamDomainChange = TeamDomainChange
   { _teamDomainChangeUrl    :: Text
@@ -348,28 +236,17 @@ data EmailDomainChanged = EmailDomainChanged
   { _emailDomainChangedEmailDomain :: Text
   , _emailDomainChangedEventTS     :: TS }
 
--- data RtmSendMessage = RtmSendMessage
---   { _sendMessageSeqnum :: Word64
---   , _sendMessageChat   :: ID Chat
---   , _sendMessageText   :: Text }
-
 class TapLikeTyped a where
   isTypedID :: Proxy a -> ID b -> Bool
 instance TapLikeTyped Channel where
   isTypedID _ = isPrefixOf "C" . unID
-instance TapLikeTyped File where
-  isTypedID _ (ID t) = "F" `isPrefixOf` t && not ("Fc" `isPrefixOf` t)
-instance TapLikeTyped FileComment where
-  isTypedID _ (ID t) = "Fc" `isPrefixOf` t
 instance TapLikeTyped Group where
   isTypedID _ = isPrefixOf "G" . unID
 instance TapLikeTyped Chat where
    isTypedID _ i
     =  isTypedID (Proxy :: Proxy Channel) i
-    || isTypedID (Proxy :: Proxy IM) i
     || isTypedID (Proxy :: Proxy Group) i
-instance TapLikeTyped IM where
-  isTypedID _ = isPrefixOf "D" . unID
+
 instance TapLikeTyped User where
   isTypedID _ = isPrefixOf "U" . unID
 
@@ -383,8 +260,7 @@ asChannelID :: ID Chat -> Maybe (ID Channel)
 asChannelID = asTypedID
 asGroupID :: ID Chat -> Maybe (ID Group)
 asGroupID = asTypedID
-asIMID :: ID Chat -> Maybe (ID IM)
-asIMID = asTypedID
+
 
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
@@ -394,27 +270,17 @@ deriving instance Eq User
 deriving instance Eq Profile
 deriving instance Eq Channel
 deriving instance Eq Group
-deriving instance Eq IM
 deriving instance Eq Bot
 deriving instance Eq MessageSubtype
 deriving instance Eq MessageReaction
 deriving instance Eq Message
 deriving instance Eq MessageEdited
-deriving instance Eq Attachment
-deriving instance Eq AttachmentField
 deriving instance Eq a => Eq (TapLikeTracked a)
-deriving instance Eq FileMode
-deriving instance Eq File
-deriving instance Eq FileComment
 deriving instance Eq RtmEvent
 deriving instance Eq a => Eq (ChatMarked a)
 deriving instance Eq a => Eq (ChatUser a)
 deriving instance Eq a => Eq (ChatRenamed a)
 deriving instance Eq a => Eq (ChatHistoryChanged a)
-deriving instance Eq IMCreated
-deriving instance Eq FileDeleted
-deriving instance Eq FileCommentUpdated
-deriving instance Eq FileCommentDeleted
 deriving instance Eq Presence
 deriving instance Eq PresenceChange
 deriving instance Eq UserTyping
@@ -433,25 +299,16 @@ makeLenses ''User
 makeLenses ''Profile
 makeLenses ''Channel
 makeLenses ''Group
-makeLenses ''IM
 makeLenses ''Bot
 makeLenses ''MessageReaction
 makeLenses ''Message
 makeLenses ''MessageEdited
-makeLenses ''Attachment
-makeLenses ''AttachmentField
 makeLenses ''TapLikeTracked
-makeLenses ''File
-makeLenses ''FileComment
 makePrisms ''RtmEvent
 makeLenses ''ChatMarked
 makeLenses ''ChatUser
 makeLenses ''ChatRenamed
 makeLenses ''ChatHistoryChanged
-makeLenses ''IMCreated
-makeLenses ''FileDeleted
-makeLenses ''FileCommentUpdated
-makeLenses ''FileCommentDeleted
 makeLenses ''PresenceChange
 makeLenses ''UserTyping
 makeLenses ''PrefChange
@@ -474,27 +331,17 @@ deriveTextShow ''User
 deriveTextShow ''Profile
 deriveTextShow ''Channel
 deriveTextShow ''Group
-deriveTextShow ''IM
 deriveTextShow ''Bot
 deriveTextShow ''Message
 deriveTextShow ''MessageSubtype
 deriveTextShow ''MessageEdited
 deriveTextShow ''MessageReaction
-deriveTextShow ''Attachment
-deriveTextShow ''AttachmentField
 deriveTextShow ''TapLikeTracked
-deriveTextShow ''File
-deriveTextShow ''FileMode
-deriveTextShow ''FileComment
 deriveTextShow ''RtmEvent
 deriveTextShow ''ChatMarked
 deriveTextShow ''ChatUser
 deriveTextShow ''ChatRenamed
 deriveTextShow ''ChatHistoryChanged
-deriveTextShow ''IMCreated
-deriveTextShow ''FileDeleted
-deriveTextShow ''FileCommentUpdated
-deriveTextShow ''FileCommentDeleted
 deriveTextShow ''PresenceChange
 deriveTextShow ''UserTyping
 deriveTextShow ''PrefChange
@@ -603,16 +450,7 @@ instance FromJSON Group where
     <*> o .:? "latest"
     <*> o .:? "unread_count"
 
-instance FromJSON IM where
-  parseJSON = withObject "im object" $ \ o -> IM
-    <$> o .: "id"
-    <*> o .: "user"
-    <*> o .: "created"
-    <*> o .:? "is_user_deleted" .!= False
-    <*> o .:? "is_open" .!= False
-    <*> o .:? "last_read"
-    <*> o .:? "latest"
-    <*> o .:? "unread_count"
+
 
 instance FromJSON Bot where
   parseJSON = withObject "bot object" $ \ o -> Bot
@@ -628,8 +466,7 @@ instance FromJSON a => FromJSON (TapLikeTracked a) where
 
 instance FromJSON Message where
   parseJSON = withObject "message object" $ \ o -> Message
-    <$> o .:? "channel"
-    <*> o .: "user"
+    <$> o .: "user"
     <*> o .:? "subtype"
     <*> o .: "text"
     <*> o .: "ts"
@@ -637,11 +474,8 @@ instance FromJSON Message where
     <*> o .:? "deleted_ts"
     <*> o .:? "event_ts"
     <*> o .:? "hidden" .!= False
-    <*> o .:? "attachments" .!= []
-    <*> o .:? "inviter"
     <*> o .:? "is_starred"
     <*> o .:? "pinned_to" .!= []
-    <*> o .:? "reactions" .!= []
 
 instance FromJSON MessageSubtype where
   parseJSON = withText "message subtype" $ \ case
@@ -656,16 +490,6 @@ instance FromJSON MessageSubtype where
     "channel_name"      -> pure ChannelNameMS
     "channel_archive"   -> pure ChannelArchiveMS
     "channel_unarchive" -> pure ChannelUnarchiveMS
-    "group_join"        -> pure GroupJoinMS
-    "group_leave"       -> pure GroupLeaveMS
-    "group_topic"       -> pure GroupTopicMS
-    "group_purpose"     -> pure GroupPurposeMS
-    "group_name"        -> pure GroupNameMS
-    "group_archive"     -> pure GroupArchiveMS
-    "group_unarchive"   -> pure GroupUnarchiveMS
-    "file_share"        -> pure FileShareMS
-    "file_comment"      -> pure FileCommentMS
-    "file_mention"      -> pure FileMentionMS
     other               -> fail . unpack $ "unknown message subtype " <> other
 
 instance FromJSON MessageEdited where
@@ -678,76 +502,6 @@ instance FromJSON MessageReaction where
     <$> o .: "name"
     <*> o .: "count"
     <*> o .: "users"
-
-instance FromJSON Attachment where
-  parseJSON = withObject "attachment object" $ \ o -> Attachment
-    <$> o .: "fallback"
-    <*> o .:? "color"
-    <*> o .:? "pretext"
-    <*> o .:? "author_name"
-    <*> o .:? "author_link"
-    <*> o .:? "author_icon"
-    <*> o .:? "title"
-    <*> o .:? "title_link"
-    <*> o .:? "text"
-    <*> o .:? "fields" .!= []
-
-instance FromJSON AttachmentField where
-  parseJSON = withObject "attachment field object" $ \ o -> AttachmentField
-    <$> o .: "title"
-    <*> o .: "value"
-    <*> o .: "short"
-
-instance FromJSON File where
-  parseJSON = withObject "file object" $ \ o -> File
-    <$> o .: "id"
-    <*> o .: "created"
-    <*> o .: "timestamp"
-    <*> o .: "name"
-    <*> o .: "title"
-    <*> o .: "mimetype"
-    <*> o .: "filetype"
-    <*> o .: "pretty_type"
-    <*> o .: "user"
-    <*> o .: "mode"
-    <*> o .: "editable"
-    <*> o .: "is_external"
-    <*> o .: "external_type"
-    <*> o .: "size"
-    <*> o .: "url"
-    <*> o .: "url_download"
-    <*> o .: "url_private"
-    <*> o .: "url_private_download"
-    <*> parseJSON (Object . HM.fromList . concatMap (\ (k, v) -> maybeToList . map (, v) . stripPrefix "thumb_" $ k) . HM.toList $ o)
-    <*> o .: "permalink"
-    <*> o .: "edit_link"
-    <*> o .: "preview"
-    <*> o .: "preview_highlight"
-    <*> o .: "lines"
-    <*> o .: "lines_more"
-    <*> o .: "is_public"
-    <*> o .: "public_url_shared"
-    <*> o .:? "channels" .!= []
-    <*> o .:? "groups" .!= []
-    <*> o .:? "ims" .!= []
-    <*> o .:? "initial_comment"
-    <*> o .:? "num_stars" .!= 0
-    <*> o .:? "is_starred" .!= False
-
-instance FromJSON FileMode where
-  parseJSON = withText "file mode" $ \ case
-    "hosted"   -> pure FileHosted
-    "external" -> pure FileExternal
-    "snippet"  -> pure FileSnippet
-    "post"     -> pure FilePost
-    other      -> fail . unpack $ "unknown file mode " <> other
-
-instance FromJSON FileComment where
-  parseJSON = withObject "file comment object" $ \ o -> FileComment
-    <$> o .: "id"
-    <*> o .: "timestamp"
-    <*> o .: "user"
-    <*> o .: "comment"
 
 instance FromJSON RtmEvent where
   parseJSON v =
@@ -765,29 +519,16 @@ instance FromJSON RtmEvent where
               "message"                 -> RtmMessage <$> recur
               "channel_marked"          -> RtmChannelMarked <$> recur
               "channel_created"         -> RtmChannelCreated <$> o .: "channel"
-              "channel_joined"          -> RtmChannelJoined <$> o .: "channel"
-              "channel_left"            -> RtmChannelLeft <$> o .: "channel"
               "channel_deleted"         -> RtmChannelDeleted <$> o .: "channel"
               "channel_rename"          -> RtmChannelRenamed <$> o .: "channel"
               "channel_archive"         -> RtmChannelArchive <$> recur
               "channel_unarchive"       -> RtmChannelUnarchive <$> recur
               "channel_history_changed" -> RtmChannelHistoryChanged <$> recur
-              "file_created"            -> RtmFileCreated <$> o .: "file"
-              "file_shared"             -> RtmFileShared <$> o .: "file"
-              "file_unshared"           -> RtmFileUnshared <$> o .: "file"
-              "file_public"             -> RtmFilePublic <$> o .: "file"
-              "file_private"            -> RtmFilePrivate <$> o .: "file"
-              "file_change"             -> RtmFileChange <$> o .: "file"
-              "file_deleted"            -> RtmFileDeleted <$> recur
-              "file_comment_added"      -> RtmFileCommentAdded <$> recur
-              "file_comment_edited"     -> RtmFileCommentEdited <$> recur
-              "file_comment_deleted"    -> RtmFileCommentDeleted <$> recur
               "presence_change"         -> RtmPresenceChange <$> recur
               "manual_presence_change"  -> RtmManualPresenceChange <$> o .: "presence"
               "user_typing"             -> RtmUserTyping <$> recur
               "pref_change"             -> RtmPrefChange <$> recur
               "user_change"             -> RtmUserChange <$> o .: "user"
-              "team_join"               -> RtmTeamJoin <$> o .: "user"
               "star_added"              -> RtmStarAdded <$> recur
               "star_removed"            -> RtmStarRemoved <$> recur
               "emoji_changed"           -> RtmEmojiChanged <$> o .: "event_ts"
@@ -828,25 +569,6 @@ instance FromJSON (ChatHistoryChanged a) where
     <*> o .: "ts"
     <*> o .: "event_ts"
 
-instance FromJSON IMCreated where
-  parseJSON = withObject "im created event" $ \ o -> IMCreated
-    <$> o .: "user"
-    <*> o .: "channel"
-
-instance FromJSON FileDeleted where
-  parseJSON = withObject "file deleted event" $ \ o -> FileDeleted
-    <$> o .: "file_id"
-    <*> o .: "event_ts"
-
-instance FromJSON FileCommentUpdated where
-  parseJSON = withObject "file comment event" $ \ o -> FileCommentUpdated
-    <$> o .: "file"
-    <*> o .: "comment"
-
-instance FromJSON FileCommentDeleted where
-  parseJSON = withObject "file comment deleted event" $ \ o -> FileCommentDeleted
-    <$> o .: "file"
-    <*> o .: "comment"
 
 instance FromJSON PresenceChange where
   parseJSON = withObject "presence change event" $ \ o -> PresenceChange
@@ -872,11 +594,7 @@ instance FromJSON Star where
 instance FromJSON StarItem where
   parseJSON = withObject "starred item reference" $ \ o -> o .: "type" >>= pure . asText >>= \ case
     "message"      -> StarItemMessage     <$> o .: "message"
-    "file"         -> StarItemFile        <$> o .: "file"
-    "file_comment" -> StarItemFileComment <$> o .: "file" <*> o .: "comment"
     "channel"      -> StarItemChannel     <$> o .: "channel"
-    "im"           -> StarItemIM          <$> o .: "im"
-    "group"        -> StarItemGroup       <$> o .: "group"
     other          -> fail . unpack $ "unknown starrable item type " <> other
 
 instance FromJSON TeamDomainChange where

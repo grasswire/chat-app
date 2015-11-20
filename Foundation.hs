@@ -12,11 +12,8 @@ import Yesod.Core.Types     (Logger)
 import qualified Yesod.Core.Unsafe as Unsafe
 import Web.Authenticate.OAuth (Credential(..))
 import qualified Data.ByteString as BS
-import qualified Network.Wai as NW
 import qualified Data.ByteString.Char8 as S8
-import           Data.CaseInsensitive  ( CI )
-
-import qualified Data.Map                 as M
+import qualified Data.Map              as M
 import Server
 
 type OAuthToken = BS.ByteString
