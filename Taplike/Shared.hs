@@ -256,20 +256,6 @@ data RtmEvent
   | RtmChannelArchive (ChatUser Channel)
   | RtmChannelUnarchive (ChatUser Channel)
   | RtmChannelHistoryChanged (ChatHistoryChanged Channel)
-  | RtmIMCreated IMCreated
-  | RtmIMOpen (ChatUser IM)
-  | RtmIMClose (ChatUser IM)
-  | RtmIMMarked (ChatMarked IM)
-  | RtmIMHistoryChanged (ChatHistoryChanged IM)
-  | RtmGroupJoined Group
-  | RtmGroupLeft (ID Group)
-  | RtmGroupOpen (ChatUser Group)
-  | RtmGroupClose (ChatUser Group)
-  | RtmGroupArchive (ID Group)
-  | RtmGroupUnarchive (ID Group)
-  | RtmGroupRename (ChatRenamed Group)
-  | RtmGroupMarked (ChatMarked Group)
-  | RtmGroupHistoryChanged (ChatHistoryChanged Group)
   | RtmFileCreated File
   | RtmFileShared File
   | RtmFileUnshared File
@@ -291,9 +277,6 @@ data RtmEvent
   | RtmEmojiChanged TS
   | RtmCommandsChanged TS
   | RtmTeamPrefChange PrefChange
-  | RtmTeamRename Text
-  | RtmTeamDomainChange TeamDomainChange
-  | RtmEmailDomainChanged EmailDomainChanged
   | RtmBotAdded Bot
   | RtmBotChanged Bot
   | RtmAccountsChanged
@@ -580,24 +563,6 @@ instance FromJSON Team where
     <*> o .: "over_storage_limit"
     <*> o .: "prefs"
 
--- instance FromJSON User where
---   parseJSON = withObject "user object" $ \ o -> User
---     <$> o .: "id"
---     <*> o .: "name"
---     <*> o .: "real_name"
---     <*> o .: "deleted"
---     <*> o .: "color"
---     <*> o .: "profile"
---     <*> o .: "is_admin"
---     <*> o .: "is_owner"
---     <*> o .: "is_primary_owner"
---     <*> o .: "is_restricted"
---     <*> o .: "is_ultra_restricted"
---     <*> o .:? "has_2fa" .!= False
---     <*> o .:? "two_factor_type"
---     <*> o .:? "has_files" .!= False
---     <*> o .:? "presence"
-
 instance FromJSON Profile where
   parseJSON = withObject "user profile object" $ \ o -> Profile
     <$> o .:? "first_name"
@@ -807,20 +772,6 @@ instance FromJSON RtmEvent where
               "channel_archive"         -> RtmChannelArchive <$> recur
               "channel_unarchive"       -> RtmChannelUnarchive <$> recur
               "channel_history_changed" -> RtmChannelHistoryChanged <$> recur
-              "im_created"              -> RtmIMCreated <$> recur
-              "im_open"                 -> RtmIMOpen <$> recur
-              "im_close"                -> RtmIMClose <$> recur
-              "im_marked"               -> RtmIMMarked <$> recur
-              "im_history_changed"      -> RtmIMHistoryChanged <$> recur
-              "group_joined"            -> RtmGroupJoined <$> o .: "channel"
-              "group_left"              -> RtmGroupLeft <$> o .: "channel"
-              "group_open"              -> RtmGroupOpen <$> recur
-              "group_close"             -> RtmGroupClose <$> recur
-              "group_archive"           -> RtmGroupArchive <$> o .: "channel"
-              "group_unarchive"         -> RtmGroupUnarchive <$> o .: "channel"
-              "group_rename"            -> RtmGroupRename <$> o .: "channel"
-              "group_marked"            -> RtmGroupMarked <$> recur
-              "group_history_changed"   -> RtmGroupHistoryChanged <$> recur
               "file_created"            -> RtmFileCreated <$> o .: "file"
               "file_shared"             -> RtmFileShared <$> o .: "file"
               "file_unshared"           -> RtmFileUnshared <$> o .: "file"
@@ -842,9 +793,6 @@ instance FromJSON RtmEvent where
               "emoji_changed"           -> RtmEmojiChanged <$> o .: "event_ts"
               "commands_changed"        -> RtmCommandsChanged <$> o .: "event_ts"
               "team_pref_change"        -> RtmTeamPrefChange <$> recur
-              "team_rename"             -> RtmTeamRename <$> o .: "name"
-              "team_domain_change"      -> RtmTeamDomainChange <$> recur
-              "email_domain_changed"    -> RtmEmailDomainChanged <$> recur
               "bot_added"               -> RtmBotAdded <$> o .: "bot"
               "bot_changed"             -> RtmBotChanged <$> o .: "bot"
               "accounts_changed"        -> pure RtmAccountsChanged
