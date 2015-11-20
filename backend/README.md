@@ -15,7 +15,7 @@ sudo apt-get install libpq-dev
 # Building
 
 ```
-stack build
+make
 ```
 
 # Prepping the database

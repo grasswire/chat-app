@@ -1,0 +1,27 @@
+name: chat-frontend
+version: 0.0.0
+cabal-version: >=1.8
+build-type: Simple
+license: MIT
+license-file: LICENSE
+copyright: Grasswire
+maintainer: Chris Allen
+stability: stable
+homepage: https://github.com/grasswire/chat-app
+synopsis: Hello World
+description: It's Hello, World, but in the browser.
+category: Web
+author: Hamish Mackenzie
+data-dir: ""
+
+source-repository head
+    type: git
+    location: https://github.com/grasswire/chat-app
+
+executable ghcjs-dom-hello
+    build-depends: mtl >=2.1 && <2.3,
+                   base >=4.2 && <5,
+                   ghcjs-dom >=0.2 && <0.3
+    main-is: Main.hs
+    buildable: True
+    hs-source-dirs: src
