@@ -17,16 +17,16 @@ chatApp :: Text -> Maybe User -> WebSocketsT Handler ()
 chatApp channelName user = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
-    outChan <- atomically $ (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
-    inChan <- atomically $ do
-        dupTChan outChan
+    outChan <- atomically
+                (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
+    inChan <- atomically (dupTChan outChan)
     case user of
       Just _ ->
         race_
           (ingest inChan)
-          (sourceWS $$ mapM_C (\msg -> atomically $ writeTChan outChan $  msg))
+          (sourceWS $$ mapM_C (atomically . writeTChan outChan))
       Nothing -> ingest inChan
-    where ingest chan = (forever $ atomically (readTChan chan) >>= sendTextData)
+    where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
@@ -43,8 +43,7 @@ getChatR chatId = do
     case chatRoom of
       Just chat -> do
         webSockets $ chatApp (chatRoomTitle chat) chatUser
-        defaultLayout $ do
-          $(widgetFile "chat-room")
+        defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
 postNewChatR :: Handler ()
@@ -58,7 +57,7 @@ postNewChatR = do
 
 getHomeR :: Handler Html
 getHomeR = do
-    chatRooms <- runDB $ (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
+    chatRooms <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")

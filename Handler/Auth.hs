@@ -1,4 +1,4 @@
-{-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
+{-# LANGUAGE TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
 module Handler.Auth where
 
@@ -15,7 +15,7 @@ getRequestToken :: Text -> TwitterConf -> OAuth
 getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
         { oauthConsumerKey = S8.pack $ unpack consumerKey
         , oauthConsumerSecret = S8.pack $ unpack secret
-        , oauthCallback = Just $ S8.pack $ unpack $ callback
+        , oauthCallback = Just $ S8.pack $ unpack callback
         }
 
 storeCredential :: OAuthToken -> Credential -> App -> IO ()
@@ -33,7 +33,7 @@ getTwitterAuthR = do
   app <- getYesod
   let conf = twitterConf . appSettings $ app
   renderFunc <- getUrlRender
-  let callback = renderFunc $ TwitterCallbackR
+  let callback = renderFunc TwitterCallbackR
   let token = getRequestToken callback conf
   manager <- appHttpManager <$> getYesod
   cred <- liftIO $ OA.getTemporaryCredential token manager
@@ -41,7 +41,7 @@ getTwitterAuthR = do
      Just temporaryToken -> do
          liftIO $ storeCredential temporaryToken cred app
          let url = OA.authorizeUrl token cred
-         redirect $  (pack url :: Text)
+         redirect (pack url :: Text)
      Nothing -> redirect (pack "http://disney.com" :: Text)
 
 getTwitterCallbackR :: Handler Html
@@ -52,8 +52,8 @@ getTwitterCallbackR = do
    let tokenStore = twitterTokenStore app
    let conf = twitterConf . appSettings $ app
    renderFunc <- getUrlRender
-   let callback = renderFunc $ TwitterCallbackR
-   let homeR = renderFunc $ HomeR
+   let callback = renderFunc TwitterCallbackR
+   let homeR = renderFunc HomeR
    let tokens = getRequestToken callback conf
    mcred <- case temporaryToken of
               Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
@@ -64,7 +64,7 @@ getTwitterCallbackR = do
           let token = getRequestToken callback conf
           manager <- appHttpManager <$> getYesod
           user <- liftIO $ verifyTwitterCreds manager (mkTwitterInfo token accessTokens)
-          let twitterUserId = (fromIntegral $ TT.userId user)
+          let twitterUserId = fromIntegral $ TT.userId user
           maybePersistedUser <- getUser $ UserKey twitterUserId
           case maybePersistedUser of
             Nothing -> do
@@ -77,11 +77,10 @@ getTwitterCallbackR = do
     _ -> redirect homeR
 
 verifyTwitterCreds :: Manager -> TWInfo -> IO TT.User
-verifyTwitterCreds manager twInfo =  do
-  runResourceT (call twInfo manager accountVerifyCredentials)
+verifyTwitterCreds manager twInfo = runResourceT (call twInfo manager accountVerifyCredentials)
 
 getUser :: Key User -> Handler (Maybe User)
-getUser userKey = runDB $ get $ userKey
+getUser userKey = runDB $ get userKey
 
 mkTwitterInfo :: OAuth -> Credential -> TWInfo
 mkTwitterInfo tokens credential = setCredential tokens credential def
