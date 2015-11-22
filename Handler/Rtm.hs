@@ -25,9 +25,9 @@ getRtmStartR = do
             Just roomId -> do
               let maybeInt = TR.decimal roomId
               case maybeInt of
-                Right roomId -> do
+                Right rId -> do
                   renderer <- getUrlRender
-                  let url = renderer $ ChatR (toSqlKey ((fromIntegral . fst $ roomId ) :: Int64))
+                  let url = renderer $ ChatR (toSqlKey ((fromIntegral . fst $ rId ) :: Int64))
                   returnJson $ RtmStartRp url (Self (unUserKey i) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) []
                 Left err -> sendResponseStatus badRequest400 (pack err :: Text)
             Nothing -> sendResponseStatus badRequest400 ("BADREQUEST: MISSING room_id param" :: Text)

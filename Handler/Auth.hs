@@ -9,9 +9,7 @@ import Web.Twitter.Conduit hiding (lookup)
 import qualified Web.Authenticate.OAuth as OA
 import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.Map as M
-import qualified Network.HTTP.Conduit as HTTP
 import qualified Web.Twitter.Types as TT
-import Data.Maybe (fromMaybe)
 
 getRequestToken :: Text -> TwitterConf -> OAuth
 getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
@@ -37,7 +35,8 @@ getTwitterAuthR = do
   renderFunc <- getUrlRender
   let callback = renderFunc $ TwitterCallbackR
   let token = getRequestToken callback conf
-  cred <- liftIO $ HTTP.withManager $ OA.getTemporaryCredential token
+  manager <- appHttpManager <$> getYesod
+  cred <- liftIO $ OA.getTemporaryCredential token manager
   case lookup "oauth_token" $ unCredential cred of
      Just temporaryToken -> do
          liftIO $ storeCredential temporaryToken cred app
@@ -61,9 +60,12 @@ getTwitterCallbackR = do
               Nothing -> return Nothing
    case (mcred, oauthVerifier) of
     (Just cred, Just authVer) -> do
-          accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
+
+          -- accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
+          accessTokens <- liftIO $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
           let token = getRequestToken callback conf
-          user <- liftIO $ verifyTwitterCreds $ mkTwitterInfo token accessTokens
+          manager <- appHttpManager <$> getYesod
+          user <- liftIO $ verifyTwitterCreds manager (mkTwitterInfo token accessTokens)
           let twitterUserId = (fromIntegral $ TT.userId user)
           maybePersistedUser <- getUser $ UserKey twitterUserId
           case maybePersistedUser of
@@ -76,9 +78,8 @@ getTwitterCallbackR = do
               redirect homeR
     _ -> redirect homeR
 
-verifyTwitterCreds :: TWInfo -> IO TT.User
-verifyTwitterCreds twInfo =  do
-  manager <- HTTP.newManager defaultManagerSettings
+verifyTwitterCreds :: Manager -> TWInfo -> IO TT.User
+verifyTwitterCreds manager twInfo =  do
   runResourceT (call twInfo manager accountVerifyCredentials)
 
 getUser :: Key User -> Handler (Maybe User)
