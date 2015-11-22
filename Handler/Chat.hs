@@ -1,6 +1,6 @@
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
-module Handler.Home where
+module Handler.Chat where
 
 import Import
 import Yesod.WebSockets

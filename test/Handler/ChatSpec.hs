@@ -1,4 +1,4 @@
-module Handler.HomeSpec (spec) where
+module Handler.ChatSpec (spec) where
 
 import TestImport
 

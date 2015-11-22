@@ -21,15 +21,13 @@ library
                      Settings
                      Settings.StaticFiles
                      Handler.Common
-                     Handler.Home
+                     Handler.Chat
                      Handler.Rtm
                      Handler.Auth
                      Types
                      Server
                      Taplike.Shared
-                     Taplike.Incoming
                      Taplike.Outgoing
-                     Extra.JSON
                      Model.Incoming
                      Taplike.TextShowOrphans
 
