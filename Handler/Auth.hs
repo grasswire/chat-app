@@ -60,8 +60,6 @@ getTwitterCallbackR = do
               Nothing -> return Nothing
    case (mcred, oauthVerifier) of
     (Just cred, Just authVer) -> do
-
-          -- accessTokens <- liftIO $ HTTP.withManager $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred)
           accessTokens <- liftIO $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
           let token = getRequestToken callback conf
           manager <- appHttpManager <$> getYesod
