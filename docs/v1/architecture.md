@@ -9,6 +9,8 @@ Feel free to email/slack as well.
 
 Tenancy is defined as one server "owning" all traffic and websocket connections for a single chat room.
 
+Probably want a queue for chat room migrations so we don't screw ourselves in a blackout.
+
 ## Tenancy Pros
 
 - Potentially lower latency (doesn't round-trip through Redis/Kafka)
@@ -68,7 +70,7 @@ Backend uses [unagi-chan](http://hackage.haskell.org/package/unagi-chan) or some
 
 ## Message type
 
-Frontend-generated UUIDV4 per message so that messages can be synchronized via heartbeat gossip without duplication. Remember, the client knows the truth - the backend is only a middleman!
+Frontend-generated UUIDV4 per message so that messages can be synchronized via heartbeat gossip without duplication. Remember, the client knows the truth - the backend is only a middleman! This is also why the client assigns timestamp, so that message ordering reflects the author's intent.
 
 ```haskell
 -- Should look something like this pseudo-code
