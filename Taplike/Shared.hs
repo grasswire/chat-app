@@ -13,7 +13,15 @@ import           TextShow.TH (deriveTextShow)
 import           Control.Applicative (empty)
 
 import           Taplike.TextShowOrphans ()
-import Model (User, User(..))
+import Model (User, User(..), ChatRoom)
+
+data ChatRoomCreatedRp = ChatRoomCreatedRp
+  { chatRoomCreatedRpChatRoom :: ChatRoom
+  , chatRoomCreatedRpId       :: Int64
+  }
+
+instance ToJSON ChatRoomCreatedRp where
+  toJSON (ChatRoomCreatedRp room roomId) = object ["chat_room" .= room, "id" .= roomId]
 
 newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 instance FromJSON TS where

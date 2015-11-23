@@ -9,7 +9,8 @@ import Server
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Model.Incoming as Incoming
-import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..))
+import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChatRoomCreatedRp(..))
+import Database.Persist.Sql (fromSqlKey)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -59,7 +60,9 @@ postNewChatR = do
     chatRoom <- requireJsonBody :: Handler Incoming.ChatRoom
     authId <- maybeAuthId
     case authId of
-      Just i -> runDB (insert (ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom))) >> sendResponseStatus status201 ("CREATED" :: Text)
+      Just i -> do
+        let newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom)
+        runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key)))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 

@@ -6,7 +6,7 @@ This spec spells out the technical specifications of the following features.
 
 - logging in
 - creating a chat room
-- home page that displays a list of the top ten most popular chats wo
+- home page that displays a list of the top ten most popular chats
 - participating in chat
 
 # Logging In
@@ -61,4 +61,27 @@ If a user is not authenticated (because they’re not “logged in”) a 401 sta
 
 After a successful room creation, the user should be directed to the newly created room. The `id` returned in the http response can be used to construct a type safe url to redirect with.
 
-After redirecting to the new room, a modal should appear prompting the user to invite others to the new room. The modal will include a copyable link, a button to tweet and a button to share on FB. Both Twitter and FB buttons will pop open a new window with standard twitter and FB sharing functionality. The presence of a query param ?invite=true will be included in the url a user is redirected to after creating a room. This presence of this param
+After navigating to the url for the new room, a GET /api/rtm.start?room_id{$roomId} should be sent. The response is a JSON body:
+
+```json
+{
+   "users":[
+      {
+         "twitterScreenName":"joecianflone",
+         "profileImageUrl":"https://pbs.twimg.com/profile_images/561226905815642113/Lv_DZLTF_normal.jpeg",
+         "emailAddress":null,
+         "twitterUserId":174050963
+      }
+   ],
+   "url":"http://localhost:3000/room/13",
+   "self":{
+      "profile_image_url":"https://pbs.twimg.com/profile_images/663241074786312192/b6FsLFMy_normal.jpg",
+      "name":"Levi Notik",
+      "id":174050963
+   }
+}
+```
+
+The `users` property lists the users currently participating in the chat room. The `url` is the url that should be used to open up a WebSocket connection on the client side. `self` is a `User` object representing the authenticated user. Since anonymous users can view (but not participate in) chats, this property may be null.
+
+If the list of users returned by `rtm.start` is empty, a modal should appear prompting the user to invite others to the room. This applies even for a room not created by the current user. The modal will include a copyable link, a button to tweet and a button to share on FB. Both Twitter and FB buttons will pop open a new window with standard twitter and FB sharing functionality.
