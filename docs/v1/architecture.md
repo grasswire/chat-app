@@ -74,8 +74,12 @@ Frontend-generated UUIDV4 per message so that messages can be synchronized via h
 
 ```haskell
 -- Should look something like this pseudo-code
+
+newtype ChannelName = ChannelName Text
+newtype MessageText = MessageText Text
+
 data Message =
-  Message UUIDV4 UTCTime Text
+  Message UUIDV4 UTCTime ChannelName MessageText
 ```
 
 ## Heartbeat sync
@@ -104,4 +108,6 @@ We could keep an STM of a `Set` of the last ~2 minutes of messages per server to
 TVar (HashMap Channel (Set Message))
 ```
 
-If we [want to get real clever](http://hackage.haskell.org/package/stm-containers).
+If we [want to get real clever](http://hackage.haskell.org/package/stm-containers), see the [explanation here](http://nikita-volkov.github.io/stm-containers/).
+
+Heartbeat _does not_ need to happen in V1 strictly speaking! It's a backstop for client desync!
