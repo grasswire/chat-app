@@ -1,4 +1,6 @@
-# Scope
+# Technical Spec - V1
+
+## Scope
 
 This spec spells out the technical specifications of the following features.
 
