@@ -109,3 +109,5 @@ TVar (HashMap Channel (Set Message))
 ```
 
 If we [want to get real clever](http://hackage.haskell.org/package/stm-containers), see the [explanation here](http://nikita-volkov.github.io/stm-containers/).
+
+Heartbeat _does not_ need to happen in V1 strictly speaking! It's a backstop for client desync!
