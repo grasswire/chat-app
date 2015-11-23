@@ -17,11 +17,13 @@ chatApp :: Text -> Maybe User -> WebSocketsT Handler ()
 chatApp channelName user = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
-    outChan <- atomically
-                (channelBroadcastChan <$> lookupOrCreateChannel (chatServer app) (fromStrict channelName))
+    (outChan, channel) <- atomically $ do
+                chan <- lookupOrCreateChannel (chatServer app) (fromStrict channelName)
+                return (channelBroadcastChan chan, chan)
     inChan <- atomically (dupTChan outChan)
     case user of
-      Just _ ->
+      Just u -> do
+        _ <- liftIO $ atomically $ chanAddClient JoinReasonConnected channel (userTwitterUserId u)
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C (atomically . writeTChan outChan))

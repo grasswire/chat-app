@@ -13,6 +13,9 @@ import qualified Data.Set                 as S
 import           System.IO
 import           Text.Printf              (hPrintf, printf)
 import           Prelude                  ((.), ($), (++))
+import Data.Int (Int64)
+import Model
+import Database.Persist (Key (..))
 
 -- import Channel
 -- import Import
@@ -53,12 +56,12 @@ data JoinReason
 
 -- Note there is no notion of DMs here. That would have to be a specific, fixed channel
 data Client = Client
-    { clientName          :: ClientName
+    { clientName          :: ClientId
     , clientKicked        :: TVar (Maybe (String, String)) -- should be Map String String since multiple channels
     , clientChans         :: TVar (Map Channel (TChan Message)) -- client can be in multiple channels
     }
 
-newClient :: ClientName -> STM Client
+newClient :: ClientId -> STM Client
 newClient name  = do
     broadcastChan <- newTVar M.empty
     kicked        <- newTVar Nothing
@@ -75,7 +78,7 @@ newClient name  = do
 -- Chat channel datatype, not to be confused with a TChan.
 data Channel = Channel
     { channelName          :: ChannelName
-    , channelClients       :: TVar (S.Set ClientName)
+    , channelClients       :: TVar (S.Set ClientId)
     , channelBroadcastChan :: TChan RtmEvent
     }
 
@@ -91,15 +94,15 @@ chanMessage :: Channel -> RtmEvent -> STM ()
 chanMessage = writeTChan . channelBroadcastChan
 
 -- Notify the channel a client has connected.
-chanNotifyHasConnected :: Channel -> ClientName -> STM ()
+chanNotifyHasConnected :: Channel -> ClientId -> STM ()
 chanNotifyHasConnected chan name = chanNotify chan RtmHello
 
 data Server = Server
     { serverChannels :: TVar (Map ChannelName Channel)
-    , serverClients  :: TVar (Map ClientName Client)
+    , serverClients  :: TVar (Map ClientId Client)
     }
 
-lookupClient :: Server -> ClientName -> STM (Maybe Client)
+lookupClient :: Server -> ClientId -> STM (Maybe Client)
 lookupClient Server{..} name = M.lookup name <$> readTVar serverClients
 
 lookupOrCreateChannel :: Server -> ChannelName -> STM Channel
@@ -123,7 +126,7 @@ addChannel :: Server -> ChannelName -> STM ()
 addChannel Server{..} name = newChannel name >>= modifyTVar serverChannels . M.insert name
 
 -- Try to add a client to the server; fail if the requested name is taken.
-tryAddClient :: Server -> ClientName  -> IO (Maybe Client)
+tryAddClient :: Server -> ClientId  -> IO (Maybe Client)
 tryAddClient server@Server{..} name = atomically $ do
     clients <- readTVar serverClients
     if M.member name clients
@@ -145,23 +148,26 @@ welcomeMsg = T.unlines
     , "/quit             - quit the server"
     ]
 
-chanAddClient :: JoinReason -> Channel -> ClientName -> STM ()
+chanAddClient :: JoinReason -> Channel -> ClientId -> STM ()
 chanAddClient JoinReasonJoined    = chanAddClient' chanNotifyHasJoined
 chanAddClient JoinReasonConnected = chanAddClient' chanNotifyHasConnected
 
-chanAddClient' :: (Channel -> ClientName -> STM ()) -> Channel -> ClientName -> STM ()
+chanAddClient' :: (Channel -> ClientId -> STM ()) -> Channel -> ClientId -> STM ()
 chanAddClient' notifyAction chan@Channel{..} name = do
     notifyAction chan name
     modifyTVar channelClients . S.insert $ name
 
+listUsers :: Channel -> STM [Int64]
+listUsers channel = S.toList <$> (readTVar $ channelClients channel)
+
 -- Notify the channel a client has left.
-chanNotifyHasLeft :: Channel -> ClientName -> STM ()
+chanNotifyHasLeft :: Channel -> ClientId -> STM ()
 chanNotifyHasLeft chan name = chanNotify chan RtmHello
 
 -- Notify the channel a client has disconnected.
-chanNotifyHasDisconnected :: Channel -> ClientName -> STM ()
+chanNotifyHasDisconnected :: Channel -> ClientId -> STM ()
 chanNotifyHasDisconnected chan name = chanNotify chan RtmHello
 
 -- Notify the channel a client has joined.
-chanNotifyHasJoined :: Channel -> ClientName -> STM ()
+chanNotifyHasJoined :: Channel -> ClientId -> STM ()
 chanNotifyHasJoined chan name = chanNotify chan RtmHello

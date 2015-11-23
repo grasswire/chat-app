@@ -13,13 +13,13 @@ import Data.Aeson (encode, decode)
 import Taplike.Shared (RtmEvent(..), RtmEvent)
 
 
-type ClientName = TL.Text
+type ClientId = Int64
 type ChannelName = TL.Text
 
 data Message
     = Notice TL.Text
-    | Tell ClientName TL.Text
-    | Broadcast ChannelName ClientName TL.Text
+    | Tell ClientId TL.Text
+    | Broadcast ChannelName ClientId TL.Text
     | Command TL.Text
 
 instance WebSocketsData RtmEvent where

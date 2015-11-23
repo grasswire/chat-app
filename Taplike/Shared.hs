@@ -44,7 +44,7 @@ data RtmStartRequest = RtmStartRequest { rtmStartToken :: Text }
 
 data RtmStartRp = RtmStartRp
   { _rtmStartUrl      :: Text
-  , _rtmStartSelf     :: Self
+  , _rtmStartSelf     :: Maybe Self
   , _rtmStartUsers    :: [User]
   }
 
@@ -364,7 +364,7 @@ instance FromJSON a => FromJSON (Response a) where
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
     <$> o .: "url"
-    <*> o .: "self"
+    <*> o .:? "self"
     <*> o .: "users"
 
 instance ToJSON RtmStartRp where
