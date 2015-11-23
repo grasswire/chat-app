@@ -4,7 +4,7 @@ import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
 import           Control.Lens.TH (makeLenses, makePrisms)
 import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(Object, String), Object, FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText)
-import           Data.Aeson.Types (Parser)
+import           Data.Aeson.Types (Parser, Value(..))
 import qualified Data.HashMap.Strict as HM
 import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
@@ -18,6 +18,8 @@ import Model (User, User(..))
 newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 instance FromJSON TS where
   parseJSON = withText "timestamp" $ pure . TS
+instance ToJSON TS where
+  toJSON (TS t) = String t
 deriveTextShow ''TS
 
 newtype Time = Time { unTime :: Word32 } deriving (Eq, Ord)
@@ -144,7 +146,7 @@ testMessage chat from text = Message
 
 data MessageSubtype
   = BotMS | MeMS | ChangedMS | DeletedMS
-  | ChannelJoinMS | ChannelLeaveMS | ChannelTopicMS | ChannelPurposeMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
+  | ChannelTopicMS | ChannelPurposeMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
 
 data MessageEdited = MessageEdited
   { _messageEditedUser :: Int64
@@ -477,14 +479,30 @@ instance FromJSON Message where
     <*> o .:? "is_starred"
     <*> o .:? "pinned_to" .!= []
 
+instance ToJSON Message where
+  toJSON (Message user subtype text ts edited deletedTs eventTs hidden isStarred pinnedTo) =
+    object ["type" .=  ("message" :: Text), "user" .= user, "subtype" .= parseSubType subtype, "text" .= text, "ts" .= ts
+           , "edited" .= edited, "deleted_ts" .= deletedTs, "event_ts" .= eventTs, "hidden" .= hidden
+           , "is_starred" .= isStarred, "pinned_to" .= pinnedTo]
+    where parseSubType st = case st of
+                              Just BotMS              -> String ("bot_message" :: Text)
+                              Just MeMS               -> String ("me_message" :: Text)
+                              Just ChangedMS          -> String ("message_changed" :: Text)
+                              Just DeletedMS          -> String ("message_deleted" :: Text)
+                              Just ChannelTopicMS     -> String ("channel_topic" :: Text)
+                              Just ChannelPurposeMS   -> String ("channel_purpose" :: Text)
+                              Just ChannelNameMS      -> String ("channel_name" :: Text)
+                              Just ChannelArchiveMS   -> String ("channel_archive" :: Text)
+                              Just ChannelUnarchiveMS -> String ("channel_unarchive" :: Text)
+                              Nothing                 -> Null
+
+
 instance FromJSON MessageSubtype where
   parseJSON = withText "message subtype" $ \ case
     "bot_message"       -> pure BotMS
     "me_message"        -> pure MeMS
     "message_changed"   -> pure ChangedMS
     "message_deleted"   -> pure DeletedMS
-    "channel_join"      -> pure ChannelJoinMS
-    "channel_leave"     -> pure ChannelLeaveMS
     "channel_topic"     -> pure ChannelTopicMS
     "channel_purpose"   -> pure ChannelPurposeMS
     "channel_name"      -> pure ChannelNameMS
@@ -496,6 +514,9 @@ instance FromJSON MessageEdited where
   parseJSON = withObject "message edited object" $ \ o -> MessageEdited
     <$> o .: "user"
     <*> o .: "ts"
+
+instance ToJSON MessageEdited where
+  toJSON (MessageEdited user ts) = object ["user" .= user, "ts" .= ts]
 
 instance FromJSON MessageReaction where
   parseJSON = withObject "message reaction object" $ \ o -> MessageReaction
@@ -541,12 +562,15 @@ instance FromJSON RtmEvent where
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
-  toJSON (RtmSendMessage msg) = object
-      [ "type"    .= ("incoming_message" :: Text)
-      , "id"      .= _sendMessageSeqnum msg
-      , "channel" .= _sendMessageChat msg
-      , "text"    .= _sendMessageText msg
-      ]
+  toJSON event = case event of
+                  RtmSendMessage msg ->  object
+                    [ "type"    .= ("incoming_message" :: Text)
+                    , "id"      .= _sendMessageSeqnum msg
+                    , "channel" .= _sendMessageChat msg
+                    , "text"    .= _sendMessageText msg
+                    ]
+                  RtmMessage message -> toJSON message
+                  RtmHello           -> object ["type" .= ("hello" :: Text)]
 
 instance FromJSON (ChatMarked a) where
   parseJSON = withObject "channel / im / group marked event" $ \ o -> ChatMarked

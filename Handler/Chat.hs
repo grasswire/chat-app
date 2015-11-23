@@ -9,6 +9,7 @@ import Server
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Model.Incoming as Incoming
+import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..))
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -26,9 +27,14 @@ chatApp channelName user = do
         _ <- liftIO $ atomically $ chanAddClient JoinReasonConnected channel (userTwitterUserId u)
         race_
           (ingest inChan)
-          (sourceWS $$ mapM_C (atomically . writeTChan outChan))
+          (sourceWS $$ mapM_C (atomically . writeTChan outChan . processMessage u))
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
+
+processMessage :: User -> RtmEvent -> RtmEvent
+processMessage user event = case event of
+                              (RtmSendMessage incoming) -> RtmMessage (Message (userTwitterUserId user) Nothing ( _sendMessageText incoming) (TS "0") Nothing Nothing Nothing False Nothing [])
+                              _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
