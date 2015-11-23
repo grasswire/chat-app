@@ -57,9 +57,6 @@ makeFoundation appSettings = do
         (if appMutableStatic appSettings then staticDevel else static)
         (appStaticDir appSettings)
 
-    -- atomically :: STM a -> IO a
-    -- [(5,'a'), (3,'b')]
-    -- newBroadcastTChan :: STM (TChan a)
     chatServer <- newServer
 
     twitterTokenStore <- newIORef Map.empty

@@ -3,46 +3,20 @@
 module Server where
 
 import           Control.Applicative
-import           Control.Concurrent.Async (race_)
 import           Control.Concurrent.STM
-import           Control.Exception        (finally, mask)
 import           Control.Monad
 import           Data.Map                 (Map)
 import qualified Data.Map                 as M
 import qualified Data.Set                 as S
 import           System.IO
-import           Text.Printf              (hPrintf, printf)
-import           Prelude                  ((.), ($), (++))
+import           Prelude                  ((.), ($))
 import Data.Int (Int64)
-import Model
-import Database.Persist (Key (..))
-
--- import Channel
--- import Import
-
 import Data.String
 import Types
 import Data.Maybe
 import qualified Data.Text.Lazy as T
 import Data.Text.Lazy (Text)
-import Data.Monoid ((<>))
-import Data.Aeson (Value(..))
-
 import Taplike.Shared (RtmEvent(..))
-
-
-{-|
-  As part of creating our App, we initialize a new "Server", which begins with
-  empty maps representing both the channels and clients.
-
-  The first step is a for a client to connect to a channel.
-  We'll assume for now we've verified that this is a legit channel by querying our database, etc
-
-  To connect the client we:
-
-  1. try to add client to server
-  2. if Nothing returned, tha
--}
 
 data LeaveReason
     = LeaveReasonLeft
@@ -51,8 +25,6 @@ data LeaveReason
 data JoinReason
     = JoinReasonJoined
     | JoinReasonConnected
-
-
 
 -- Note there is no notion of DMs here. That would have to be a specific, fixed channel
 data Client = Client
@@ -70,10 +42,6 @@ newClient name  = do
         , clientKicked  = kicked
         , clientChans   = broadcastChan
         }
-
-        -- Notify a client.
--- notify :: Client -> String -> STM ()
--- notify client = sendMessage client . Notice
 
 -- Chat channel datatype, not to be confused with a TChan.
 data Channel = Channel

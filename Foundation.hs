@@ -15,8 +15,6 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as S8
 import qualified Data.Map              as M
 import Server
-import Network.HTTP.Conduit (Manager)
-
 
 type OAuthToken = BS.ByteString
 

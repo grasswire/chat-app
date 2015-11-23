@@ -24,7 +24,7 @@ getRtmStartR = do
           case maybeInt of
             Right rId -> do
               renderer <- getUrlRender
-              let sqlKey = toSqlKey rId -- ((fromIntegral . fst $ rId ) :: Int64)
+              let sqlKey = toSqlKey rId
               let url = renderer $ ChatR sqlKey
               chatRoom <- runDB (get sqlKey)
               users <- case chatRoom of
