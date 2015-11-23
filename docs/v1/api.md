@@ -2,7 +2,7 @@
 
 # REST API
 
-## Event Types  
+## Event Types
 
 # Real Time Messaging API
 
