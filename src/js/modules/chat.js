@@ -22,7 +22,7 @@ App.Modules.Chat = function () {
             uuid: guid(),
             channel_id: 9,
             type: "incoming_message",
-            timestamp: new Date().getTime()
+            timestamp: new Date().toISOString()
       };
 
       o.connection.send(JSON.stringify(message));
