@@ -9,10 +9,12 @@
         <img src="static/images/screenshot.png">
 
   <div class="content-container">
-    <h2 class="main__headline">Live Now
+    <h2 class="main__headline">Trending Chats
     <div class="content-flex-container">
       $forall room <- chatRooms
-        <div class="card">
+        <a class="card" href="@{ChatR $ (entityKey room)}">
           <h3 class="card__title">#{chatRoomTitle (entityVal room)}
+          <p class="card__meta">
+            <span class="fa fa-user">
+            <strong>2,103
           <p class="card__text">#{chatRoomDescription (entityVal room)}
-          <a href="@{ChatR $ (entityKey room)}" class="card__button">Enter

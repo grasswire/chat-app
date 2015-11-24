@@ -35,5 +35,12 @@
 
    &__signin {
       @include button-inline(14px);
+      border: 0;
+      font-weight: get-font-weight(regular);
+      padding: 0 10px;
+
+      @include last() {
+         padding-right: 0;
+      }
    }
 }

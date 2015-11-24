@@ -21,8 +21,9 @@
 
 .main {
    &__headline {
-      @include font-size(30px);
-      padding-bottom: 22px;
+      @include font-size(16px);
+      margin-top: 50px;
+      margin-bottom: 20px;
    }
 }
 
