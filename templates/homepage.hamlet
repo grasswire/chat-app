@@ -18,3 +18,21 @@
             <span class="fa fa-user">
             <strong>2,103
           <p class="card__text">#{chatRoomDescription (entityVal room)}
+
+  <div class="content-container">
+    <h2 class="secondary__headline">All Chats
+    <div class="content-flex-container">
+
+      <a class="card--listing" href="">
+        <h3 class="card__title--listing">Listing Title
+        <p class="card__meta--listing">
+          <span class="fa fa-user">
+          <strong>2,103
+        <p class="card__text--listing">Some dummy text here
+
+      <a class="card--listing" href="">
+        <h3 class="card__title--listing">Listing Title
+        <p class="card__meta--listing">
+          <span class="fa fa-user">
+          <strong>2,103
+        <p class="card__text--listing">Some dummy text here
