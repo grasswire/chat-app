@@ -9,7 +9,7 @@ brew install postgresql
 ## Ubuntu
 
 ```
-sudo apt-get install libpq-dev
+sudo apt-get install postgresql libpq-dev
 ```
 
 # Building
@@ -23,6 +23,7 @@ stack build
 Using psql, do the following
 
 ```
+$ sudo su - postgres
 $ psql -d template1
 you=# create user taplike with password 'taplike';
 CREATE ROLE
@@ -30,7 +31,7 @@ you=# create database taplike;
 CREATE DATABASE
 you=# create database taplike_test;
 CREATE DATABASE
-you=# create database chat-app_test;
+you=# create database "chat-app_test";
 CREATE DATABASE
 you=# grant all privileges on database taplike to taplike;
 GRANT
