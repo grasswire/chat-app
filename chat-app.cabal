@@ -119,7 +119,9 @@ library
                  , lens
                  , scientific
                  , netwire
-                --  , text-icu
+                 , uuid
+                 , uuid-aeson
+                 , text-show-instances
 
 
 executable         chat-app
