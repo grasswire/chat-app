@@ -1,9 +1,10 @@
 <main role="main">
   <header class="major-display">
-    <div class="content-container">
+    <div class="content-flex-wrapper">
       <div class="major-display__textblock">
-        <h1 class="major-display__headline">Chat with other people about _________.
-        <p class="major-display__lead">TapLike is the easiest way to chat with other people about anything at all. Join a live conversation or start your own.
+        <h1 class="major-display__headline">TapLike is a place where...
+          <br>dog lovers can become cat lovers
+        <a href="" class="button--callout">Create a Room
       <div class="major-display__visual">
         <img src="static/images/screenshot.png">
 

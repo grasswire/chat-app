@@ -6,23 +6,13 @@
 }
 
 .content-flex-container {
-   align-content: center;
-   align-items: stretch;
-   flex-wrap: wrap;
-   display: flex;
-   height: 100%;
+   @include flex-container();
 }
 
 .content-flex-wrapper {
-   @extend .content-flex-wrapper;
+   @include flex-container();
    max-width: $max-page-width;
    margin: 0 auto;
-   align-content: center;
-   align-items: center;
-   flex-wrap: wrap;
-   justify-content: space-between;
-   display: flex;
-   height: 100%;
 }
 
 .content-wrapper {
@@ -39,4 +29,11 @@
 main {
    height: 100%;
    padding-top: $masthead-height;
+}
+
+.button {
+   &--callout {
+      @include button(16px);
+      padding: 15px 60px;
+   }
 }

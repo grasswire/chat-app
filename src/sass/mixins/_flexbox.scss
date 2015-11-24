@@ -1,0 +1,8 @@
+@mixin flex-container($content: center, $items: center, $justify: space-between) {
+   align-content: $content;
+   align-items: $items;
+   display: flex;
+   flex-wrap: wrap;
+   height: 100%;
+   justify-content: $justify;
+}

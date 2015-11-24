@@ -1,22 +1,27 @@
 .major-display {
-   padding: 60px 0;
+   background: get-color(concrete);
+   padding: 55px 0 70px 0;
 
    &__textblock {
       @include span(8 of 16);
+      color: get-color(dove-gray);
+      text-align: center;
    }
 
    &__visual {
-      @include span(last 4 of 16);
+      @include span(last 8 of 16);
+      text-align: right;
+
+      img {
+         width: 70%;
+      }
    }
 
    &__headline {
-      @include font-size(45px);
-      line-height: 1;
-   }
-
-   &__lead {
-      @include font-size(18px);
-      padding: 15px 0;
-      line-height: 1.4;
+      @include font-size(28px);
+      font-family: get-stack(sans-condensed);
+      margin-bottom: 20px;
    }
 }
+
+

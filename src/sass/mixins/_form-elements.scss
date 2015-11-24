@@ -40,17 +40,16 @@
 
 @mixin button($size: 16px) {
     @include font-size($size);
-    background: get-color(rhino);
-    border: none;
-    border-radius: 2px;
-    color: get-color(white);
+    background: get-color(alto);
+    border: 1px solid get-color(dove-gray);
+    color: get-color(dove-gray);
     display: inline-block;
-    font-weight: get-font-weight(light);
-    padding: 10px 20px;
+    font-weight: get-font-weight(bold);
+    padding: 10px 40px;
     text-decoration: none;
     transition: background 0.3s ease-out;
     &:hover {
-        background: get-color(shark);
+        background: darken(get-color(alto), 5%);
         transition: background 0.3s ease-in;
     }
 }
@@ -69,4 +68,5 @@
       transition: color 0.3s ease-in;
    }
 }
+
 

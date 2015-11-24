@@ -25,10 +25,10 @@
  */
 // Functions & Mixins .........................................................
 @import "functions/getters-setters";
-@import "mixins/font";
 @import "mixins/pseudo-elements";
-@import "mixins/flexbox";
 @import "mixins/form-elements";
+@import "mixins/flexbox";
+@import "mixins/font";
 
 /**
  * This is where you start editing.  We don't make any assumptions so these are
