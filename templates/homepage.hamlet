@@ -10,7 +10,7 @@
 
   <div class="content-container">
     <h2 class="main__headline">Trending Chats
-    <div class="content-flex-container">
+    <div class="card__container">
       $forall room <- chatRooms
         <a class="card" href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}">
           <h3 class="card__title">#{chatRoomTitle (entityVal room)}
@@ -51,6 +51,6 @@
             <strong>2,103
         <p class="card__text--listing">Some dummy text here
 
-<footer class="content-container">
-  <div class="loader">
-    <a href="" class="loader__button">Load More
+  <footer class="content-container">
+    <div class="loader">
+      <a href="" class="loader__button">Load More

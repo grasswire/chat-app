@@ -1,7 +1,6 @@
 .loader {
    @include flex-container(center, center, center);
    padding: 20px 0 40px 0;
-   margin-top: -50px;
 
    &__button {
       @include button(16px);

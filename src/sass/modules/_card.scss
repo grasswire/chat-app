@@ -7,6 +7,10 @@
    padding: 100px 20px 30px 20px;
    width: 30%;
 
+   &__container {
+      @include flex-container(stretch, stretch);
+   }
+
    &--listing {
       flex-grow: 1;
       width: 50%;
