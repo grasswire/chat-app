@@ -19,6 +19,7 @@ import Data.Scientific (Scientific)
 import Model
 import Data.UUID.Aeson()
 import TextShow.Data.Time()
+import Taplike.ChatRoomSlug
 
 instance TextShow (Key ChatRoom) where
   showb = showb . fromSqlKey
@@ -41,10 +42,11 @@ instance FromJSON MessageText where
 data ChatRoomCreatedRp = ChatRoomCreatedRp
   { chatRoomCreatedRpChatRoom :: ChatRoom
   , chatRoomCreatedRpId       :: Int64
+  , chatRoomSlug              :: ChatRoomSlug
   }
 
 instance ToJSON ChatRoomCreatedRp where
-  toJSON (ChatRoomCreatedRp room roomId) = object ["chat_room" .= room, "id" .= roomId]
+  toJSON (ChatRoomCreatedRp room roomId slug) = object ["chat_room" .= room, "id" .= roomId, "slug" .= slug]
 
 newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 instance FromJSON TS where

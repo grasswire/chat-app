@@ -2,15 +2,18 @@
 
 module Handler.Chat where
 
-import Import
+import Import hiding (toLower)
 import Yesod.WebSockets
 import Server
 
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
+import qualified Data.Text as T
 import qualified Model.Incoming as Incoming
 import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChatRoomCreatedRp(..))
 import Database.Persist.Sql (fromSqlKey)
+import Taplike.ChatRoomSlug
+import Data.Char (isAlphaNum, toLower)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -42,16 +45,16 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
-getChatR :: Key ChatRoom -> Handler Html
-getChatR chatId = do
-    chatRoom <- runDB (get chatId)
+getChatR :: ChatRoomSlug -> Handler Html
+getChatR slug = do
+    chatRoom <- runDB (getBy $ UniqueChatRoomSlug slug)
     authId <- maybeAuthId
     chatUser <- case authId of
                   Just uId -> runDB $ get uId
                   _        -> return Nothing
     case chatRoom of
       Just chat -> do
-        webSockets $ chatApp (chatRoomTitle chat) chatUser
+        webSockets $ chatApp (chatRoomTitle $ entityVal chat) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
@@ -61,10 +64,13 @@ postNewChatR = do
     authId <- maybeAuthId
     case authId of
       Just i -> do
-        let newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom)
-        runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key)))
+        let slug = slugify $ Incoming.title chatRoom
+        let newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug
+        runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
+slugify :: Text -> ChatRoomSlug
+slugify txt = ChatRoomSlug $ T.dropWhileEnd (=='-') $ T.map (\c -> if isAlphaNum c then (toLower c) else '-') txt
 
 getHomeR :: Handler Html
 getHomeR = do

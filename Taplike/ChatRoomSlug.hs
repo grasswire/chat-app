@@ -6,8 +6,8 @@ import Data.Aeson(Value(..), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (typeMismatch)
 import Database.Persist.Sql
 
-newtype ChatRoomSlug = ChatRoomSlug Text
-    deriving (PathPiece, Show)
+newtype ChatRoomSlug = ChatRoomSlug {unSlug :: Text}
+    deriving (PathPiece, Show, Eq, Read)
 
 instance ToJSON ChatRoomSlug where
   toJSON (ChatRoomSlug slug) = String slug

@@ -14,4 +14,4 @@
         <div class="card">
           <h3 class="card__title">#{chatRoomTitle (entityVal room)}
           <p class="card__text">#{chatRoomDescription (entityVal room)}
-          <a href="@{ChatR $ (entityKey room)}" class="card__button">Enter
+          <a href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}" class="card__button">Enter
