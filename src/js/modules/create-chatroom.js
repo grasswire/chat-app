@@ -12,11 +12,12 @@ App.Modules.CreateChatroom = function () {
          .on({
             complete: finished
          });
+
+         return false;
    };
 
    var finished = function(response) {
-      //location.href = "room/" + s.slugify(response.chat_room.title);
-      location.href = "room/" + response.id;
+      location.href = '/room/'+response.slug;
    };
 
    return {
