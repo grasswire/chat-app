@@ -25,14 +25,32 @@
 
       <a class="card--listing" href="">
         <h3 class="card__title--listing">Listing Title
-        <p class="card__meta--listing">
-          <span class="fa fa-user">
-          <strong>2,103
+          <div class="card__meta--listing">
+            <span class="fa fa-user">
+            <strong>2,103
         <p class="card__text--listing">Some dummy text here
 
       <a class="card--listing" href="">
         <h3 class="card__title--listing">Listing Title
-        <p class="card__meta--listing">
-          <span class="fa fa-user">
-          <strong>2,103
+          <div class="card__meta--listing">
+            <span class="fa fa-user">
+            <strong>2,103
         <p class="card__text--listing">Some dummy text here
+
+      <a class="card--listing" href="">
+        <h3 class="card__title--listing">Listing Title
+          <div class="card__meta--listing">
+            <span class="fa fa-user">
+            <strong>2,103
+        <p class="card__text--listing">Some dummy text here
+
+      <a class="card--listing" href="">
+        <h3 class="card__title--listing">Listing Title
+          <div class="card__meta--listing">
+            <span class="fa fa-user">
+            <strong>2,103
+        <p class="card__text--listing">Some dummy text here
+
+<footer class="content-container">
+  <div class="loader">
+    <a href="" class="loader__button">Load More
