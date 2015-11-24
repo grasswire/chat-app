@@ -125,6 +125,8 @@ library
                  , uuid-aeson
                  , text-show-instances
                  , yesod-persistent
+                 , regex-base
+                 , regex-pcre
 
 
 executable         chat-app

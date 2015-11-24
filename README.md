@@ -1,4 +1,11 @@
-using psql, do the following 
+A native library called `PCRE` is needed in order to install project dependencies.
+
+On a mac, you can use brew:
+
+`brew install pcre`
+
+
+using psql, do the following
 
 ```
 levinotik=# create user taplike with password 'taplike';
