@@ -15,6 +15,7 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as S8
 import qualified Data.Map              as M
 import Server
+import Yesod.Persist.Core (YesodDB)
 
 type OAuthToken = BS.ByteString
 
