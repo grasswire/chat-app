@@ -27,6 +27,14 @@
    }
 }
 
+.secondary {
+   &__headline {
+      @include font-size(16px);
+      margin-top: 20px;
+      margin-bottom: 20px;
+   }
+}
+
 main {
    height: 100%;
    padding-top: $masthead-height;

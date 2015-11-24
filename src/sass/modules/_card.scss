@@ -11,22 +11,38 @@
       flex-grow: 1;
       width: 50%;
       color: get-color(dove-gray);
+      margin-bottom: 30px;
    }
+
    &__button {
       @include button();
    }
 
    &__title {
       @include font-size(21px);
+
+      &--listing {
+         @include font-size(15px);
+      }
    }
 
    &__text {
       @include font-size(14px);
+
+      &--listing {
+         @include font-size(13px);
+      }
    }
 
    &__meta {
       @include font-size(14px);
       padding: 10px 0;
+
+      &--listing {
+         @include font-size(15px);
+         display: inline-block;
+         padding-left: 7px;
+      }
    }
 }
 
