@@ -1,4 +1,11 @@
-using psql, do the following 
+You will need some native C libraries to build project dependencies.
+
+On Mac OS, you can run:
+
+`brew link icu4c --force`
+
+
+using psql, do the following
 
 ```
 levinotik=# create user taplike with password 'taplike';

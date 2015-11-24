@@ -30,6 +30,7 @@ library
                      Taplike.Outgoing
                      Model.Incoming
                      Taplike.TextShowOrphans
+                     Taplike.ChatRoomSlug
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT
@@ -58,6 +59,7 @@ library
                 RankNTypes
                 StandaloneDeriving
                 ScopedTypeVariables
+                TypeFamilies
 
     build-depends: base                          >= 4          && < 5
                  , yesod                         >= 1.4.1      && < 1.5
@@ -122,6 +124,8 @@ library
                  , uuid
                  , uuid-aeson
                  , text-show-instances
+                 , yesod-persistent
+                 , text-regex-replace
 
 
 executable         chat-app

@@ -1,1 +1,1 @@
-App.routes.chatRoom = "@{ChatR chatId}";
+App.routes.chatRoom = "@{ChatR slug}";

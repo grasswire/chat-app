@@ -12,7 +12,7 @@
     <h2 class="main__headline">Trending Chats
     <div class="content-flex-container">
       $forall room <- chatRooms
-        <a class="card" href="@{ChatR $ (entityKey room)}">
+        <a class="card" href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}">
           <h3 class="card__title">#{chatRoomTitle (entityVal room)}
           <p class="card__meta">
             <span class="fa fa-user">
