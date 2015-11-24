@@ -1,5 +1,11 @@
 # Dependencies
 
+## Node.js
+
+https://nodejs.org/en/blog/release/v4.2.0/
+
+You'll need node, npm, and gulp in your path in order for the `./start` init script for frontend assets to work.
+
 ## Mac
 
 ```
