@@ -15,11 +15,7 @@ App.Modules.CreateChatroom = function () {
    };
 
    var finished = function(response) {
-      console.log(response);
-      Events.publish("tl/modal/closing", {
-         modal: $(".js-modal[data-modal-open=true]")
-      });
-
+      location.href = "room/" + response.id;
    };
 
    return {
