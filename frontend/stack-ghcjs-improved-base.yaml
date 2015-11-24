@@ -29,5 +29,5 @@ setup-info:
 
 extra-deps:
   - ghcjs-dom-0.2.2.0 # improved-base compatible with (2015-10-01 ghcjs)
-#   - ref-tf-0.4
-#   - these-0.6.1.0
+  - ref-tf-0.4
+  - these-0.6.1.0
