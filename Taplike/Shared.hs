@@ -2,7 +2,6 @@ module Taplike.Shared where
 
 import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
-import           Control.Lens.TH (makeLenses, makePrisms)
 import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(Object, String), Object, FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText)
 import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
 import qualified Data.HashMap.Strict as HM
@@ -10,10 +9,8 @@ import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
-import           Control.Applicative (empty)
 
 import           Taplike.TextShowOrphans ()
-import Model (User, User(..), ChatRoom)
 import Database.Persist.Sql (fromSqlKey, toSqlKey)
 import Database.Persist.Class (Key(..))
 import Data.UUID.V4 as UUIDV4

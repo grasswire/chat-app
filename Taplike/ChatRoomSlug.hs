@@ -4,9 +4,7 @@ import Yesod.Core.Dispatch (PathPiece)
 import ClassyPrelude
 import Data.Aeson(Value(..), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (typeMismatch)
-import Taplike.Slug
-import Database.Persist.Class (getBy)
-import Model (ChatRoom)
+import Database.Persist.Sql
 
 newtype ChatRoomSlug = ChatRoomSlug Text
     deriving (PathPiece, Show)
@@ -18,6 +16,10 @@ instance FromJSON ChatRoomSlug where
   parseJSON (String s) = pure $ ChatRoomSlug s
   parseJSON invalid = typeMismatch "ChatRoomSlug" invalid
 
-instance Slug ChatRoomSlug where
-    type SlugEntity ChatRoomSlug = ChatRoom
-    lookupSlug = getBy . UniqueChatRoomSlug
+instance PersistField ChatRoomSlug where
+    toPersistValue (ChatRoomSlug slug) = toPersistValue slug
+    fromPersistValue (PersistText txt) = Right $ ChatRoomSlug txt
+    fromPersistValue x = Left $ "Not a PersistText " ++ pack (show x)
+
+instance PersistFieldSql ChatRoomSlug where
+    sqlType _ =  SqlString

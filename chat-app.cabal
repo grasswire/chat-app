@@ -30,7 +30,6 @@ library
                      Taplike.Outgoing
                      Model.Incoming
                      Taplike.TextShowOrphans
-                     Taplike.Instances
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

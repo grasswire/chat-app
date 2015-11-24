@@ -4,11 +4,9 @@ module Model.Incoming where
 
 import Control.Applicative (empty)
 import Data.Aeson
-import Data.Monoid
 import ClassyPrelude
 -- import Data.Aeson (toJSON, Value(..))
 import qualified Data.Text as T
-import Data.Aeson
 
 data ChatRoom = ChatRoom
   { title       :: T.Text
