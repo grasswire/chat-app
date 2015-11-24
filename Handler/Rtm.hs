@@ -5,11 +5,8 @@ module Handler.Rtm where
 import Import
 import Server
 
-import Database.Persist.Sql (toSqlKey)
 import Taplike.Shared (RtmStartRp(..), Self(..))
-import Text.Read (readEither)
 import Taplike.ChatRoomSlug
-
 
 getRtmStartR :: Handler Value
 getRtmStartR = do

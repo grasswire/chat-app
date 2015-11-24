@@ -1,8 +1,8 @@
-A native library called `PCRE` is needed in order to install project dependencies.
+You will need some native C libraries to build project dependencies.
 
-On a mac, you can use brew:
+On Mac OS, you can run:
 
-`brew install pcre`
+`brew link icu4c --force`
 
 
 using psql, do the following

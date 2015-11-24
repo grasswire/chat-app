@@ -13,12 +13,8 @@ import qualified Model.Incoming as Incoming
 import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChatRoomCreatedRp(..))
 import Database.Persist.Sql (fromSqlKey)
 import Taplike.ChatRoomSlug
-import Data.Char (isAlphaNum, toLower)
-import Text.Regex.PCRE ( (=~~) )
-import qualified Data.ByteString.Lazy.Char8 as B
-import Data.Text.Lazy.Encoding as TLE
-
-
+import Data.Char (toLower)
+import Data.Text.ICU.Replace
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -75,26 +71,12 @@ postNewChatR = do
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChatRoomSlug
-slugify = ChatRoomSlug . toStrict . TLE.decodeUtf8 . makeSlug . TLE.encodeUtf8 . fromStrict 
+slugify = ChatRoomSlug . makeSlug
 
-{- | Replace using a regular expression. ByteString version. -}
-regexReplace ::
-    B.ByteString          -- ^ regular expression
-    -> B.ByteString       -- ^ replacement text
-    -> B.ByteString       -- ^ text to operate on
-    -> B.ByteString
-regexReplace regex replacement text = go text []
-    where go str res =
-              if B.null str
-              then B.concat . reverse $ res
-              else case (str =~~ regex) :: Maybe (B.ByteString, B.ByteString, B.ByteString) of
-                     Nothing -> B.concat . reverse $ (str:res)
-                     Just (bef, _ , aft) -> go aft (replacement:bef:res)
-
-makeSlug :: B.ByteString -> B.ByteString
-makeSlug = regexReplace "[ _]" "-"
-          . regexReplace "[^a-z0-9_ ]+" ""
-          . B.map toLower
+makeSlug :: Text -> Text
+makeSlug =  replaceAll "[ _]" "-"
+          . replaceAll "[^a-z0-9_ ]+" ""
+          . T.map toLower
 
 getHomeR :: Handler Html
 getHomeR = do

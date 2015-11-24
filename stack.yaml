@@ -15,6 +15,7 @@ extra-deps:
 - netwire-5.0.0
 - uuid-aeson-0.1.0.0
 - text-show-instances-2.1
+- text-regex-replace-0.1.1.1
 flags:
   twitter-types:
     time15: true
