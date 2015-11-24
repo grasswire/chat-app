@@ -301,34 +301,6 @@ deriving instance Eq TeamDomainChange
 deriving instance Eq EmailDomainChanged
 deriving instance Eq IncomingMessage
 
-makeLenses ''RtmStartRequest
-makeLenses ''RtmStartRp
-makeLenses ''Self
-makeLenses ''Team
-makeLenses ''User
-makeLenses ''Profile
-makeLenses ''Channel
-makeLenses ''Group
-makeLenses ''Bot
-makeLenses ''MessageReaction
-makeLenses ''Message
-makeLenses ''MessageEdited
-makeLenses ''TapLikeTracked
-makePrisms ''RtmEvent
-makeLenses ''ChatMarked
-makeLenses ''ChatUser
-makeLenses ''ChatRenamed
-makeLenses ''ChatHistoryChanged
-makeLenses ''PresenceChange
-makeLenses ''UserTyping
-makeLenses ''PrefChange
-makeLenses ''Star
-makePrisms ''StarItem
-makeLenses ''TeamDomainChange
-makeLenses ''EmailDomainChanged
-makeLenses ''IncomingMessage
-
-
 instance TextShow Chat where
   showb _ = "Chat"
 
