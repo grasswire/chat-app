@@ -55,3 +55,18 @@
     }
 }
 
+@mixin button-inline($size: 16px) {
+   @include button($size);
+   background: transparent;
+   border-radius: 0;
+   color: get-color(black);
+   transition: none;
+   transition: color 0.3s ease-out;
+
+   &:hover {
+      background: transparent;
+      color: get-color(shark);
+      transition: color 0.3s ease-in;
+   }
+}
+

@@ -1,6 +1,6 @@
 .masthead {
    @include container();
-   background: get-color(gallery);
+   background: get-color(white);
    font-weight: get-font-weight(light);
    position: fixed;
    height: $masthead-height;
@@ -8,17 +8,13 @@
 }
 
 .logo {
-   @include font-size(22px);
-   @include span(2 of 16);
-   line-height: 2;
+   @include font-size(28px);
+   font-family: get-stack(sans-condensed);
    text-decoration: none;
+   padding: 0 10px;
 }
 
 .nav {
-   &__main {
-      @include span(last 8 of 16);
-   }
-
    &__list {
       text-align: right;
    }
@@ -38,8 +34,6 @@
    }
 
    &__signin {
-      @include button();
-      margin: 4px 0 0 0;
-      display: inline-block;
+      @include button-inline(14px);
    }
 }
