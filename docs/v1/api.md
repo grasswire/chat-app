@@ -1,5 +1,10 @@
 # TapLike API - V1
 
+# Slack references
+
+- https://api.slack.com/rtm
+- https://api.slack.com/events
+
 # REST API
 
 ## Event Types
