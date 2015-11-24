@@ -96,6 +96,7 @@ var scripts = {
    main: [
       config.src.bower + "jquery-validation/dist/jquery.validate.js",
       config.src.bower + "underscore/underscore.js",
+      config.src.bower + "underscore.string/dist/underscore.string.js",
       config.src.bower + "momentjs/moment.js",
       //config.src.bower + "handlebars/handlebars.runtime.js",
       config.src.bower + "amplify/lib/amplify.js",

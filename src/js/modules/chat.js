@@ -1,16 +1,6 @@
 App.Modules = App.Modules || {};
 App.Modules.Chat = function () {
 
-  var guid = function() {
-    function s4() {
-    return Math.floor((1 + Math.random()) * 0x10000)
-      .toString(16)
-      .substring(1);
-    }
-  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
-    s4() + '-' + s4() + s4() + s4();
-  };
-
   var o = {
      connection: null,
      id: 1
@@ -19,15 +9,13 @@ App.Modules.Chat = function () {
    var chat = function(data) {
       var message = {
             message_text: $(".js-chat-input").val(),
-            uuid: guid(),
+            uuid: Utils.generateUUID(),
             channel_id: 9,
             type: "incoming_message",
             timestamp: new Date().toISOString()
       };
 
       o.connection.send(JSON.stringify(message));
-
-
       $(".js-chat-input").val("");
       return false;
    };

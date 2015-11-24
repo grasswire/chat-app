@@ -15,6 +15,7 @@ App.Modules.CreateChatroom = function () {
    };
 
    var finished = function(response) {
+      //location.href = "room/" + s.slugify(response.chat_room.title);
       location.href = "room/" + response.id;
    };
 
