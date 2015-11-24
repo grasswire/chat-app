@@ -7,9 +7,11 @@
 
 # REST API
 
+# Real Time Messaging API
+
 ## Event Types
 
-The simplest event is a message sent from a user:
+The simplest event is a message sent by a client/user:
 
 ```json
 {
@@ -21,8 +23,7 @@ The simplest event is a message sent from a user:
 }
 ```
 
-
-# Real Time Messaging API
+See `architecture.md` for the motivation of the client-generated `uuid` and `timestamp` properties.
 
 # Models
 

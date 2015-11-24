@@ -13,6 +13,8 @@ extra-deps:
 - yesod-websockets-0.2.4
 - pwstore-fast-2.4.4
 - netwire-5.0.0
+- uuid-aeson-0.1.0.0
+- text-show-instances-2.1
 flags:
   twitter-types:
     time15: true

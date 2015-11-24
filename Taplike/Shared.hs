@@ -4,7 +4,7 @@ import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
 import           Control.Lens.TH (makeLenses, makePrisms)
 import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(Object, String), Object, FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText)
-import           Data.Aeson.Types (Parser, Value(..))
+import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
 import qualified Data.HashMap.Strict as HM
 import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
@@ -14,6 +14,32 @@ import           Control.Applicative (empty)
 
 import           Taplike.TextShowOrphans ()
 import Model (User, User(..), ChatRoom)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
+import Database.Persist.Class (Key(..))
+import Data.UUID.V4 as UUIDV4
+import Data.UUID (UUID(..))
+import Data.Scientific (Scientific)
+import Model
+import Data.UUID.Aeson()
+import TextShow.Data.Time()
+
+instance TextShow (Key ChatRoom) where
+  showb = showb . fromSqlKey
+
+newtype ChannelId = ChannelId (Key ChatRoom)
+instance ToJSON ChannelId where
+  toJSON (ChannelId key) = Number $ (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
+instance FromJSON ChannelId where
+  parseJSON = withScientific "channel_id" $ \ s ->
+    case (toBoundedInteger s :: Maybe Int64) of
+      Just i -> pure $ ChannelId (toSqlKey i)
+      Nothing  -> fail . unpack $ "out of bound channel id " <> showt (FromStringShow s)
+newtype MessageText = MessageText Text
+instance ToJSON MessageText where
+  toJSON (MessageText text) = String text
+instance FromJSON MessageText where
+  parseJSON (String s) = pure $ MessageText s
+  parseJSON invalid    = typeMismatch "MessageText" invalid
 
 data ChatRoomCreatedRp = ChatRoomCreatedRp
   { chatRoomCreatedRpChatRoom :: ChatRoom
@@ -122,7 +148,7 @@ data Chat
 data Message = Message
   { _messageUser         :: Int64
   , _messageSubtype      :: Maybe MessageSubtype
-  , _messageText         :: Text
+  , _messageText         :: MessageText
   , _messageTS           :: TS
   , _messageEdited       :: Maybe MessageEdited
   , _messageDeletedTS    :: Maybe TS
@@ -133,16 +159,17 @@ data Message = Message
   }
 
 data IncomingMessage = IncomingMessage
- { _sendMessageSeqnum :: Word64
- , _sendMessageChat   :: Int64
- , _sendMessageText   :: Text
-}
+ { incomingMessageUUID        :: UUID
+ , incomingMessageTS          :: UTCTime
+ , incomingMessageChannelId   :: ChannelId
+ , incomingMessageMessageText :: MessageText
+ }
 
 testMessage :: Int64 -> Int64 -> Text -> Message
 testMessage chat from text = Message
   { _messageUser         = from
   , _messageSubtype      = Nothing
-  , _messageText         = text
+  , _messageText         = MessageText text
   , _messageTS           = TS "0"
   , _messageEdited       = Nothing
   , _messageDeletedTS    = Nothing
@@ -214,8 +241,6 @@ data ChatHistoryChanged a = ChatHistoryChanged
   { _chatHistoryChangedLatest  :: Text
   , _chatHistoryChangedTS      :: TS
   , _chatHistoryChangedEventTS :: TS }
-
-
 
 data PresenceChange = PresenceChange
   { _presenceChangeUser     :: ID User
@@ -300,6 +325,8 @@ deriving instance Eq StarItem
 deriving instance Eq TeamDomainChange
 deriving instance Eq EmailDomainChanged
 deriving instance Eq IncomingMessage
+deriving instance Eq MessageText
+deriving instance Eq ChannelId
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -332,6 +359,10 @@ deriveTextShow ''StarItem
 deriveTextShow ''TeamDomainChange
 deriveTextShow ''EmailDomainChanged
 deriveTextShow ''IncomingMessage
+deriveTextShow ''UUID
+deriveTextShow ''MessageText
+deriveTextShow ''ChannelId
+
 
 instance ToJSON RtmStartRequest where
   toJSON (RtmStartRequest { .. }) = object
@@ -543,12 +574,7 @@ instance FromJSON RtmEvent where
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
-                  RtmSendMessage msg ->  object
-                    [ "type"    .= ("incoming_message" :: Text)
-                    , "id"      .= _sendMessageSeqnum msg
-                    , "channel" .= _sendMessageChat msg
-                    , "text"    .= _sendMessageText msg
-                    ]
+                  RtmSendMessage msg -> toJSON msg
                   RtmMessage message -> toJSON message
                   RtmHello           -> object ["type" .= ("hello" :: Text)]
 
@@ -612,15 +638,17 @@ instance FromJSON EmailDomainChanged where
     <*> o .: "event_ts"
 
 instance ToJSON IncomingMessage where
-  toJSON (IncomingMessage seqnum chat message) = object
-    [ "type"    .= ("incoming_message" :: Text)
-    , "id"      .= seqnum
-    , "channel" .= chat
-    , "text"    .= message
+  toJSON (IncomingMessage uuid ts channelId msgText) = object
+    [ "type"         .= ("incoming_message" :: Text)
+    , "uuid"         .= uuid
+    , "timestamp"    .= ts
+    , "channel_id"   .= channelId
+    , "message_text" .= msgText
     ]
 
 instance FromJSON IncomingMessage where
   parseJSON  = withObject "incoming message" $ \ o ->  IncomingMessage
-      <$> o .: "id"
-      <*> o .: "channel"
-      <*> o .: "text"
+      <$> o .: "uuid"
+      <*> o .: "timestamp"
+      <*> o .: "channel_id"
+      <*> o .: "message_text"
