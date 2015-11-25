@@ -8,6 +8,12 @@ On Mac OS, you can run:
 
 `brew link icu4c --force`
 
+On Ubuntu:
+
+`sudo apt-get install libicu-dev -y`
+
+`sudo apt-get install libpq-dev -y`
+
 Build the project using `stack`:
 
 `stack build`
@@ -22,7 +28,7 @@ If you need to compile JS/CSS assets, you can run the `start` script:
 
 which will compile all assets into the `/static` directory, build the project and start the server.
 
-# Preparing the application database 
+# Preparing the application database
 
 Using psql, do the following
 
