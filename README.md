@@ -32,7 +32,7 @@ GRANT
 
 ## Build
 
-Before you can build the project, you will need some native libraries available on your system if they aren't already installed. 
+Before you can build the project, you will need some native libraries available on your system if they aren't already installed.
 
 On **Mac** OS, you can run:
 
@@ -52,7 +52,7 @@ Make sure the start script is executable. `chmod +x start` then run it:
 
 `./start`
 
-This script installs all required `node` packages, uses `gulp` to compile JS and CSS assets and starts the server. If you edit any source files and save your changes, the project will recompile and start the server again. 
+This script installs all required `node` packages, uses `gulp` to compile JS and CSS assets and starts the server. If you edit any source files and save your changes, the project will recompile and start the server again.
 
 ### Method 2: build and run with separate commands
 
@@ -61,3 +61,9 @@ This script installs all required `node` packages, uses `gulp` to compile JS and
 `stack build`
 
 `stack exec --chat-app`
+
+### Notes
+
+If GHC complains that it still cannot find icuuc, you can explicitly let `stack build` know where it. For example, on Mac:
+
+`stack build --extra-include-dirs=/usr/local/opt/icu4c/include --extra-lib-dirs=/usr/local/opt/icu4c/lib`
