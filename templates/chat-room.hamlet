@@ -1,34 +1,34 @@
 <div class="signature page-chat-room">
+
 <main role="main">
-  <div class="content-flex-container room">
-    <div class="content-flex-container room__wrapper">
+  <div class="room">
+    <aside class="room__sidebar">
       <div class="room__metadata">
-        <h2 class="panel__title--main">Title
-        <p class="panel__description">This is a description of the room
-        <ul class="chat__list">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-          <li class="chat__items">
-            <a href="#">
-              <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
-      <div class="room__highlights">
-        <h2 class="panel__title">Most Liked
-        metadata
-    <div class="room__realtime">
-      <h2 class="panel__title">Chat
-      <div class="panel__output js-chat-output">
-      <form class="js-chat-form panel__chat-form">
-        <input class="panel__input js-chat-input" autofocus>
+        <h2 class="">Title
+        <p class="">This is a description of the room
+      <div class="room__members">
+        <nav>
+          <a href="#" class="js-toggle-admins">Admins (3)
+          <a href="#" class="js-toggle-memebers">Members (238)
+        <ul class="members__list">
+          <li class="members__item">
+            <a href="#" data-member-is-admin="false">
+               <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+      <div class="room__share">
+        <a href="">Share on Facebook
+        <a href="">Share on Twitter
+      <div class="room__likes">
+        <ul class="likes__list">
+          <li class="likes__item">
+            thing 1
+      <div class="room__userinfo">
+        OK
+
+    <section class="room__realtime">
+      <div class="room__output js-chat-output">
+      <form class="js-chat-form room__chat-form">
+        $maybe userId <- authId
+          <input class="room__input js-chat-input" placeholder="Type something and press enter..." autofocus>
+        $nothing
+          <input class="room__input js-chat-input" placeholder="Sign in to chat" disabled>
+

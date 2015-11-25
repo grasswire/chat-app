@@ -13,7 +13,6 @@ html {
    }
    height: 100%;
    letter-spacing: get-stack(letter-spacing);
-
 }
 
 * {
@@ -25,6 +24,7 @@ html {
 }
 
 body {
+   background: get-color(concrete);
    color: get-color(charcoal);
    height: 100%;
    margin: 0;

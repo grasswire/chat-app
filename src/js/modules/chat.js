@@ -14,21 +14,24 @@ App.Modules.Chat = function () {
             type: "incoming_message",
             timestamp: new Date().toISOString()
       };
-
       o.connection.send(JSON.stringify(message));
+
       $(".js-chat-input").val("");
+
       return false;
    };
 
-   var displayMessage = function(data) {
+   var displayMessage = function(response) {
      var p = document.createElement("p");
-     p.appendChild(document.createTextNode(data.e.data));
+     p.appendChild(document.createTextNode(response.e.data));
+
      $(".js-chat-output").append(p);
+
      return false;
    };
 
    var setup = function() {
-      var url = App.routes.chatRoom
+      var url = App.routes.chatRoom;
       o.connection = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""));
       o.connection.onmessage = function(e) {
          Events.publish("tl/chat/message/sent", {

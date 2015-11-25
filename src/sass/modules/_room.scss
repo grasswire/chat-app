@@ -1,116 +1,39 @@
-@mixin room-block {
-   padding: 10px 20px;
-   width: 33%;
-   border-right: 1px solid get-color(dove-gray);
-   @include last() {
-      border: none;
-   }
-}
-
 .room {
-   &__wrapper {
-      border-right: 1px solid get-color(dove-gray);
-      width: 66%;
-      @include media("<=bantam") {
-         width: 50%;
-      }
-   }
-   &__metadata {
-      border-right: 1px solid get-color(dove-gray);
-      height: 100%;
-      padding: 10px 20px;
-      width: 50%;
+   @include flex-container(stretch, stretch);
 
-      @include media("<=bantam") {
-         border: 0;
-         height: 50%;
-         width: 100%;
-      }
-   }
-
-   &__highlights {
-      height: 100%;
-      padding: 10px 20px;
-      width: 50%;
-
-      @include media("<=bantam") {
-         border: 0;
-         width: 100%;
-         height: 50%;
-      }
+   &__sidebar {
+      background: get-color(alto);
+      padding: 20px 20px 20px 10px;
+      width: 30%;
    }
 
    &__realtime {
-      @include room-block;
+      height: 100%;
       position: relative;
-      width: 34%;
-
-      @include media("<=bantam") {
-         width: 50%;
-      }
-   }
-}
-
-.panel {
-   &__title {
-      @include font-size(24px);
-      text-align: center;
-
-      &--main {
-         @include font-size(24px);
-         text-align: left;
-      }
-   }
-
-   &__description {
-      @include font-size(20px);
+      width: 70%;
    }
 
    &__input {
       @include input();
-   }
-
-   &__output {
-      position: absolute;
-      padding: 10px 20px;
-      left: 0;
-      right: 0;
-      top: 50px;
-      bottom: 80px;
-      overflow-y: scroll;
-      border-bottom: 1px solid get-color(dove-gray);
-
-      p {
-         @include font-size(16px);
-      }
+      @include font-size(13px);
+      background-color: get-color(gallery);
+      padding: 15px 20px;
    }
 
    &__chat-form {
+      bottom: 10px;
+      padding: 20px 40px;
       position: absolute;
-      bottom: 0;
       width: 100%;
-      left: 0;
-      right: 0;
-      padding: 10px 20px;
-   }
-}
-
-.chat {
-   &__list {
-      margin: 10px 0 0 0;
-      padding: 0;
-      list-style-type: none;
    }
 
-   &__items {
-      margin: 0;
-      padding: 4px;
-      display: inline-block;
-
-      img {
-         width: 25px;
-         height: 25px;
-         border-radius: 50%;
-      }
+   &__output {
+      bottom: 125px;
+      overflow:hidden;
+      overflow-y: scroll;
+      padding: 20px 40px;
+      position: absolute;
+      top: 0;
+      width: 100%;
    }
 }
