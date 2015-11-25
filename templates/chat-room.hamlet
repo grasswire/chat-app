@@ -4,8 +4,8 @@
   <div class="room">
     <aside class="room__sidebar">
       <div class="room__metadata">
-        <h2 class="room__title">Title
-        <p class="room__description">This is a description of the room
+        <h2 class="room__title">#{chatRoomTitle room}
+        <p class="room__description">#{chatRoomDescription room}
       <div class="room__members">
         <nav>
           <a href="#" class="button--member-toggle js-toggle-admins">Admins (3)
