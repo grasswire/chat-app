@@ -9,6 +9,14 @@ App.Modules.Modal = function () {
    var closeModal = function(data) {
       var openModal = $('.js-modal[data-modal-open=true]');
       openModal.fadeOut(50).attr('data-modal-open', false);
+      var params = App.Helpers.getQueryParams(location.search);
+
+      if (_.has(params, "modal")) {
+         var url = App.Helpers.updateQueryParams('modal', '');
+         // Removes the query param without the refreshing the page
+         window.history.pushState("", "", url);
+      }
+
       Events.publish("tl/modal/closed", {
          modal: openModal
       });
