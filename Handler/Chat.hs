@@ -54,8 +54,9 @@ getChatR slug = do
                   Just uId -> runDB $ get uId
                   _        -> return Nothing
     case chatRoom of
-      Just chat -> do
-        webSockets $ chatApp (chatRoomTitle $ entityVal chat) chatUser
+      Just c -> do
+        let room = entityVal c
+        webSockets $ chatApp (chatRoomTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
