@@ -5,7 +5,7 @@ module Handler.Auth where
 import Import
 
 import qualified Data.ByteString.Char8 as S8
-import Web.Twitter.Conduit hiding (lookup)
+import Web.Twitter.Conduit hiding (lookup, params)
 import qualified Web.Authenticate.OAuth as OA
 import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.Map as M
@@ -28,12 +28,16 @@ takeCredential k ioref =
         let (res, newm) = M.updateLookupWithKey (\_ _ -> Nothing) k m in
         (newm, res)
 
+createRoomModalParams :: [(Text, Text)]
+createRoomModalParams = [("modal", "create")]
+
 getTwitterAuthR :: Handler Text
 getTwitterAuthR = do
   app <- getYesod
   let conf = twitterConf . appSettings $ app
-  renderFunc <- getUrlRender
-  let callback = renderFunc TwitterCallbackR
+  modalParam <- lookupGetParam "modal"
+  renderFunc <- getUrlRenderParams
+  let callback = renderFunc TwitterCallbackR (if (isJust modalParam) then createRoomModalParams else [])
   let token = getRequestToken callback conf
   manager <- appHttpManager <$> getYesod
   cred <- liftIO $ OA.getTemporaryCredential token manager
@@ -48,12 +52,14 @@ getTwitterCallbackR :: Handler Html
 getTwitterCallbackR = do
    app <- getYesod
    temporaryToken <- lookupGetParam "oauth_token"
-   oauthVerifier <-  lookupGetParam "oauth_verifier"
+   oauthVerifier  <- lookupGetParam "oauth_verifier"
+   modalParam     <- lookupGetParam "modal"
    let tokenStore = twitterTokenStore app
    let conf = twitterConf . appSettings $ app
-   renderFunc <- getUrlRender
-   let callback = renderFunc TwitterCallbackR
-   let homeR = renderFunc HomeR
+   let params = (if (isJust modalParam) then createRoomModalParams else [])
+   renderFunc <- getUrlRenderParams
+   let callback = renderFunc TwitterCallbackR params
+   let homeR = renderFunc HomeR params
    let tokens = getRequestToken callback conf
    mcred <- case temporaryToken of
               Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
