@@ -10,11 +10,7 @@ On Mac OS, you can run:
 
 On Ubuntu:
 
-`sudo apt-get install libicu-dev -y`
-
-`sudo apt-get install libpq-dev -y`
-
-`sudo apt-get install libtinfo-dev -y`
+`sudo apt-get install libicu-dev libpq-dev libtinfo-dev -y`
 
 Build the project using `stack`:
 
