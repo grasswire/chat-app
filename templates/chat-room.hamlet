@@ -4,25 +4,85 @@
   <div class="room">
     <aside class="room__sidebar">
       <div class="room__metadata">
-        <h2 class="">Title
-        <p class="">This is a description of the room
+        <h2 class="room__title">Title
+        <p class="room__description">This is a description of the room
       <div class="room__members">
         <nav>
-          <a href="#" class="js-toggle-admins">Admins (3)
-          <a href="#" class="js-toggle-memebers">Members (238)
-        <ul class="members__list">
-          <li class="members__item">
+          <a href="#" class="button--member-toggle js-toggle-admins">Admins (3)
+          <a href="#" class="button--member-toggle js-toggle-memebers">Members (238)
+        <ul class="member__list">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="true">
+               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="true">
+               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="true">
+               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
             <a href="#" data-member-is-admin="false">
-               <img src="https://placeholdit.imgix.net/~text?txtsize=1&w=25&h=25">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+          <li class="member__item">
+            <a href="#" data-member-is-admin="false">
+               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
       <div class="room__share">
-        <a href="">Share on Facebook
-        <a href="">Share on Twitter
+        <a href="#" class="button--outline">Share on Facebook
+        <a href="#" class="button--outline">Share on Twitter
       <div class="room__likes">
         <ul class="likes__list">
           <li class="likes__item">
             thing 1
       <div class="room__userinfo">
-        OK
+        <div class="room__info">
+          <h4>
+            <a href="">Username
+              <span class="fa a-chevron-down">
+          <p>
+            <span class="fa fa-heart">
+              2,123
+        <div class="room__notification">
+           <a href="#">
+             <span class="fa fa-bell-o">
 
     <section class="room__realtime">
       <div class="room__output js-chat-output">

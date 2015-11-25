@@ -3,6 +3,7 @@
     margin: 0 auto;
     max-width: $max-page-width;
     padding: 0 10px;
+
 }
 
 .content-flex-container {
@@ -44,5 +45,26 @@ main {
    &--callout {
       @include button(16px);
       padding: 15px 60px;
+   }
+
+   &--member-toggle {
+      @include font-size(14px);
+      display: inline-block;
+      margin: 0 15px 10px 0;
+
+      @include last() {
+         margin: 0 15px 0 0;
+      }
+   }
+
+   &--outline {
+      @include button(16px);
+      border: 1px solid get-color(dusty-gray);
+      background: transparent;
+      color: get-color(dusty-gray);
+      text-align: center;
+      margin: 20px 0;
+      padding: 20px 0;
+      width: 100%;
    }
 }
