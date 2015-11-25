@@ -1,44 +1,63 @@
-# Building the project
+# Building and Running the Project
 
-You will need some native C libraries to build project dependencies.
+## stack
 
-On Mac OS, you can run:
+`Stack` "is a cross-platform program for developing Haskell projects". You will use it to build the
+project. You can find instructions for installing `stack` on your OS [here](http://docs.haskellstack.org/en/stable/README.html)
+
+## Setup
+
+### Stack setup
+
+In the project directory, run `stack setup` which will download the compiler if necessary. You only need to run this command the first time you build the project.
+
+### Preparing the application database
+
+Using `psql`, do the following:
+
+```
+me=# create user taplike with password 'taplike';
+CREATE ROLE
+me=# create database taplike;
+CREATE DATABASE
+me=# create database taplike_test;
+CREATE DATABASE
+me=# grant all privileges on database taplike to taplike;
+GRANT
+me=# grant all privileges on database taplike_test to taplike;
+GRANT
+```
+
+
+
+## Build
+
+Before you can build the project, you will need some native libraries available on your system if they aren't already installed. 
+
+On **Mac** OS, you can run:
 
 `brew install icu4c`
 
 `brew link icu4c --force`
 
-On Ubuntu:
+On **Ubuntu**:
 
 `sudo apt-get install libicu-dev libpq-dev libtinfo-dev -y`
 
-Build the project using `stack`:
+There are two ways to build and run the project.
+
+### Method 1: build and run with start script
+
+Make sure the start script is executable. `chmod +x start` then run it:
+
+`./start`
+
+This script installs all required `node` packages, uses `gulp` to compile JS and CSS assets and starts the server. If you edit any source files and save your changes, the project will recompile and start the server again. 
+
+### Method 2: build and run with separate commands
+
+`gulp compile`
 
 `stack build`
 
-Run the project using `stack`:
-
 `stack exec --chat-app`
-
-If you need to compile JS/CSS assets, you can run the `start` script:
-
-`./script`
-
-which will compile all assets into the `/static` directory, build the project and start the server.
-
-# Preparing the application database
-
-Using psql, do the following
-
-```
-levinotik=# create user taplike with password 'taplike';
-CREATE ROLE
-levinotik=# create database taplike;
-CREATE DATABASE
-levinotik=# create database taplike_test;
-CREATE DATABASE
-levinotik=# grant all privileges on database taplike to taplike;
-GRANT
-levinotik=# grant all privileges on database taplike_test to taplike;
-GRANT
-```
