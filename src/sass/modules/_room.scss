@@ -12,8 +12,13 @@
 
    &__sidebar {
       background: get-color(alto);
+      overflow: scroll;
       position: relative;
       width: 30%;
+   }
+
+   &__likes {
+      padding: 20px 20px 20px 10px;
    }
 
    &__realtime {
@@ -35,7 +40,7 @@
       background: darken(get-color(alto), 10%);
       height: 100px;
       padding: 20px 20px 20px 10px;
-      position: absolute;
+      position: fixed;
       width: 100%;
    }
 
@@ -112,5 +117,68 @@
          height: 30px;
          width: 30px;
       }
+   }
+}
+
+.likes {
+
+   &__list {
+      list-style-type: none;
+      margin: 0 0 110px 0;
+      padding: 0;
+   }
+
+   &__item {
+      line-height: 1.3;
+      margin: 40px 0 20px 0;
+   }
+
+   &__content {
+      @include font-size(14px);
+   }
+}
+
+.meta {
+   &__list {
+      @include flex-container(center, center, flex-start);
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+   }
+
+   &__item {
+      @include flex-container(center, center, center);
+      @include font-size(18px);
+      margin: 0 0 10px 0;
+      padding: 0 10px 0 0;
+
+      @include last() {
+         padding: 0;
+      }
+   }
+
+   &__count {
+      @include font-size(13px);
+      display: inline-block;
+      padding: 0 5px;
+   }
+   &__username {
+      @include font-size(13px);
+      display: inline-block;
+      padding: 0 5px;
+   }
+   &__timestamp {
+      @include font-size(13px);
+      display: inline-block;
+      padding: 0 5px;
+      text-transform: uppercase;
+   }
+}
+
+.avatar {
+   &--liked {
+      border-radius: 50%;
+      height: 20px;
+      width: 20px;
    }
 }
