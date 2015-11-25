@@ -82,6 +82,7 @@ makeSlug =  replaceAll "[ _]" "-"
 getHomeR :: Handler Html
 getHomeR = do
     chatRooms <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
+    authId <- maybeAuthId
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")

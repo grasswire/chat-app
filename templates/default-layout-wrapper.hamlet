@@ -15,7 +15,7 @@ $newline never
           <ul class="nav__list">
             $maybe userId <- authId
               <li class="nav__item">
-                <a href="#" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
+                <a href="/" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
               <li class="nav__item">
                   <a href="@{LogOutR}" class="nav__signin">Sign Out
             $nothing

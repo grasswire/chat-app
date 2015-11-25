@@ -4,7 +4,11 @@
       <div class="major-display__textblock">
         <h1 class="major-display__headline">TapLike is a place where...
           <br>dog lovers can become cat lovers
-        <a href="" class="button--callout">Create a Room
+          $maybe userId <- authId
+            <a href="#" class="js-trigger-modal button--callout" data-modal-trigger="create">Create a Room
+          $nothing
+            <a href="@{TwitterAuthR}?modal=create" class="button--callout">Create a Room
+
       <div class="major-display__visual">
         <img src="static/images/screenshot.png">
 
