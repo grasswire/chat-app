@@ -64,6 +64,6 @@ This script installs all required `node` packages, uses `gulp` to compile JS and
 
 ### Notes
 
-If GHC complains that it still cannot find icuuc, you can explicitly let `stack build` know where it. For example, on Mac:
+If GHC complains that it still cannot find icuuc, you can explicitly let `stack build` know where it is. For example, on Mac:
 
 `stack build --extra-include-dirs=/usr/local/opt/icu4c/include --extra-lib-dirs=/usr/local/opt/icu4c/lib`
