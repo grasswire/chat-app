@@ -66,7 +66,7 @@ postNewChatR = do
     case authId of
       Just i -> do
         let slug = slugify $ Incoming.title chatRoom
-        let newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug
+            newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug
         runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
