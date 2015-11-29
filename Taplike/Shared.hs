@@ -105,11 +105,7 @@ data Channel = Channel
   , _channelCreated     :: Time
   , _channelCreator     :: ID User
   , _channelIsArchived  :: Bool
-  , _channelIsGeneral   :: Bool
-  , _channelMembers     :: [ID User]
   , _channelTopic       :: Maybe (TapLikeTracked Text)
-  , _channelPurpose     :: Maybe (TapLikeTracked Text)
-  , _channelIsMember    :: Bool
   , _channelLastRead    :: Maybe TS
   , _channelLatest      :: Maybe Message
   , _channelUnreadCount :: Maybe Int }
@@ -375,11 +371,7 @@ instance FromJSON Channel where
     <*> o .: "created"
     <*> o .: "creator"
     <*> o .: "is_archived"
-    <*> o .:? "is_general" .!= False
-    <*> o .:? "members" .!= []
     <*> o .:? "topic"
-    <*> o .:? "purpose"
-    <*> o .:? "is_member" .!= False
     <*> o .:? "last_read"
     <*> o .:? "latest"
     <*> o .:? "unread_count"
