@@ -15,6 +15,7 @@ import Database.Persist.Sql (fromSqlKey)
 import Taplike.ChatRoomSlug
 import Data.Char (toLower)
 import Data.Text.ICU.Replace
+import Data.Time.Clock (getCurrentTime)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -66,8 +67,9 @@ postNewChatR = do
     authId <- maybeAuthId
     case authId of
       Just i -> do
+        currentTime <- liftIO getCurrentTime
         let slug = slugify $ Incoming.title chatRoom
-            newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug
+            newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug currentTime i False
         runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 

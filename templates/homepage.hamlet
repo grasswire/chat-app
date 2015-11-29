@@ -21,7 +21,7 @@
           <p class="card__meta">
             <span class="fa fa-user">
             <strong>2,103
-          <p class="card__text">#{chatRoomDescription (entityVal room)}
+          <p class="card__text">#{chatRoomTopic (entityVal room)}
 
   <div class="content-container">
     <h2 class="secondary__headline">All Chats
