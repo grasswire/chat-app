@@ -5,6 +5,10 @@ import ClassyPrelude
 import Data.Aeson(Value(..), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (typeMismatch)
 import Database.Persist.Sql
+-- import TextShow (FromStringShow(FromStringShow), TextShow(showbPrec))
+import TextShow.TH (deriveTextShow)
+
+
 
 newtype ChatRoomSlug = ChatRoomSlug {unSlug :: Text}
     deriving (PathPiece, Show, Eq, Read)
@@ -23,3 +27,5 @@ instance PersistField ChatRoomSlug where
 
 instance PersistFieldSql ChatRoomSlug where
     sqlType _ =  SqlString
+
+deriveTextShow ''ChatRoomSlug

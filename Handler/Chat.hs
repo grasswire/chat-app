@@ -15,7 +15,6 @@ import Database.Persist.Sql (fromSqlKey)
 import Taplike.ChatRoomSlug
 import Data.Char (toLower)
 import Data.Text.ICU.Replace
-import Data.Time.Clock (getCurrentTime)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"

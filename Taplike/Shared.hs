@@ -2,35 +2,34 @@ module Taplike.Shared where
 
 import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
-import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(Object, String), Object, FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText)
+import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(String), FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText, encode, decode)
 import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
 import qualified Data.HashMap.Strict as HM
 import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
-
+import           Network.WebSockets hiding (Message, Response)
 import           Taplike.TextShowOrphans ()
-import Database.Persist.Sql (fromSqlKey, toSqlKey)
-import Database.Persist.Class (Key(..))
-import Data.UUID.V4 as UUIDV4
-import Data.UUID (UUID(..))
-import Data.Scientific (Scientific)
-import Model
-import Data.UUID.Aeson()
-import TextShow.Data.Time()
-import Taplike.ChatRoomSlug
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import           Database.Persist.Class (Key(..))
+import           Data.UUID
+import           Data.Scientific (Scientific)
+import           Model hiding (ChatRoomId)
+import           Data.UUID.Aeson()
+import           TextShow.Data.Time()
+import           Taplike.ChatRoomSlug
+import           Data.Maybe (fromJust)
 
-instance TextShow (Key ChatRoom) where
-  showb = showb . fromSqlKey
 
-newtype ChannelId = ChannelId (Key ChatRoom)
-instance ToJSON ChannelId where
-  toJSON (ChannelId key) = Number $ (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
-instance FromJSON ChannelId where
+
+newtype ChatRoomId = ChatRoomId (Key ChatRoom)
+instance ToJSON ChatRoomId where
+  toJSON (ChatRoomId key) = Number $ (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
+instance FromJSON ChatRoomId where
   parseJSON = withScientific "channel_id" $ \ s ->
     case (toBoundedInteger s :: Maybe Int64) of
-      Just i -> pure $ ChannelId (toSqlKey i)
+      Just i -> pure $ ChatRoomId (toSqlKey i)
       Nothing  -> fail . unpack $ "out of bound channel id " <> showt (FromStringShow s)
 newtype MessageText = MessageText Text
 instance ToJSON MessageText where
@@ -99,16 +98,16 @@ data Profile = Profile
   , _profileSkype     :: Maybe Text
   , _profilePhone     :: Maybe Text }
 
-data Channel = Channel
-  { _channelID          :: ID Channel
-  , _channelName        :: Text
-  , _channelCreated     :: Time
-  , _channelCreator     :: ID User
-  , _channelIsArchived  :: Bool
-  , _channelTopic       :: Maybe (TapLikeTracked Text)
-  , _channelLastRead    :: Maybe TS
-  , _channelLatest      :: Maybe Message
-  , _channelUnreadCount :: Maybe Int }
+-- data ChatRoom = ChatRoom
+--   { _channelID          :: ID ChatRoom
+--   , _channelName        :: Text
+--   , _channelCreated     :: Time
+--   , _channelCreator     :: ID User
+--   , _channelIsArchived  :: Bool
+--   , _channelTopic       :: Maybe (TapLikeTracked Text)
+--   , _channelLastRead    :: Maybe TS
+--   , _channelLatest      :: Maybe Message
+--   , _channelUnreadCount :: Maybe Int }
 
 data Bot = Bot
   { _botID    :: ID Bot
@@ -127,13 +126,13 @@ data Message = Message
   , _messageEventTS      :: Maybe TS
   , _messageHidden       :: Bool
   , _messageIsStarred    :: Maybe Bool
-  , _messagePinnedTo     :: [ID Channel]
+  , _messagePinnedTo     :: [ChatRoomId]
   }
 
 data IncomingMessage = IncomingMessage
  { incomingMessageUUID        :: UUID
  , incomingMessageTS          :: UTCTime
- , incomingMessageChannelId   :: ChannelId
+ , incomingMessageChannelId   :: ChatRoomId
  , incomingMessageMessageText :: MessageText
  }
 
@@ -175,13 +174,13 @@ data RtmEvent
   | RtmReplyOk Word64 (Maybe TS) (Maybe Text)
   | RtmReplyNotOk Word64 Int32 Text
   | RtmMessage Message
-  | RtmChannelMarked (ChatMarked Channel)
-  | RtmChannelCreated Channel
-  | RtmChannelDeleted (ID Channel)
-  | RtmChannelRenamed (ChatRenamed Channel)
-  | RtmChannelArchive (ChatUser Channel)
-  | RtmChannelUnarchive (ChatUser Channel)
-  | RtmChannelHistoryChanged (ChatHistoryChanged Channel)
+  | RtmChatRoomMarked (ChatMarked ChatRoom)
+  | RtmChatRoomCreated ChatRoom
+  | RtmChatRoomDeleted (ID ChatRoom)
+  | RtmChatRoomRenamed (ChatRenamed ChatRoom)
+  | RtmChatRoomArchive (ChatUser ChatRoom)
+  | RtmChatRoomUnarchive (ChatUser ChatRoom)
+  | RtmChatRoomHistoryChanged (ChatHistoryChanged ChatRoom)
   | RtmPresenceChange PresenceChange
   | RtmManualPresenceChange Presence
   | RtmPrefChange PrefChange
@@ -195,6 +194,10 @@ data RtmEvent
   | RtmBotChanged Bot
   | RtmAccountsChanged
   | RtmSendMessage IncomingMessage
+
+instance WebSocketsData RtmEvent where
+  fromLazyByteString = fromJust . decode
+  toLazyByteString   = encode
 
 data ChatMarked a = ChatMarked
   { _chatMarkedChannel :: ID a
@@ -232,15 +235,15 @@ data Star = Star
 
 data StarItem
   = StarItemMessage Message
-  | StarItemChannel (ID Channel)
+  | StarItemChannel (ID ChatRoom)
 
 class TapLikeTyped a where
   isTypedID :: Proxy a -> ID b -> Bool
-instance TapLikeTyped Channel where
+instance TapLikeTyped ChatRoom where
   isTypedID _ = isPrefixOf "C" . unID
 instance TapLikeTyped Chat where
    isTypedID _ i
-    =  isTypedID (Proxy :: Proxy Channel) i
+    =  isTypedID (Proxy :: Proxy ChatRoom) i
 
 instance TapLikeTyped User where
   isTypedID _ = isPrefixOf "U" . unID
@@ -251,15 +254,13 @@ asTypedID i =
     then Just (ID . unID $ i)
     else Nothing
 
-asChannelID :: ID Chat -> Maybe (ID Channel)
+asChannelID :: ID Chat -> Maybe (ID ChatRoom)
 asChannelID = asTypedID
 
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
 deriving instance Eq Self
-deriving instance Eq User
 deriving instance Eq Profile
-deriving instance Eq Channel
 deriving instance Eq Bot
 deriving instance Eq MessageSubtype
 deriving instance Eq MessageReaction
@@ -279,7 +280,7 @@ deriving instance Eq Star
 deriving instance Eq StarItem
 deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
-deriving instance Eq ChannelId
+deriving instance Eq ChatRoomId
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -288,9 +289,7 @@ deriveTextShow ''RtmStartRequest
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
 deriveTextShow ''Presence
-deriveTextShow ''User
 deriveTextShow ''Profile
-deriveTextShow ''Channel
 deriveTextShow ''Bot
 deriveTextShow ''Message
 deriveTextShow ''MessageSubtype
@@ -308,9 +307,8 @@ deriveTextShow ''PrefChange
 deriveTextShow ''Star
 deriveTextShow ''StarItem
 deriveTextShow ''IncomingMessage
-deriveTextShow ''UUID
 deriveTextShow ''MessageText
-deriveTextShow ''ChannelId
+deriveTextShow ''ChatRoomId
 
 
 instance ToJSON RtmStartRequest where
@@ -364,17 +362,17 @@ instance FromJSON Profile where
     <*> o .:? "skype"
     <*> o .:? "phone"
 
-instance FromJSON Channel where
-  parseJSON = withObject "channel object" $ \ o -> Channel
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> o .: "created"
-    <*> o .: "creator"
-    <*> o .: "is_archived"
-    <*> o .:? "topic"
-    <*> o .:? "last_read"
-    <*> o .:? "latest"
-    <*> o .:? "unread_count"
+-- instance FromJSON ChatRoom where
+--   parseJSON = withObject "channel object" $ \ o -> ChatRoom
+--     <$> o .: "id"
+--     <*> o .: "name"
+--     <*> o .: "created"
+--     <*> o .: "creator"
+--     <*> o .: "is_archived"
+--     <*> o .:? "topic"
+--     <*> o .:? "last_read"
+--     <*> o .:? "latest"
+--     <*> o .:? "unread_count"
 
 instance FromJSON Bot where
   parseJSON = withObject "bot object" $ \ o -> Bot
@@ -460,13 +458,13 @@ instance FromJSON RtmEvent where
             o .: "type" >>= pure . asText >>= \ case
               "hello"                   -> pure RtmHello
               "message"                 -> RtmMessage <$> recur
-              "channel_marked"          -> RtmChannelMarked <$> recur
-              "channel_created"         -> RtmChannelCreated <$> o .: "channel"
-              "channel_deleted"         -> RtmChannelDeleted <$> o .: "channel"
-              "channel_rename"          -> RtmChannelRenamed <$> o .: "channel"
-              "channel_archive"         -> RtmChannelArchive <$> recur
-              "channel_unarchive"       -> RtmChannelUnarchive <$> recur
-              "channel_history_changed" -> RtmChannelHistoryChanged <$> recur
+              "channel_marked"          -> RtmChatRoomMarked <$> recur
+              "channel_created"         -> RtmChatRoomCreated <$> o .: "channel"
+              "channel_deleted"         -> RtmChatRoomDeleted <$> o .: "channel"
+              "channel_rename"          -> RtmChatRoomRenamed <$> o .: "channel"
+              "channel_archive"         -> RtmChatRoomArchive <$> recur
+              "channel_unarchive"       -> RtmChatRoomUnarchive <$> recur
+              "channel_history_changed" -> RtmChatRoomHistoryChanged <$> recur
               "presence_change"         -> RtmPresenceChange <$> recur
               "manual_presence_change"  -> RtmManualPresenceChange <$> o .: "presence"
               "user_typing"             -> RtmUserTyping <$> recur
