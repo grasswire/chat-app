@@ -98,17 +98,6 @@ data Profile = Profile
   , _profileSkype     :: Maybe Text
   , _profilePhone     :: Maybe Text }
 
--- data ChatRoom = ChatRoom
---   { _channelID          :: ID ChatRoom
---   , _channelName        :: Text
---   , _channelCreated     :: Time
---   , _channelCreator     :: ID User
---   , _channelIsArchived  :: Bool
---   , _channelTopic       :: Maybe (TapLikeTracked Text)
---   , _channelLastRead    :: Maybe TS
---   , _channelLatest      :: Maybe Message
---   , _channelUnreadCount :: Maybe Int }
-
 data Bot = Bot
   { _botID    :: ID Bot
   , _botName  :: Text
