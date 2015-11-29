@@ -50,9 +50,7 @@ getChatR :: ChatRoomSlug -> Handler Html
 getChatR slug = do
     chatRoom <- runDB (getBy $ UniqueChatRoomSlug slug)
     authId <- maybeAuthId
-    chatUser <- case authId of
-                  Just uId -> runDB $ get uId
-                  _        -> return Nothing
+    chatUser <- maybe (return Nothing) (runDB . get) authId
     case chatRoom of
       Just c -> do
         let room = entityVal c
