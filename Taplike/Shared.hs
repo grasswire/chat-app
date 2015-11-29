@@ -91,15 +91,6 @@ data Self = Self
 
 data Presence = PresenceActive | PresenceAway
 
-data Team = Team
-  { _teamID                :: ID Team
-  , _teamName              :: Text
-  , _teamEmailDomain       :: Maybe Text
-  , _teamDomain            :: Text
-  , _teamMsgEditWindowMins :: Maybe Int
-  , _teamOverStorageLimit  :: Bool
-  , _teamPrefs             :: Object }
-
 data Profile = Profile
   { _profileFirstName :: Maybe Text
   , _profileLastName  :: Maybe Text
@@ -122,20 +113,6 @@ data Channel = Channel
   , _channelLastRead    :: Maybe TS
   , _channelLatest      :: Maybe Message
   , _channelUnreadCount :: Maybe Int }
-
-data Group = Group
-  { _groupID          :: ID Group
-  , _groupName        :: Text
-  , _groupCreated     :: Time
-  , _groupCreator     :: ID User
-  , _groupIsArchived  :: Bool
-  , _groupMembers     :: [ID User]
-  , _groupTopic       :: Maybe (TapLikeTracked Text)
-  , _groupPurpose     :: Maybe (TapLikeTracked Text)
-  , _groupIsOpen      :: Bool
-  , _groupLastRead    :: Maybe TS
-  , _groupLatest      :: Maybe Message
-  , _groupUnreadCount :: Maybe Int }
 
 data Bot = Bot
   { _botID    :: ID Bot
@@ -218,7 +195,6 @@ data RtmEvent
   | RtmStarRemoved Star
   | RtmEmojiChanged TS
   | RtmCommandsChanged TS
-  | RtmTeamPrefChange PrefChange
   | RtmBotAdded Bot
   | RtmBotChanged Bot
   | RtmAccountsChanged
@@ -262,24 +238,13 @@ data StarItem
   = StarItemMessage Message
   | StarItemChannel (ID Channel)
 
-data TeamDomainChange = TeamDomainChange
-  { _teamDomainChangeUrl    :: Text
-  , _teamDomainChangeDomain :: Text }
-
-data EmailDomainChanged = EmailDomainChanged
-  { _emailDomainChangedEmailDomain :: Text
-  , _emailDomainChangedEventTS     :: TS }
-
 class TapLikeTyped a where
   isTypedID :: Proxy a -> ID b -> Bool
 instance TapLikeTyped Channel where
   isTypedID _ = isPrefixOf "C" . unID
-instance TapLikeTyped Group where
-  isTypedID _ = isPrefixOf "G" . unID
 instance TapLikeTyped Chat where
    isTypedID _ i
     =  isTypedID (Proxy :: Proxy Channel) i
-    || isTypedID (Proxy :: Proxy Group) i
 
 instance TapLikeTyped User where
   isTypedID _ = isPrefixOf "U" . unID
@@ -292,18 +257,13 @@ asTypedID i =
 
 asChannelID :: ID Chat -> Maybe (ID Channel)
 asChannelID = asTypedID
-asGroupID :: ID Chat -> Maybe (ID Group)
-asGroupID = asTypedID
-
 
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
 deriving instance Eq Self
-deriving instance Eq Team
 deriving instance Eq User
 deriving instance Eq Profile
 deriving instance Eq Channel
-deriving instance Eq Group
 deriving instance Eq Bot
 deriving instance Eq MessageSubtype
 deriving instance Eq MessageReaction
@@ -321,8 +281,6 @@ deriving instance Eq UserTyping
 deriving instance Eq PrefChange
 deriving instance Eq Star
 deriving instance Eq StarItem
-deriving instance Eq TeamDomainChange
-deriving instance Eq EmailDomainChanged
 deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
 deriving instance Eq ChannelId
@@ -334,11 +292,9 @@ deriveTextShow ''RtmStartRequest
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
 deriveTextShow ''Presence
-deriveTextShow ''Team
 deriveTextShow ''User
 deriveTextShow ''Profile
 deriveTextShow ''Channel
-deriveTextShow ''Group
 deriveTextShow ''Bot
 deriveTextShow ''Message
 deriveTextShow ''MessageSubtype
@@ -355,8 +311,6 @@ deriveTextShow ''UserTyping
 deriveTextShow ''PrefChange
 deriveTextShow ''Star
 deriveTextShow ''StarItem
-deriveTextShow ''TeamDomainChange
-deriveTextShow ''EmailDomainChanged
 deriveTextShow ''IncomingMessage
 deriveTextShow ''UUID
 deriveTextShow ''MessageText
@@ -386,7 +340,6 @@ instance ToJSON RtmStartRp where
     , "users" .= users
     ]
 
-
 instance FromJSON Self where
   parseJSON = withObject "self object" $ \ o -> Self
     <$> o .: "id"
@@ -405,22 +358,6 @@ instance FromJSON Presence where
     "active" -> pure PresenceActive
     "away"   -> pure PresenceAway
     other    -> fail . unpack $ "unknown presence value " <> other
-
-instance FromJSON Team where
-  parseJSON = withObject "team object" $ \ o -> Team
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> (o .:? "email_domain" >>= \ case
-          Just "" -> pure Nothing
-          Just s  -> pure $ Just s
-          Nothing -> pure Nothing)
-    <*> o .: "domain"
-    <*> (o .:? "msg_edit_window_mins" >>= \ case
-          Just (-1) -> pure Nothing
-          Just i    -> pure $ Just i
-          Nothing   -> pure Nothing)
-    <*> o .: "over_storage_limit"
-    <*> o .: "prefs"
 
 instance FromJSON Profile where
   parseJSON = withObject "user profile object" $ \ o -> Profile
@@ -446,23 +383,6 @@ instance FromJSON Channel where
     <*> o .:? "last_read"
     <*> o .:? "latest"
     <*> o .:? "unread_count"
-
-instance FromJSON Group where
-  parseJSON = withObject "group object" $ \ o -> Group
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> o .: "created"
-    <*> o .: "creator"
-    <*> o .: "is_archived"
-    <*> o .:? "members" .!= []
-    <*> o .:? "topic"
-    <*> o .:? "purpose"
-    <*> o .:? "is_open" .!= False
-    <*> o .:? "last_read"
-    <*> o .:? "latest"
-    <*> o .:? "unread_count"
-
-
 
 instance FromJSON Bot where
   parseJSON = withObject "bot object" $ \ o -> Bot
@@ -564,7 +484,6 @@ instance FromJSON RtmEvent where
               "star_removed"            -> RtmStarRemoved <$> recur
               "emoji_changed"           -> RtmEmojiChanged <$> o .: "event_ts"
               "commands_changed"        -> RtmCommandsChanged <$> o .: "event_ts"
-              "team_pref_change"        -> RtmTeamPrefChange <$> recur
               "bot_added"               -> RtmBotAdded <$> o .: "bot"
               "bot_changed"             -> RtmBotChanged <$> o .: "bot"
               "accounts_changed"        -> pure RtmAccountsChanged
@@ -625,16 +544,6 @@ instance FromJSON StarItem where
     "message"      -> StarItemMessage     <$> o .: "message"
     "channel"      -> StarItemChannel     <$> o .: "channel"
     other          -> fail . unpack $ "unknown starrable item type " <> other
-
-instance FromJSON TeamDomainChange where
-  parseJSON = withObject "team domain change event" $ \ o -> TeamDomainChange
-    <$> o .: "url"
-    <*> o .: "domain"
-
-instance FromJSON EmailDomainChanged where
-  parseJSON = withObject "email domain changed event" $ \ o -> EmailDomainChanged
-    <$> o .: "email_domain"
-    <*> o .: "event_ts"
 
 instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
