@@ -25,8 +25,8 @@ getRtmStartR = do
       users <- case channel of
                 Just room -> do
                   userIds <- do
-                    channel <- liftIO $ atomically $ S.lookupChannel (chatServer app) (fromStrict $ channelTitle $ entityVal room)
-                    case channel of
+                    serverChannel <- liftIO $ atomically $ S.lookupChannel (chatServer app) (fromStrict $ channelTitle $ entityVal room)
+                    case serverChannel of
                       Just ch -> liftIO $ atomically (S.listUsers ch)
                       _ -> return []
                   runDB $ selectList [UserTwitterUserId <-. userIds] []

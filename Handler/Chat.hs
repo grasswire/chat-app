@@ -2,7 +2,7 @@
 
 module Handler.Chat where
 
-import Import hiding (toLower) -- , Channel, Channel(..))
+import Import hiding (toLower)
 import Yesod.WebSockets
 import qualified Server as S
 
@@ -10,7 +10,8 @@ import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import qualified Model.Incoming as Incoming
-import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
+import Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
+import qualified Taplike.Shared as SH
 import Database.Persist.Sql (fromSqlKey)
 import Taplike.ChannelSlug
 import Data.Char (toLower)
@@ -38,7 +39,7 @@ chatApp channelName user = do
 
 processMessage :: User -> RtmEvent -> RtmEvent
 processMessage user event = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (Message (userTwitterUserId user) Nothing ( incomingMessageMessageText incoming) (TS "0") Nothing Nothing Nothing False Nothing [])
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (userTwitterUserId user) Nothing ( incomingMessageMessageText incoming) (TS "0") Nothing Nothing Nothing False Nothing [])
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text

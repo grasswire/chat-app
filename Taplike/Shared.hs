@@ -15,13 +15,11 @@ import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Class (Key(..))
 import           Data.UUID
 import           Data.Scientific (Scientific)
-import           Model hiding (ChannelId)
+import           Model hiding (ChannelId, MessageText, Message, MessageEdited)
 import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
 import           Taplike.ChannelSlug
 import           Data.Maybe (fromJust)
-
-
 
 newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
