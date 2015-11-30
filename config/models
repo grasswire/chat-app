@@ -12,13 +12,13 @@ UserToken
     token ByteString
     deriving Show Typeable
 
-ChatRoom json
+Channel json
     createdBy UserId
     title Text
     topic Text
-    crSlug ChatRoomSlug
+    crSlug ChannelSlug
     UniqueTitle title
-    UniqueChatRoomSlug crSlug
+    UniqueChannelSlug crSlug
     created UTCTime
     creator UserId
     isArchived Bool

@@ -2,7 +2,7 @@ module Model where
 
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
-import Taplike.ChatRoomSlug (ChatRoomSlug)
+import Taplike.ChannelSlug (ChannelSlug)
 import TextShow (TextShow)
 import TextShow.TH (deriveTextShow)
 import TextShow.Data.Time ()
@@ -16,7 +16,7 @@ share [mkPersist sqlSettings, mkMigrate "migrateAll"]
     $(persistFileWith lowerCaseSettings "config/models")
 
 deriving instance TextShow (Key User)
-deriving instance TextShow (Key ChatRoom)
+deriving instance TextShow (Key Channel)
 
 deriveTextShow ''User
-deriveTextShow ''ChatRoom
+deriveTextShow ''Channel

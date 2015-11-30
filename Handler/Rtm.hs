@@ -3,10 +3,10 @@
 module Handler.Rtm where
 
 import Import
-import Server
+import qualified Server as S
 
 import Taplike.Shared (RtmStartRp(..), Self(..))
-import Taplike.ChatRoomSlug
+import Taplike.ChannelSlug
 
 getRtmStartR :: Handler Value
 getRtmStartR = do
@@ -18,16 +18,16 @@ getRtmStartR = do
   mparam <- lookupGetParam "room_id"
   case mparam of
     Just roomId -> do
-      let chatSlug = ChatRoomSlug roomId
+      let chatSlug = ChannelSlug roomId
       renderer <- getUrlRender
       let url = renderer $ ChatR chatSlug
-      chatRoom <- runDB (getBy $ UniqueChatRoomSlug chatSlug)
-      users <- case chatRoom of
+      channel <- runDB (getBy $ UniqueChannelSlug chatSlug)
+      users <- case channel of
                 Just room -> do
                   userIds <- do
-                    channel <- liftIO $ atomically $ lookupChannel (chatServer app) (fromStrict $ chatRoomTitle $ entityVal room)
+                    channel <- liftIO $ atomically $ S.lookupChannel (chatServer app) (fromStrict $ channelTitle $ entityVal room)
                     case channel of
-                      Just ch -> liftIO $ atomically (listUsers ch)
+                      Just ch -> liftIO $ atomically (S.listUsers ch)
                       _ -> return []
                   runDB $ selectList [UserTwitterUserId <-. userIds] []
                 _ -> return []

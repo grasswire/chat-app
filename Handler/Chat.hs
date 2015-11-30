@@ -2,17 +2,17 @@
 
 module Handler.Chat where
 
-import Import hiding (toLower)
+import Import hiding (toLower) -- , Channel, Channel(..))
 import Yesod.WebSockets
-import Server
+import qualified Server as S
 
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import qualified Model.Incoming as Incoming
-import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChatRoomCreatedRp(..))
+import Taplike.Shared (RtmEvent(..), Message(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
 import Database.Persist.Sql (fromSqlKey)
-import Taplike.ChatRoomSlug
+import Taplike.ChannelSlug
 import Data.Char (toLower)
 import Data.Text.ICU.Replace
 
@@ -24,12 +24,12 @@ chatApp channelName user = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
     (outChan, channel) <- atomically $ do
-                chan <- lookupOrCreateChannel (chatServer app) (fromStrict channelName)
-                return (channelBroadcastChan chan, chan)
+                chan <- S.lookupOrCreateChannel (chatServer app) (fromStrict channelName)
+                return (S.channelBroadcastChan chan, chan)
     inChan <- atomically (dupTChan outChan)
     case user of
       Just u -> do
-        _ <- liftIO $ atomically $ chanAddClient JoinReasonConnected channel (userTwitterUserId u)
+        _ <- liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId u)
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C (atomically . writeTChan outChan . processMessage u))
@@ -46,32 +46,32 @@ getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
 
 newtype RoomId = RoomId Integer
 
-getChatR :: ChatRoomSlug -> Handler Html
+getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
-    chatRoom <- runDB (getBy $ UniqueChatRoomSlug slug)
+    channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
     chatUser <- maybe (return Nothing) (runDB . get) authId
-    case chatRoom of
+    case channel of
       Just c -> do
         let room = entityVal c
-        webSockets $ chatApp (chatRoomTitle room) chatUser
+        webSockets $ chatApp (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
 postNewChatR :: Handler ()
 postNewChatR = do
-    chatRoom <- requireJsonBody :: Handler Incoming.ChatRoom
-    authId <- maybeAuthId
+    channel <- requireJsonBody :: Handler Incoming.Channel
+    authId  <- maybeAuthId
     case authId of
       Just i -> do
         currentTime <- liftIO getCurrentTime
-        let slug = slugify $ Incoming.title chatRoom
-            newRoom = ChatRoom i (Incoming.title chatRoom) (Incoming.description chatRoom) slug currentTime i False
-        runDB (insert newRoom) >>= \key -> sendResponseStatus status201 (toJSON (ChatRoomCreatedRp newRoom (fromSqlKey key) slug))
+        let slug = slugify $ Incoming.channelTitle channel
+            newChannel  = Channel i (Incoming.channelTitle channel) (Incoming.channelTopic channel) slug currentTime i False
+        runDB (insert newChannel) >>= \key -> sendResponseStatus status201 (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
-slugify :: Text -> ChatRoomSlug
-slugify = ChatRoomSlug . makeSlug
+slugify :: Text -> ChannelSlug
+slugify = ChannelSlug . makeSlug
 
 makeSlug :: Text -> Text
 makeSlug =  replaceAll "[ _]" "-"
@@ -80,7 +80,7 @@ makeSlug =  replaceAll "[ _]" "-"
 
 getHomeR :: Handler Html
 getHomeR = do
-    chatRooms <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
+    channels <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity Channel]
     authId <- maybeAuthId
     defaultLayout $ do
         setTitle "Taplike / Home"
