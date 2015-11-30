@@ -40,8 +40,9 @@ img {
 h1, h2, h3, h4, h5, h6 {
    font: {
       family: get-stack(serif);
-      weight: get-weight(bold);
+      weight: get-font-weight(bold);
    }
+   padding: 0;
    letter-spacing: 0;
    margin: 0;
 }

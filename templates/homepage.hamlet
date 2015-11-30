@@ -1,60 +1,75 @@
-<main role="main">
-  <header class="major-display">
+<body class="#{signature}">
+  <section class="masthead">
     <div class="content-flex-wrapper">
-      <div class="major-display__textblock">
-        <h1 class="major-display__headline">TapLike is a place where...
-          <br>dog lovers can become cat lovers
+      <a href="#" class="logo">TapLike
+      <nav class="nav__main">
+        <ul class="nav__list">
           $maybe userId <- authId
-            <a href="#" class="js-trigger-modal button--callout" data-modal-trigger="create">Create a Room
+            <li class="nav__item">
+              <a href="/" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
+            <li class="nav__item">
+                <a href="@{LogOutR}" class="nav__signin">Sign Out
           $nothing
-            <a href="@{TwitterAuthR}?modal=create" class="button--callout">Create a Room
+            <li class="nav__item">
+              <a href="@{TwitterAuthR}" class="nav__signin">Sign In
 
-      <div class="major-display__visual">
-        <img src="static/images/screenshot.png">
+  <main role="main">
+    <header class="major-display">
+      <div class="content-flex-wrapper">
+        <div class="major-display__textblock">
+          <h1 class="major-display__headline">TapLike is a place where...
+            <br>dog lovers can become cat lovers
+            $maybe userId <- authId
+              <a href="#" class="js-trigger-modal button--callout" data-modal-trigger="create">Create a Room
+            $nothing
+              <a href="@{TwitterAuthR}?modal=create" class="button--callout">Create a Room
 
-  <div class="content-container">
-    <h2 class="main__headline">Trending Chats
-    <div class="card__container">
-      $forall room <- chatRooms
-        <a class="card" href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}">
-          <h3 class="card__title">#{chatRoomTitle (entityVal room)}
-          <p class="card__meta">
-            <span class="fa fa-user">
-            <strong>2,103
-          <p class="card__text">#{chatRoomDescription (entityVal room)}
+        <div class="major-display__visual">
+          <img src="static/images/screenshot.png">
 
-  <div class="content-container">
-    <h2 class="secondary__headline">All Chats
-    <div class="content-flex-container">
+    <div class="content-container">
+      <h2 class="main__headline">Trending Chats
+      <div class="card__container">
+        $forall room <- chatRooms
+          <a class="card" href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}">
+            <h3 class="card__title">#{chatRoomTitle (entityVal room)}
+            <p class="card__meta">
+              <span class="fa fa-user">
+              <strong>2,103
+            <p class="card__text">#{chatRoomDescription (entityVal room)}
 
-      <a class="card--listing" href="">
-        <h3 class="card__title--listing">Listing Title
-          <div class="card__meta--listing">
-            <span class="fa fa-user">
-            <strong>2,103
-        <p class="card__text--listing">Some dummy text here
+    <div class="content-container">
+      <h2 class="secondary__headline">All Chats
+      <div class="content-flex-container">
 
-      <a class="card--listing" href="">
-        <h3 class="card__title--listing">Listing Title
-          <div class="card__meta--listing">
-            <span class="fa fa-user">
-            <strong>2,103
-        <p class="card__text--listing">Some dummy text here
+        <a class="card--listing" href="">
+          <h3 class="card__title--listing">Listing Title
+            <div class="card__meta--listing">
+              <span class="fa fa-user">
+              <strong>2,103
+          <p class="card__text--listing">Some dummy text here
 
-      <a class="card--listing" href="">
-        <h3 class="card__title--listing">Listing Title
-          <div class="card__meta--listing">
-            <span class="fa fa-user">
-            <strong>2,103
-        <p class="card__text--listing">Some dummy text here
+        <a class="card--listing" href="">
+          <h3 class="card__title--listing">Listing Title
+            <div class="card__meta--listing">
+              <span class="fa fa-user">
+              <strong>2,103
+          <p class="card__text--listing">Some dummy text here
 
-      <a class="card--listing" href="">
-        <h3 class="card__title--listing">Listing Title
-          <div class="card__meta--listing">
-            <span class="fa fa-user">
-            <strong>2,103
-        <p class="card__text--listing">Some dummy text here
+        <a class="card--listing" href="">
+          <h3 class="card__title--listing">Listing Title
+            <div class="card__meta--listing">
+              <span class="fa fa-user">
+              <strong>2,103
+          <p class="card__text--listing">Some dummy text here
 
-  <footer class="content-container">
-    <div class="loader">
-      <a href="" class="loader__button">Load More
+        <a class="card--listing" href="">
+          <h3 class="card__title--listing">Listing Title
+            <div class="card__meta--listing">
+              <span class="fa fa-user">
+              <strong>2,103
+          <p class="card__text--listing">Some dummy text here
+
+    <footer class="content-container">
+      <div class="loader">
+        <a href="" class="loader__button">Load More

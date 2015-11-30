@@ -7,46 +7,31 @@ $newline never
     <meta name="viewport" content="width=device-width,initial-scale=1">
     ^{pageHead pc}
 
-  <body>
-    <section class="masthead">
-      <div class="content-flex-wrapper">
-        <a href="#" class="logo">TapLike
-        <nav class="nav__main">
-          <ul class="nav__list">
-            $maybe userId <- authId
-              <li class="nav__item">
-                <a href="/" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
-              <li class="nav__item">
-                  <a href="@{LogOutR}" class="nav__signin">Sign Out
-            $nothing
-              <li class="nav__item">
-                <a href="@{TwitterAuthR}" class="nav__signin">Sign In
+  ^{pageBody pc}
 
-    ^{pageBody pc}
+  <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">
+    <div class="content-container">
+      <header class="modal__header">
+        <a href="#" class="js-trigger-modal-close">
+          <span class="modal__close fa fa-times">
+      <section class="modal__body">
+        <h1 class="modal__title">Create
+        <form method="post" class="js-create create">
+          <label class="js-create-title create__label">
+            Title
+            <input type="text" name="" class="create__title js-create-title-input">
+          <label class="js-create-description create__label">
+            Description
+            <input type="text" name="" class="create__description js-create-description-input">
+          <button type="submit" class="create__button">GO
 
-    <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">
-      <div class="content-container">
-        <header class="modal__header">
-          <a href="#" class="js-trigger-modal-close">
-            <span class="modal__close fa fa-times">
-        <section class="modal__body">
-          <h1 class="modal__title">Create
-          <form method="post" class="js-create create">
-            <label class="js-create-title create__label">
-              Title
-              <input type="text" name="" class="create__title js-create-title-input">
-            <label class="js-create-description create__label">
-              Description
-              <input type="text" name="" class="create__description js-create-description-input">
-            <button type="submit" class="create__button">GO
-
-    $maybe analytics <- appAnalytics $ appSettings master
-      <script>
-        if(!window.location.href.match(/localhost/)){
-          window._gaq = [['_setAccount','#{analytics}'],['_trackPageview'],['_trackPageLoadTime']];
-          (function() {
-          \  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-          \  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-          \  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-          })();
-        }
+  $maybe analytics <- appAnalytics $ appSettings master
+    <script>
+      if(!window.location.href.match(/localhost/)){
+        window._gaq = [['_setAccount','#{analytics}'],['_trackPageview'],['_trackPageLoadTime']];
+        (function() {
+        \  var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        \  ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        \  var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+        })();
+      }

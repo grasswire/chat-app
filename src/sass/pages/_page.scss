@@ -38,7 +38,13 @@
 
 main {
    height: 100%;
-   padding-top: $masthead-height;
+}
+
+.home {
+   main {
+      height: 100%;
+      padding-top: $masthead-height;
+   }
 }
 
 .button {

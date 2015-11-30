@@ -43,7 +43,7 @@ App.Modules.Chat = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.bind("load").where('div', 'page-chat-room').to(setup, this);
+         Events.bind("load").where('body[class]', 'chatroom').to(setup, this);
          Events.bind("submit", ".js-chat-form").to(chat, this);
 
          Events.subscribe("tl/chat/message/sent", displayMessage);

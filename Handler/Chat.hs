@@ -50,6 +50,7 @@ getChatR :: ChatRoomSlug -> Handler Html
 getChatR slug = do
     chatRoom <- runDB (getBy $ UniqueChatRoomSlug slug)
     authId <- maybeAuthId
+    let signature = "chatroom" :: String
     chatUser <- case authId of
                   Just uId -> runDB $ get uId
                   _        -> return Nothing
@@ -83,6 +84,7 @@ getHomeR :: Handler Html
 getHomeR = do
     chatRooms <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity ChatRoom]
     authId <- maybeAuthId
+    let signature = "home" :: String
     defaultLayout $ do
         setTitle "Taplike / Home"
         $(widgetFile "homepage")
