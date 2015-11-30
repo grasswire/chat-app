@@ -22,20 +22,12 @@ var Events = (function() {
             var whereType  = eo.whereType.shift();
             var attribute  = _.isNull(whereKey.match(/\[(.*?)\]/)) ? "class" : whereKey.match(/\[(.*?)\]/)[1];
 
-            // TODO: the .attr() clause is going to cause problems here because it's matching exactly
-            // so if you have attr-foo="one two three" you can't say .where([attr-foo], "one")
-            // because it will come back false. I'll need to make this more intellegent.
-
-            if (whereType == "equal") {
-               if ((attribute == "class" && $(whereKey).hasClass(whereValue)) || $(whereKey).attr(attribute) == whereValue) {
-                  this.pub(eo);
-               }
+            if (whereType == "equal" && s.include($(whereKey).attr(attribute), whereValue)) {
+               this.pub(eo);
             }
 
-            if (whereType == "not-equal") {
-               if ((attribute == "class" && !$(whereKey).hasClass(whereValue)) || $(whereKey).attr(attribute) != whereValue) {
-                  this.pub(eo);
-               }
+            if (whereType == "not-equal" && ! s.include($(whereKey).attr(attribute), whereValue)) {
+               this.pub(eo);
             }
 
             return false;
