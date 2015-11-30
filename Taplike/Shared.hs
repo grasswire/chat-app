@@ -15,7 +15,7 @@ import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Class (Key(..))
 import           Data.UUID
 import           Data.Scientific (Scientific)
-import           Model hiding (ChannelId, MessageText, Message)
+import           Model hiding (ChannelId, MessageText, Message, Heartbeat)
 import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
 import           Taplike.ChannelSlug
@@ -133,6 +133,11 @@ data TapLikeTracked a = TapLikeTracked
   , _trackedLastSet :: Time
   }
 
+data Heartbeat = Heartbeat
+  { heartBeatUser :: UserId
+  , heartBeatChannel :: ChannelId
+  }
+
 data RtmEvent
   = RtmHello
   | RtmReplyOk Word64 (Maybe TS) (Maybe Text)
@@ -140,6 +145,7 @@ data RtmEvent
   | RtmMessage Message
   | RtmUserTyping UserTyping
   | RtmSendMessage IncomingMessage
+  | RTMHeartbeat Heartbeat
 
 instance WebSocketsData RtmEvent where
   fromLazyByteString = fromJust . decode
@@ -179,6 +185,7 @@ deriving instance Eq UserTyping
 deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
 deriving instance Eq ChannelId
+deriving instance Eq Heartbeat
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -193,6 +200,7 @@ deriveTextShow ''UserTyping
 deriveTextShow ''IncomingMessage
 deriveTextShow ''MessageText
 deriveTextShow ''ChannelId
+deriveTextShow ''Heartbeat
 
 
 instance ToJSON RtmStartRequest where
@@ -267,6 +275,7 @@ instance FromJSON RtmEvent where
               "message"                 -> RtmMessage <$> recur
               "user_typing"             -> RtmUserTyping <$> recur
               "incoming_message"        -> RtmSendMessage <$> recur
+              "heart_beat"              -> RTMHeartbeat <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
@@ -295,3 +304,15 @@ instance FromJSON IncomingMessage where
       <*> o .: "timestamp"
       <*> o .: "channel_id"
       <*> o .: "message_text"
+
+instance FromJSON Heartbeat where
+  parseJSON = withObject "presence heartbeat" $ \o -> Heartbeat
+    <$> o .: "user"
+    <*> o .: "channel"
+
+instance ToJSON Heartbeat where
+  toJSON (Heartbeat user channel) = object
+    [ "type"         .= ("heart_beat" :: Text)
+    , "user"         .= user
+    , "channel"    .= channel
+    ]

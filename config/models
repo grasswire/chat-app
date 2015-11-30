@@ -31,4 +31,9 @@ Message
   channel ChannelId
   deriving Eq Show Typeable
 
+Heartbeat
+  user UserId
+  lastSeen UTCTime
+  channel Channel
+
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)
