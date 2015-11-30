@@ -3,193 +3,195 @@
 <main role="main">
   <div class="room">
     <aside class="room__sidebar">
-      <div class="room__metadata">
-        <h2 class="room__title">#{chatRoomTitle room}
-        <p class="room__description">#{chatRoomDescription room}
-      <div class="room__members">
-        <nav>
-          <a href="#" class="button--member-toggle js-toggle-admins">Admins (3)
-          <a href="#" class="button--member-toggle js-toggle-memebers">Members (238)
-        <ul class="member__list">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="true">
-               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="true">
-               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="true">
-               <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-          <li class="member__item">
-            <a href="#" data-member-is-admin="false">
-               <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-      <div class="room__share">
-        <a href="#" class="button--outline">Share on Facebook
-        <a href="#" class="button--outline">Share on Twitter
-      <div class="room__likes">
-        <h2 class="room__title">Most Likes
-        <ul class="likes__list">
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-          <li class="likes__item">
-            <div class="like__meta">
-              <ul class="meta__list">
-                <li class="meta__item">
-                  <span class="fa fa-heart">
-                    <span class="meta__count">2,012
-                <li class="meta__item">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-            <div class="likes__content">
-              Now this is a story all about how my life got twist-turned-upside-down.
-      <div class="room__userinfo">
-        <div class="room__info">
-          <h4>
-            <a href="">Username
-              <span class="fa a-chevron-down">
-          <p>
-            <span class="fa fa-heart">
-              2,123
-        <div class="room__notification">
-           <a href="#">
-             <span class="fa fa-bell-o">
+      <div class="room__sidebar-wrapper">
+        <div class="room__metadata">
+          <h2 class="room__title">#{chatRoomTitle room}
+          <p class="room__description">#{chatRoomDescription room}
+        <div class="room__members">
+          <nav>
+            <a href="#" class="button--member-toggle js-toggle-admins">Admins (3)
+            <a href="#" class="button--member-toggle js-toggle-memebers">Members (238)
+          <ul class="member__list">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="true">
+                 <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="true">
+                 <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="true">
+                 <img class="member__avatar--admin" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=7b7b7b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <li class="member__item">
+              <a href="#" data-member-is-admin="false">
+                 <img class="member__avatar" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+        <div class="room__share">
+          <a href="#" class="button--outline">Share on Facebook
+          <a href="#" class="button--outline">Share on Twitter
+        <div class="room__likes">
+          <h2 class="room__title">Most Likes
+          <ul class="likes__list">
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+            <li class="likes__item">
+              <div class="like__meta">
+                <ul class="meta__list">
+                  <li class="meta__item">
+                    <span class="fa fa-heart">
+                      <span class="meta__count">2,012
+                  <li class="meta__item">
+                    <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+                    <span class="meta__username">Username
+                    <span class="meta__timestamp">10:20pm
+              <div class="likes__content">
+                Now this is a story all about how my life got twist-turned-upside-down.
+        <div class="room__userinfo">
+          <div class="room__sidebar-wrapper">
+            <div class="room__info">
+              <h4>
+                <a href="">Username
+                  <span class="fa a-chevron-down">
+              <p>
+                <span class="fa fa-heart">
+                  2,123
+            <div class="room__notification">
+               <a href="#">
+                 <span class="fa fa-bell-o">
 
     <section class="room__realtime">
       <div class="room__output js-chat-output">

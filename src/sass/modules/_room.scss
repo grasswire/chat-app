@@ -17,6 +17,10 @@
       width: 30%;
    }
 
+   &__sidebar-wrapper {
+      max-width: 500px;
+   }
+
    &__likes {
       padding: 20px 20px 20px 10px;
    }
@@ -41,7 +45,7 @@
       height: 100px;
       padding: 20px 20px 20px 10px;
       position: fixed;
-      width: 100%;
+      width: 30%;
    }
 
    &__info {
