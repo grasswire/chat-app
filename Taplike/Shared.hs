@@ -141,7 +141,7 @@ testMessage chat from text = Message
 
 data MessageSubtype
   = BotMS | MeMS | ChangedMS | DeletedMS
-  | ChannelTopicMS | ChannelPurposeMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
+  | ChannelTopicMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
 
 data MessageEdited = MessageEdited
   { _messageEditedUser :: Int64
@@ -351,18 +351,6 @@ instance FromJSON Profile where
     <*> o .:? "skype"
     <*> o .:? "phone"
 
--- instance FromJSON ChatRoom where
---   parseJSON = withObject "channel object" $ \ o -> ChatRoom
---     <$> o .: "id"
---     <*> o .: "name"
---     <*> o .: "created"
---     <*> o .: "creator"
---     <*> o .: "is_archived"
---     <*> o .:? "topic"
---     <*> o .:? "last_read"
---     <*> o .:? "latest"
---     <*> o .:? "unread_count"
-
 instance FromJSON Bot where
   parseJSON = withObject "bot object" $ \ o -> Bot
     <$> o .: "id"
@@ -399,7 +387,6 @@ instance ToJSON Message where
                               Just ChangedMS          -> String ("message_changed" :: Text)
                               Just DeletedMS          -> String ("message_deleted" :: Text)
                               Just ChannelTopicMS     -> String ("channel_topic" :: Text)
-                              Just ChannelPurposeMS   -> String ("channel_purpose" :: Text)
                               Just ChannelNameMS      -> String ("channel_name" :: Text)
                               Just ChannelArchiveMS   -> String ("channel_archive" :: Text)
                               Just ChannelUnarchiveMS -> String ("channel_unarchive" :: Text)
@@ -413,7 +400,6 @@ instance FromJSON MessageSubtype where
     "message_changed"   -> pure ChangedMS
     "message_deleted"   -> pure DeletedMS
     "channel_topic"     -> pure ChannelTopicMS
-    "channel_purpose"   -> pure ChannelPurposeMS
     "channel_name"      -> pure ChannelNameMS
     "channel_archive"   -> pure ChannelArchiveMS
     "channel_unarchive" -> pure ChannelUnarchiveMS
