@@ -3,7 +3,6 @@ module Model where
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
 import Taplike.ChannelSlug (ChannelSlug)
-import Taplike.MessageSubtype (MessageSubtype)
 import TextShow (TextShow)
 import TextShow.TH (deriveTextShow)
 import TextShow.Data.Time ()

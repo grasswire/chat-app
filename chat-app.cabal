@@ -31,7 +31,6 @@ library
                      Model.Incoming
                      Taplike.TextShowOrphans
                      Taplike.ChannelSlug
-                     Taplike.MessageSubtype
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

@@ -26,11 +26,8 @@ Channel json
 
 Message
   user UserId
-  subtype MessageSubtype Maybe
   text Text
   timestamp UTCTime
-  hidden Bool
-  edited Bool
   channel ChannelId
   deriving Eq Show Typeable
 

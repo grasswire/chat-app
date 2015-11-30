@@ -39,7 +39,7 @@ chatApp channelName user = do
 
 processMessage :: User -> RtmEvent -> RtmEvent
 processMessage user event = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (userTwitterUserId user) Nothing ( incomingMessageMessageText incoming) (TS "0") Nothing Nothing Nothing False Nothing [])
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (userTwitterUserId user) ( incomingMessageMessageText incoming) (TS "0") (Just $ TS "0") (SH.incomingMessageChannelId incoming))
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text
