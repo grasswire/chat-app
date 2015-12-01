@@ -28,6 +28,7 @@ body {
    color: get-color(charcoal);
    height: 100%;
    margin: 0;
+   min-width: 250px;
    -webkit-font-smoothing: antialiased !important;
    -moz-osx-font-smoothing: grayscale !important;
 }

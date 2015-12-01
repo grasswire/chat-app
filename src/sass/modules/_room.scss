@@ -1,7 +1,6 @@
 .room {
    @include flex-container(stretch, stretch);
 
-
    &__title {
       @include font-size(24px);
    }
@@ -14,7 +13,15 @@
       background: get-color(alto);
       overflow: scroll;
       position: relative;
+      min-width: 240px;
       width: 30%;
+   }
+
+   &__sidebar-toggler {
+      @include font-size(18px);
+      display: block;
+      padding: 10px 21px;
+      text-align: right;
    }
 
    &__sidebar-wrapper {
@@ -29,7 +36,7 @@
       background: get-color(concrete);
       height: 100%;
       position: relative;
-      width: 70%;
+      flex-grow: 2;
    }
 
    &__input {
@@ -46,6 +53,7 @@
       padding: 15px 21px;
       position: fixed;
       width: 30%;
+      min-width: 240px;
    }
 
    &__info {

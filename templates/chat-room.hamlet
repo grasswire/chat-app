@@ -1,8 +1,10 @@
 <body class="#{signature}">
   <main role="main">
     <div class="room">
-      <aside class="room__sidebar">
-        <div class="room__sidebar-wrapper">
+      <aside class="room__sidebar js-sidebar">
+        <a href="#" class="room__sidebar-toggler js-sidebar-toggler">
+          <span class="fa fa-bars">
+        <div class="room__sidebar-wrapper js-sidebar-contents">
           <div class="room__metadata">
             <h2 class="room__title">#{chatRoomTitle room}
             <p class="room__description">#{chatRoomDescription room}
@@ -179,7 +181,7 @@
                       <span class="meta__timestamp">10:20pm
                 <div class="likes__content">
                   Now this is a story all about how my life got twist-turned-upside-down.
-        <div class="room__userinfo">
+        <div class="room__userinfo js-sidebar-contents">
           <div class="room__sidebar-wrapper">
             <div class="room__info">
               <h4>
