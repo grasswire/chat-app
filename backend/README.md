@@ -45,8 +45,9 @@ Before you can build the project, you will need some native libraries available 
 On **Mac** OS, you can run:
 
 `brew install icu4c`
-
 `brew link icu4c --force`
+
+*Note: this may cause an error when you go to build, see the Notes section below if you can't get stack to build.*
 
 On **Ubuntu**:
 
@@ -72,6 +73,21 @@ This script installs all required `node` packages, uses `gulp` to compile JS and
 
 ### Notes
 
-If GHC complains that it still cannot find icuuc, you can explicitly let `stack build` know where it is. For example, on Mac:
+If GHC complains that it still cannot find icuuc, you might see somthing like this in the error: `Library not loaded: /usr/local/opt/icu4c/lib/libicuuc.55.dylib`
 
-`stack build --extra-include-dirs=/usr/local/opt/icu4c/include --extra-lib-dirs=/usr/local/opt/icu4c/lib`
+Try the following to fix it:
+
+```
+$ brew unlink icu4c
+$ brew uninstall icu4c
+$ brew install https://raw.githubusercontent.com/Homebrew/homebrew/e52ee0523e9f9bf94b8bb50bbcb426e120d20069/Library/Formula/icu4c.rb
+$ brew link icu4c --force
+```
+
+All we've done here is removed the latest version of icu4c and installed the version we know is working (55.1) and re-linked.  After you've done this you should be able to run the project with no issue.
+
+If the above doesn't work you can explicitly let `stack build` know where it is. For example, on Mac:
+
+```stack build --extra-include-dirs=/usr/local/opt/icu4c/include --extra-lib-dirs=/usr/local/opt/icu4c/lib
+```
+

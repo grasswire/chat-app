@@ -1,5 +1,62 @@
 .room {
    @include flex-container(stretch, stretch);
+}
+
+.sidebar {
+   background: get-color(alto);
+   overflow: scroll;
+   position: relative;
+   min-width: 240px;
+   width: 30%;
+
+   &__wrapper {
+      max-width: 500px;
+   }
+
+   &__toggler {
+      @include font-size(18px);
+      display: block;
+      padding: 10px 21px;
+      text-align: right;
+   }
+
+}
+
+.realtime {
+   background: get-color(concrete);
+   height: 100%;
+   position: relative;
+   flex-grow: 2;
+
+   &__input {
+      @include input();
+      @include font-size(13px);
+      background-color: get-color(gallery);
+      padding: 15px 20px;
+   }
+
+   &__output {
+      bottom: 125px;
+      overflow:hidden;
+      overflow-y: scroll;
+      padding: 20px 40px;
+      position: absolute;
+      top: 0;
+      width: 100%;
+   }
+
+   &__form {
+      bottom: 10px;
+      padding: 20px 40px;
+      position: absolute;
+      width: 100%;
+   }
+
+}
+
+
+.room {
+   @include flex-container(stretch, stretch);
 
    &__title {
       @include font-size(24px);
@@ -9,42 +66,10 @@
       @include font-size(18px);
    }
 
-   &__sidebar {
-      background: get-color(alto);
-      overflow: scroll;
-      position: relative;
-      min-width: 240px;
-      width: 30%;
-   }
-
-   &__sidebar-toggler {
-      @include font-size(18px);
-      display: block;
-      padding: 10px 21px;
-      text-align: right;
-   }
-
-   &__sidebar-wrapper {
-      max-width: 500px;
-   }
-
    &__likes {
       padding: 15px 21px;
    }
 
-   &__realtime {
-      background: get-color(concrete);
-      height: 100%;
-      position: relative;
-      flex-grow: 2;
-   }
-
-   &__input {
-      @include input();
-      @include font-size(13px);
-      background-color: get-color(gallery);
-      padding: 15px 20px;
-   }
 
    &__userinfo {
       bottom: 0px;
@@ -79,22 +104,6 @@
       padding: 15px 21px;
    }
 
-   &__chat-form {
-      bottom: 10px;
-      padding: 20px 40px;
-      position: absolute;
-      width: 100%;
-   }
-
-   &__output {
-      bottom: 125px;
-      overflow:hidden;
-      overflow-y: scroll;
-      padding: 20px 40px;
-      position: absolute;
-      top: 0;
-      width: 100%;
-   }
 
    &__share {
       padding: 15px 21px;
