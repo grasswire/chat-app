@@ -11,13 +11,25 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
 import qualified Taplike.Shared as SH
-import Database.Persist.Sql (fromSqlKey)
+import Database.Persist.Sql (fromSqlKey, toSqlKey)
 import Taplike.ChannelSlug
 import Data.Char (toLower)
 import Data.Text.ICU.Replace
+import qualified Database.Esqueleto as E
+import qualified Database.Redis as Redis
+import Database.Redis (runRedis, zincrby, zrevrange)
+import qualified Data.ByteString.Char8 as C8
+
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
+
+channelSetKey :: ByteString
+channelSetKey = C8.pack "chan_set"
+
+mkChannelSetValue :: Key Channel -> ByteString
+mkChannelSetValue  = C8.pack . show . fromSqlKey
+
 
 chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp channelId channelName userEntity = do
@@ -32,6 +44,10 @@ chatApp channelId channelName userEntity = do
         currentTime <- liftIO getCurrentTime
         void $ lift $ updateLastSeen (entityKey u) currentTime
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
+        liftIO $ runRedis (redisConn app) $ do
+          res <- zincrby channelSetKey 1 (mkChannelSetValue channelId)
+          print res
+-- :: RedisCtx m f => ByteString key -> Integer increment -> ByteString member -> m (f Double)
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \event -> do
@@ -92,7 +108,13 @@ makeSlug =  replaceAll "[ _]" "-"
 
 getHomeR :: Handler Html
 getHomeR = do
-    channels <- runDB (selectList [] [LimitTo 5]) :: Handler [Entity Channel]
+    app <- getYesod
+    popularChannelIds <- liftIO $ runRedis (redisConn app) $ do
+                          chans <- zrevrange channelSetKey 0 10
+                          case chans of
+                            Left  e -> return []
+                            Right r -> return (toSqlKey . fromIntegral <$> catMaybes (fmap fst <$> C8.readInteger <$> r) :: [Key Channel])
+    channels <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
     authId <- maybeAuthId
     let signature = "home" :: String
     defaultLayout $ do
