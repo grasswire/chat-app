@@ -23,8 +23,5 @@ dash/
 node_modules
 bower
 backend/src/bower/
-backend/static/js/
-backend/static/css/
-backend/static/fonts/
-backend/static/images/
 backend/src/js/templates.tpl
+.ghci
