@@ -3,14 +3,8 @@ User json sql=taplike_users
     twitterScreenName Text
     profileImageUrl Text
     emailAddress Text Maybe
-    Primary twitterUserId
     UniqueUser twitterUserId
     deriving Eq Show Typeable
-
-UserToken
-    user UserId
-    token ByteString
-    deriving Show Typeable
 
 Channel json
     createdBy UserId
@@ -34,6 +28,7 @@ Message
 Heartbeat
   user UserId
   lastSeen UTCTime
-  channel Channel
+  channel ChannelId
+  UniqueUC user channel
 
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

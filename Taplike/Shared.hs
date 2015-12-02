@@ -81,7 +81,7 @@ data RtmStartRp = RtmStartRp
   }
 
 data Self = Self
-  { _selfID               :: Int64
+  { _selfID               :: UserId
   , _selfName             :: Text
   , _selfProfileImageUrl  :: Text
   }
@@ -104,7 +104,7 @@ data Bot = Bot
 data Chat
 
 data Message = Message
-  { _messageUser         :: Int64
+  { _messageUser         :: UserId
   , _messageText         :: MessageText
   , _messageTS           :: TS
   , _messageEventTS      :: Maybe TS
@@ -118,7 +118,7 @@ data IncomingMessage = IncomingMessage
  , incomingMessageMessageText :: MessageText
  }
 
-testMessage :: Int64 -> Int64 -> Text -> Message
+testMessage :: Int64 -> UserId -> Text -> Message
 testMessage chat from text = Message
   { _messageUser         = from
   , _messageText         = MessageText text
@@ -145,7 +145,7 @@ data RtmEvent
   | RtmMessage Message
   | RtmUserTyping UserTyping
   | RtmSendMessage IncomingMessage
-  | RTMHeartbeat Heartbeat
+  | RtmHeartbeat Heartbeat
 
 instance WebSocketsData RtmEvent where
   fromLazyByteString = fromJust . decode
@@ -275,13 +275,14 @@ instance FromJSON RtmEvent where
               "message"                 -> RtmMessage <$> recur
               "user_typing"             -> RtmUserTyping <$> recur
               "incoming_message"        -> RtmSendMessage <$> recur
-              "heart_beat"              -> RTMHeartbeat <$> recur
+              "heart_beat"              -> RtmHeartbeat <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
                   RtmSendMessage msg -> toJSON msg
                   RtmMessage message -> toJSON message
+                  RtmHeartbeat beat ->  toJSON beat
                   RtmHello           -> object ["type" .= ("hello" :: Text)]
 
 instance FromJSON UserTyping where

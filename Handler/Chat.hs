@@ -20,26 +20,34 @@ import Data.Text.ICU.Replace
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
-chatApp :: Text -> Maybe User -> WebSocketsT Handler ()
-chatApp channelName user = do
+chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp channelId channelName userEntity = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
     (outChan, channel) <- atomically $ do
                 chan <- S.lookupOrCreateChannel (chatServer app) (fromStrict channelName)
                 return (S.channelBroadcastChan chan, chan)
     inChan <- atomically (dupTChan outChan)
-    case user of
+    case userEntity of
       Just u -> do
-        _ <- liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId u)
+        _ <- liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
         race_
           (ingest inChan)
-          (sourceWS $$ mapM_C (atomically . writeTChan outChan . processMessage u))
+          (sourceWS $$ mapM_C $ \event -> do
+            let outEvent = processMessage u event
+            case event of
+                 RtmHeartbeat beat -> do
+                   currentTime <- liftIO getCurrentTime
+                   void $ lift $ runDB (upsert (Heartbeat (entityKey u) currentTime channelId ) [HeartbeatLastSeen =. currentTime])
+                 _ -> return ()
+            atomically $ writeTChan outChan outEvent
+         )
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
 
-processMessage :: User -> RtmEvent -> RtmEvent
-processMessage user event = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (userTwitterUserId user) ( incomingMessageMessageText incoming) (TS "0") (Just $ TS "0") (SH.incomingMessageChannelId incoming))
+processMessage :: Entity User -> RtmEvent -> RtmEvent
+processMessage userEntity event = case event of
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (TS "0") (Just $ TS "0") (SH.incomingMessageChannelId incoming))
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text
@@ -51,11 +59,11 @@ getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
-    chatUser <- maybe (return Nothing) (runDB . get) authId
+    chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
       Just c -> do
         let room = entityVal c
-        webSockets $ chatApp (channelTitle room) chatUser
+        webSockets $ chatApp (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
