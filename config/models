@@ -7,7 +7,6 @@ User json sql=taplike_users
     deriving Eq Show Typeable
 
 Channel json
-    createdBy UserId
     title Text
     topic Text
     crSlug ChannelSlug
@@ -15,7 +14,6 @@ Channel json
     UniqueChannelSlug crSlug
     created UTCTime
     creator UserId
-    isArchived Bool
     deriving Eq Show Typeable
 
 Message

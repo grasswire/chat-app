@@ -24,7 +24,7 @@
               <a href="@{TwitterAuthR}?modal=create" class="button--callout">Create a Room
 
         <div class="major-display__visual">
-          <img src="static/images/screenshot.png">
+          <img src=@{StaticR images_screenshot_png}>
 
     <div class="content-container">
       <h2 class="main__headline">Trending Chats
