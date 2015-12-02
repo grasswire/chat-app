@@ -126,6 +126,7 @@ library
                  , yesod-persistent
                  , text-regex-replace
                  , hedis
+                 , esqueleto
 
 
 executable         chat-app

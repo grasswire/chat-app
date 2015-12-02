@@ -39,7 +39,7 @@ import Handler.Auth
 import qualified Data.Map as Map
 import Server
 import qualified Database.Redis as Redis
-import Database.Redis (runRedis, ConnectInfo(..), defaultConnectInfo)
+import Database.Redis (ConnectInfo(..), defaultConnectInfo)
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the

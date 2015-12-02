@@ -29,7 +29,9 @@ chatApp channelId channelName userEntity = do
     inChan <- atomically (dupTChan outChan)
     case userEntity of
       Just u -> do
-        _ <- liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
+        currentTime <- liftIO getCurrentTime
+        void $ lift $ updateLastSeen (entityKey u) currentTime
+        liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \event -> do
@@ -37,12 +39,13 @@ chatApp channelId channelName userEntity = do
             case event of
                  RtmHeartbeat beat -> do
                    currentTime <- liftIO getCurrentTime
-                   void $ lift $ runDB (upsert (Heartbeat (entityKey u) currentTime channelId ) [HeartbeatLastSeen =. currentTime])
+                   void $ lift $ updateLastSeen (entityKey u) currentTime
                  _ -> return ()
             atomically $ writeTChan outChan outEvent
          )
       Nothing -> ingest inChan
-    where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
+    where ingest chan                       = forever $ atomically (readTChan chan) >>= sendTextData
+          updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
 
 processMessage :: Entity User -> RtmEvent -> RtmEvent
 processMessage userEntity event = case event of
