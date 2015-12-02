@@ -7,6 +7,9 @@ import           Data.Aeson (Value)
 import qualified Data.HashMap.Strict as HM
 import qualified Data.Map.Strict as MS
 import           TextShow (FromStringShow(FromStringShow), TextShow(showbPrec))
+import           TextShow.TH (deriveTextShow)
+import           Data.UUID
+import           Database.Persist.Sql
 
 -- powerful orphan instance time!
 instance TextShow Value where
@@ -19,3 +22,7 @@ instance TextShow a => TextShow (Seq a) where
   showbPrec prec = ("Seq.fromList " <>) . showbPrec prec . toList
 instance TextShow a => TextShow (Event a) where
   showbPrec prec = event "NoEvent" (("Event " <>) . showbPrec prec)
+
+deriving instance TextShow (BackendKey SqlBackend)
+
+deriveTextShow ''UUID

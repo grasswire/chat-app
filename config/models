@@ -3,21 +3,32 @@ User json sql=taplike_users
     twitterScreenName Text
     profileImageUrl Text
     emailAddress Text Maybe
-    Primary twitterUserId
     UniqueUser twitterUserId
-    deriving Show Typeable
+    deriving Eq Show Typeable
 
-UserToken
-    user UserId
-    token ByteString
-    deriving Show Typeable
-
-ChatRoom json
+Channel json
     createdBy UserId
     title Text
-    description Text
-    crSlug ChatRoomSlug
+    topic Text
+    crSlug ChannelSlug
     UniqueTitle title
-    UniqueChatRoomSlug crSlug
-    deriving Show Typeable
+    UniqueChannelSlug crSlug
+    created UTCTime
+    creator UserId
+    isArchived Bool
+    deriving Eq Show Typeable
+
+Message
+  user UserId
+  text Text
+  timestamp UTCTime
+  channel ChannelId
+  deriving Eq Show Typeable
+
+Heartbeat
+  user UserId
+  lastSeen UTCTime
+  channel ChannelId
+  UniqueUC user channel
+
  -- By default this file is used in Model.hs (which is imported by Foundation.hs)

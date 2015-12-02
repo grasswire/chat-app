@@ -12,7 +12,6 @@
           $nothing
             <li class="nav__item">
               <a href="@{TwitterAuthR}" class="nav__signin">Sign In
-
   <main role="main">
     <header class="major-display">
       <div class="content-flex-wrapper">
@@ -30,13 +29,13 @@
     <div class="content-container">
       <h2 class="main__headline">Trending Chats
       <div class="card__container">
-        $forall room <- chatRooms
-          <a class="card" href="@{ChatR $ (chatRoomCrSlug $ entityVal room)}">
-            <h3 class="card__title">#{chatRoomTitle (entityVal room)}
+        $forall channel <- channels
+          <a class="card" href="@{ChatR $ (channelCrSlug $ entityVal channel)}">
+            <h3 class="card__title">#{channelTitle (entityVal channel)}
             <p class="card__meta">
               <span class="fa fa-user">
               <strong>2,103
-            <p class="card__text">#{chatRoomDescription (entityVal room)}
+            <p class="card__text">#{channelTopic (entityVal channel)}
 
     <div class="content-container">
       <h2 class="secondary__headline">All Chats

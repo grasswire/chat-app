@@ -2,29 +2,26 @@ module Taplike.Shared where
 
 import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
-import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(Object, String), Object, FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText)
+import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(String), FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText, encode, decode)
 import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
 import qualified Data.HashMap.Strict as HM
 import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
-
+import           Network.WebSockets hiding (Message, Response)
 import           Taplike.TextShowOrphans ()
-import Database.Persist.Sql (fromSqlKey, toSqlKey)
-import Database.Persist.Class (Key(..))
-import Data.UUID.V4 as UUIDV4
-import Data.UUID (UUID(..))
-import Data.Scientific (Scientific)
-import Model
-import Data.UUID.Aeson()
-import TextShow.Data.Time()
-import Taplike.ChatRoomSlug
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import           Database.Persist.Class (Key(..))
+import           Data.UUID
+import           Data.Scientific (Scientific)
+import           Model hiding (ChannelId, MessageText, Message, Heartbeat)
+import           Data.UUID.Aeson()
+import           TextShow.Data.Time()
+import           Taplike.ChannelSlug
+import           Data.Maybe (fromJust)
 
-instance TextShow (Key ChatRoom) where
-  showb = showb . fromSqlKey
-
-newtype ChannelId = ChannelId (Key ChatRoom)
+newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
   toJSON (ChannelId key) = Number $ (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
 instance FromJSON ChannelId where
@@ -39,14 +36,14 @@ instance FromJSON MessageText where
   parseJSON (String s) = pure $ MessageText s
   parseJSON invalid    = typeMismatch "MessageText" invalid
 
-data ChatRoomCreatedRp = ChatRoomCreatedRp
-  { chatRoomCreatedRpChatRoom :: ChatRoom
-  , chatRoomCreatedRpId       :: Int64
-  , chatRoomSlug              :: ChatRoomSlug
+data ChannelCreatedRp = ChannelCreatedRp
+  { channelCreatedRpChannel :: Channel
+  , channelCreatedRpId       :: Int64
+  , channelSlug              :: ChannelSlug
   }
 
-instance ToJSON ChatRoomCreatedRp where
-  toJSON (ChatRoomCreatedRp room roomId slug) = object ["chat_room" .= room, "id" .= roomId, "slug" .= slug]
+instance ToJSON ChannelCreatedRp where
+  toJSON (ChannelCreatedRp room roomId slug) = object ["chat_room" .= room, "id" .= roomId, "slug" .= slug]
 
 newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 instance FromJSON TS where
@@ -84,7 +81,7 @@ data RtmStartRp = RtmStartRp
   }
 
 data Self = Self
-  { _selfID               :: Int64
+  { _selfID               :: UserId
   , _selfName             :: Text
   , _selfProfileImageUrl  :: Text
   }
@@ -99,17 +96,6 @@ data Profile = Profile
   , _profileSkype     :: Maybe Text
   , _profilePhone     :: Maybe Text }
 
-data Channel = Channel
-  { _channelID          :: ID Channel
-  , _channelName        :: Text
-  , _channelCreated     :: Time
-  , _channelCreator     :: ID User
-  , _channelIsArchived  :: Bool
-  , _channelTopic       :: Maybe (TapLikeTracked Text)
-  , _channelLastRead    :: Maybe TS
-  , _channelLatest      :: Maybe Message
-  , _channelUnreadCount :: Maybe Int }
-
 data Bot = Bot
   { _botID    :: ID Bot
   , _botName  :: Text
@@ -118,16 +104,11 @@ data Bot = Bot
 data Chat
 
 data Message = Message
-  { _messageUser         :: Int64
-  , _messageSubtype      :: Maybe MessageSubtype
+  { _messageUser         :: UserId
   , _messageText         :: MessageText
   , _messageTS           :: TS
-  , _messageEdited       :: Maybe MessageEdited
-  , _messageDeletedTS    :: Maybe TS
   , _messageEventTS      :: Maybe TS
-  , _messageHidden       :: Bool
-  , _messageIsStarred    :: Maybe Bool
-  , _messagePinnedTo     :: [ID Channel]
+  , _messageChannel      :: ChannelId
   }
 
 data IncomingMessage = IncomingMessage
@@ -137,32 +118,14 @@ data IncomingMessage = IncomingMessage
  , incomingMessageMessageText :: MessageText
  }
 
-testMessage :: Int64 -> Int64 -> Text -> Message
+testMessage :: Int64 -> UserId -> Text -> Message
 testMessage chat from text = Message
   { _messageUser         = from
-  , _messageSubtype      = Nothing
   , _messageText         = MessageText text
   , _messageTS           = TS "0"
-  , _messageEdited       = Nothing
-  , _messageDeletedTS    = Nothing
   , _messageEventTS      = Nothing
-  , _messageHidden       = False
-  , _messageIsStarred    = Nothing
-  , _messagePinnedTo     = []
+  , _messageChannel      = ChannelId $ ChannelKey 1
  }
-
-data MessageSubtype
-  = BotMS | MeMS | ChangedMS | DeletedMS
-  | ChannelTopicMS | ChannelPurposeMS | ChannelNameMS | ChannelArchiveMS | ChannelUnarchiveMS
-
-data MessageEdited = MessageEdited
-  { _messageEditedUser :: Int64
-  , _messageEditedTS   :: TS }
-
-data MessageReaction = MessageReaction
-  { _messageReactionName :: Text
-  , _messageReactionCount :: Int
-  , _messageReactionUsers :: [ID User] }
 
 data TapLikeTracked a = TapLikeTracked
   { _trackedValue   :: a
@@ -170,69 +133,27 @@ data TapLikeTracked a = TapLikeTracked
   , _trackedLastSet :: Time
   }
 
+data Heartbeat = Heartbeat
+  { heartBeatUser :: UserId
+  , heartBeatChannel :: ChannelId
+  }
+
 data RtmEvent
   = RtmHello
   | RtmReplyOk Word64 (Maybe TS) (Maybe Text)
   | RtmReplyNotOk Word64 Int32 Text
   | RtmMessage Message
-  | RtmChannelMarked (ChatMarked Channel)
-  | RtmChannelCreated Channel
-  | RtmChannelDeleted (ID Channel)
-  | RtmChannelRenamed (ChatRenamed Channel)
-  | RtmChannelArchive (ChatUser Channel)
-  | RtmChannelUnarchive (ChatUser Channel)
-  | RtmChannelHistoryChanged (ChatHistoryChanged Channel)
-  | RtmPresenceChange PresenceChange
-  | RtmManualPresenceChange Presence
-  | RtmPrefChange PrefChange
-  | RtmUserChange User
   | RtmUserTyping UserTyping
-  | RtmStarAdded Star
-  | RtmStarRemoved Star
-  | RtmEmojiChanged TS
-  | RtmCommandsChanged TS
-  | RtmBotAdded Bot
-  | RtmBotChanged Bot
-  | RtmAccountsChanged
   | RtmSendMessage IncomingMessage
+  | RtmHeartbeat Heartbeat
 
-data ChatMarked a = ChatMarked
-  { _chatMarkedChannel :: ID a
-  , _chatMarkedTS      :: TS }
-
-data ChatUser a = ChatUser
-  { _chatUserUser      :: ID User
-  , _chatUserChannelID :: ID a }
-
-data ChatRenamed a = ChatRenamed
-  { _chatRenamedChannelID :: ID a
-  , _chatRenamedName      :: Text }
-
-data ChatHistoryChanged a = ChatHistoryChanged
-  { _chatHistoryChangedLatest  :: Text
-  , _chatHistoryChangedTS      :: TS
-  , _chatHistoryChangedEventTS :: TS }
-
-data PresenceChange = PresenceChange
-  { _presenceChangeUser     :: ID User
-  , _presenceChangePresence :: Presence }
-
-data PrefChange = PrefChange
-  { _prefChangeName  :: Text
-  , _prefChangeValue :: Value }
+instance WebSocketsData RtmEvent where
+  fromLazyByteString = fromJust . decode
+  toLazyByteString   = encode
 
 data UserTyping = UserTyping
   { _userTypingUser    :: ID User
   , _userTypingChannel :: ID Chat }
-
-data Star = Star
-  { _starUser    :: Text
-  , _starItem    :: StarItem
-  , _starEventTS :: TS }
-
-data StarItem
-  = StarItemMessage Message
-  | StarItemChannel (ID Channel)
 
 class TapLikeTyped a where
   isTypedID :: Proxy a -> ID b -> Bool
@@ -257,29 +178,14 @@ asChannelID = asTypedID
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
 deriving instance Eq Self
-deriving instance Eq User
-deriving instance Eq Profile
-deriving instance Eq Channel
-deriving instance Eq Bot
-deriving instance Eq MessageSubtype
-deriving instance Eq MessageReaction
 deriving instance Eq Message
-deriving instance Eq MessageEdited
 deriving instance Eq a => Eq (TapLikeTracked a)
 deriving instance Eq RtmEvent
-deriving instance Eq a => Eq (ChatMarked a)
-deriving instance Eq a => Eq (ChatUser a)
-deriving instance Eq a => Eq (ChatRenamed a)
-deriving instance Eq a => Eq (ChatHistoryChanged a)
-deriving instance Eq Presence
-deriving instance Eq PresenceChange
 deriving instance Eq UserTyping
-deriving instance Eq PrefChange
-deriving instance Eq Star
-deriving instance Eq StarItem
 deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
 deriving instance Eq ChannelId
+deriving instance Eq Heartbeat
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -287,30 +193,14 @@ instance TextShow Chat where
 deriveTextShow ''RtmStartRequest
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
-deriveTextShow ''Presence
-deriveTextShow ''User
-deriveTextShow ''Profile
-deriveTextShow ''Channel
-deriveTextShow ''Bot
 deriveTextShow ''Message
-deriveTextShow ''MessageSubtype
-deriveTextShow ''MessageEdited
-deriveTextShow ''MessageReaction
 deriveTextShow ''TapLikeTracked
 deriveTextShow ''RtmEvent
-deriveTextShow ''ChatMarked
-deriveTextShow ''ChatUser
-deriveTextShow ''ChatRenamed
-deriveTextShow ''ChatHistoryChanged
-deriveTextShow ''PresenceChange
 deriveTextShow ''UserTyping
-deriveTextShow ''PrefChange
-deriveTextShow ''Star
-deriveTextShow ''StarItem
 deriveTextShow ''IncomingMessage
-deriveTextShow ''UUID
 deriveTextShow ''MessageText
 deriveTextShow ''ChannelId
+deriveTextShow ''Heartbeat
 
 
 instance ToJSON RtmStartRequest where
@@ -349,39 +239,6 @@ instance ToJSON Self where
     , "profile_image_url" .= profileImageUrl
     ]
 
-instance FromJSON Presence where
-  parseJSON = withText "presence value" $ \ case
-    "active" -> pure PresenceActive
-    "away"   -> pure PresenceAway
-    other    -> fail . unpack $ "unknown presence value " <> other
-
-instance FromJSON Profile where
-  parseJSON = withObject "user profile object" $ \ o -> Profile
-    <$> o .:? "first_name"
-    <*> o .:? "last_name"
-    <*> o .:? "real_name"
-    <*> o .:? "email"
-    <*> o .:? "skype"
-    <*> o .:? "phone"
-
-instance FromJSON Channel where
-  parseJSON = withObject "channel object" $ \ o -> Channel
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> o .: "created"
-    <*> o .: "creator"
-    <*> o .: "is_archived"
-    <*> o .:? "topic"
-    <*> o .:? "last_read"
-    <*> o .:? "latest"
-    <*> o .:? "unread_count"
-
-instance FromJSON Bot where
-  parseJSON = withObject "bot object" $ \ o -> Bot
-    <$> o .: "id"
-    <*> o .: "name"
-    <*> o .:? "icons" .!= HM.empty
-
 instance FromJSON a => FromJSON (TapLikeTracked a) where
   parseJSON = withObject "tracked value object" $ \ o -> TapLikeTracked
     <$> o .: "value"
@@ -391,60 +248,16 @@ instance FromJSON a => FromJSON (TapLikeTracked a) where
 instance FromJSON Message where
   parseJSON = withObject "message object" $ \ o -> Message
     <$> o .: "user"
-    <*> o .:? "subtype"
     <*> o .: "text"
     <*> o .: "ts"
-    <*> o .:? "edited"
-    <*> o .:? "deleted_ts"
     <*> o .:? "event_ts"
-    <*> o .:? "hidden" .!= False
-    <*> o .:? "is_starred"
-    <*> o .:? "pinned_to" .!= []
+    <*> o .: "channel"
 
 instance ToJSON Message where
-  toJSON (Message user subtype text ts edited deletedTs eventTs hidden isStarred pinnedTo) =
-    object ["type" .=  ("message" :: Text), "user" .= user, "subtype" .= parseSubType subtype, "text" .= text, "ts" .= ts
-           , "edited" .= edited, "deleted_ts" .= deletedTs, "event_ts" .= eventTs, "hidden" .= hidden
-           , "is_starred" .= isStarred, "pinned_to" .= pinnedTo]
-    where parseSubType st = case st of
-                              Just BotMS              -> String ("bot_message" :: Text)
-                              Just MeMS               -> String ("me_message" :: Text)
-                              Just ChangedMS          -> String ("message_changed" :: Text)
-                              Just DeletedMS          -> String ("message_deleted" :: Text)
-                              Just ChannelTopicMS     -> String ("channel_topic" :: Text)
-                              Just ChannelPurposeMS   -> String ("channel_purpose" :: Text)
-                              Just ChannelNameMS      -> String ("channel_name" :: Text)
-                              Just ChannelArchiveMS   -> String ("channel_archive" :: Text)
-                              Just ChannelUnarchiveMS -> String ("channel_unarchive" :: Text)
-                              Nothing                 -> Null
-
-
-instance FromJSON MessageSubtype where
-  parseJSON = withText "message subtype" $ \ case
-    "bot_message"       -> pure BotMS
-    "me_message"        -> pure MeMS
-    "message_changed"   -> pure ChangedMS
-    "message_deleted"   -> pure DeletedMS
-    "channel_topic"     -> pure ChannelTopicMS
-    "channel_purpose"   -> pure ChannelPurposeMS
-    "channel_name"      -> pure ChannelNameMS
-    "channel_archive"   -> pure ChannelArchiveMS
-    "channel_unarchive" -> pure ChannelUnarchiveMS
-    other               -> fail . unpack $ "unknown message subtype " <> other
-
-instance FromJSON MessageEdited where
-  parseJSON = withObject "message edited object" $ \ o -> MessageEdited
-    <$> o .: "user"
-    <*> o .: "ts"
-
-instance ToJSON MessageEdited where
-  toJSON (MessageEdited user ts) = object ["user" .= user, "ts" .= ts]
-
-instance FromJSON MessageReaction where
-  parseJSON = withObject "message reaction object" $ \ o -> MessageReaction
-    <$> o .: "name"
-    <*> o .: "count"
-    <*> o .: "users"
+  toJSON (Message user text ts eventTs channel) =
+    object ["type" .=  ("message" :: Text), "user" .= user, "text" .= text, "ts" .= ts
+           , "event_ts" .= eventTs, "channel" .= channel
+           ]
 
 instance FromJSON RtmEvent where
   parseJSON v =
@@ -460,82 +273,22 @@ instance FromJSON RtmEvent where
             o .: "type" >>= pure . asText >>= \ case
               "hello"                   -> pure RtmHello
               "message"                 -> RtmMessage <$> recur
-              "channel_marked"          -> RtmChannelMarked <$> recur
-              "channel_created"         -> RtmChannelCreated <$> o .: "channel"
-              "channel_deleted"         -> RtmChannelDeleted <$> o .: "channel"
-              "channel_rename"          -> RtmChannelRenamed <$> o .: "channel"
-              "channel_archive"         -> RtmChannelArchive <$> recur
-              "channel_unarchive"       -> RtmChannelUnarchive <$> recur
-              "channel_history_changed" -> RtmChannelHistoryChanged <$> recur
-              "presence_change"         -> RtmPresenceChange <$> recur
-              "manual_presence_change"  -> RtmManualPresenceChange <$> o .: "presence"
               "user_typing"             -> RtmUserTyping <$> recur
-              "pref_change"             -> RtmPrefChange <$> recur
-              "user_change"             -> RtmUserChange <$> o .: "user"
-              "star_added"              -> RtmStarAdded <$> recur
-              "star_removed"            -> RtmStarRemoved <$> recur
-              "emoji_changed"           -> RtmEmojiChanged <$> o .: "event_ts"
-              "commands_changed"        -> RtmCommandsChanged <$> o .: "event_ts"
-              "bot_added"               -> RtmBotAdded <$> o .: "bot"
-              "bot_changed"             -> RtmBotChanged <$> o .: "bot"
-              "accounts_changed"        -> pure RtmAccountsChanged
               "incoming_message"        -> RtmSendMessage <$> recur
+              "heart_beat"              -> RtmHeartbeat <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
                   RtmSendMessage msg -> toJSON msg
                   RtmMessage message -> toJSON message
+                  RtmHeartbeat beat ->  toJSON beat
                   RtmHello           -> object ["type" .= ("hello" :: Text)]
-
-instance FromJSON (ChatMarked a) where
-  parseJSON = withObject "channel / im / group marked event" $ \ o -> ChatMarked
-    <$> o .: "channel"
-    <*> o .: "ts"
-
-instance FromJSON (ChatUser a) where
-  parseJSON = withObject "channel and user from event" $ \ o -> ChatUser
-    <$> o .: "channel"
-    <*> o .: "user"
-
-instance FromJSON (ChatRenamed a) where
-  parseJSON = withObject "channel and new name from event" $ \ o -> ChatRenamed
-    <$> o .: "id"
-    <*> o .: "name"
-
-instance FromJSON (ChatHistoryChanged a) where
-  parseJSON = withObject "channel history changed event" $ \ o -> ChatHistoryChanged
-    <$> o .: "latest"
-    <*> o .: "ts"
-    <*> o .: "event_ts"
-
-
-instance FromJSON PresenceChange where
-  parseJSON = withObject "presence change event" $ \ o -> PresenceChange
-    <$> o .: "user"
-    <*> o .: "presence"
 
 instance FromJSON UserTyping where
   parseJSON = withObject "user typing event" $ \ o -> UserTyping
     <$> o .: "user"
     <*> o .: "channel"
-
-instance FromJSON PrefChange where
-  parseJSON = withObject "pref change event" $ \ o -> PrefChange
-    <$> o .: "name"
-    <*> o .: "value"
-
-instance FromJSON Star where
-  parseJSON = withObject "star event" $ \ o -> Star
-    <$> o .: "user"
-    <*> o .: "item"
-    <*> o .: "event_ts"
-
-instance FromJSON StarItem where
-  parseJSON = withObject "starred item reference" $ \ o -> o .: "type" >>= pure . asText >>= \ case
-    "message"      -> StarItemMessage     <$> o .: "message"
-    "channel"      -> StarItemChannel     <$> o .: "channel"
-    other          -> fail . unpack $ "unknown starrable item type " <> other
 
 instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
@@ -552,3 +305,15 @@ instance FromJSON IncomingMessage where
       <*> o .: "timestamp"
       <*> o .: "channel_id"
       <*> o .: "message_text"
+
+instance FromJSON Heartbeat where
+  parseJSON = withObject "presence heartbeat" $ \o -> Heartbeat
+    <$> o .: "user"
+    <*> o .: "channel"
+
+instance ToJSON Heartbeat where
+  toJSON (Heartbeat user channel) = object
+    [ "type"         .= ("heart_beat" :: Text)
+    , "user"         .= user
+    , "channel"    .= channel
+    ]

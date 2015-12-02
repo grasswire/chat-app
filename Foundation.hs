@@ -15,8 +15,9 @@ import qualified Data.ByteString as BS
 import qualified Data.ByteString.Char8 as S8
 import qualified Data.Map              as M
 import Server
-import Yesod.Persist.Core (YesodDB)
-import Taplike.ChatRoomSlug
+import Taplike.ChannelSlug
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+
 
 type OAuthToken = BS.ByteString
 
@@ -159,9 +160,11 @@ instance YesodAuth App where
 
     authPlugins _ = []
 
+    -- maybeAuthId = return Nothing
     maybeAuthId = do
         userIdFromSession <- lookupSession sessionUserIdKey
-        return $ (UserKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+        return $ (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+
 
     authHttpManager = getHttpManager
 

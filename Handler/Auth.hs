@@ -10,6 +10,8 @@ import qualified Web.Authenticate.OAuth as OA
 import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.Map as M
 import qualified Web.Twitter.Types as TT
+import Database.Persist.Sql (toSqlKey, fromSqlKey)
+
 
 getRequestToken :: Text -> TwitterConf -> OAuth
 getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth
@@ -71,14 +73,14 @@ getTwitterCallbackR = do
           manager <- appHttpManager <$> getYesod
           user <- liftIO $ verifyTwitterCreds manager (mkTwitterInfo token accessTokens)
           let twitterUserId = fromIntegral $ TT.userId user
-          maybePersistedUser <- getUser $ UserKey twitterUserId
+          maybePersistedUser <- runDB $ getBy (UniqueUser twitterUserId)
           case maybePersistedUser of
             Nothing -> do
               userId <- runDB $ insert $ User twitterUserId (TT.userScreenName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
               setSession sessionUserIdKey (pack . show $ userId)
               redirect homeR
             Just u -> do
-              setSession sessionUserIdKey (pack . show $ userTwitterUserId u)
+              setSession sessionUserIdKey (pack . show $ fromSqlKey (entityKey u))
               redirect homeR
     _ -> redirect homeR
 

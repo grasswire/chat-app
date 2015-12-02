@@ -6,8 +6,8 @@
           <span class="fa fa-bars">
         <div class="room__sidebar-wrapper js-sidebar-contents">
           <div class="room__metadata">
-            <h2 class="room__title">#{chatRoomTitle room}
-            <p class="room__description">#{chatRoomDescription room}
+            <h2 class="room__title">#{channelTitle room}
+            <p class="room__description">#{channelTopic room}
           <div class="room__members">
             <nav>
               <a href="#" class="button--member-toggle js-toggle-admins">Admins (3)
@@ -201,4 +201,3 @@
             <input class="room__input js-chat-input" placeholder="Type something and press enter..." autofocus>
           $nothing
             <input class="room__input js-chat-input" placeholder="Sign in to chat" disabled>
-

@@ -5,21 +5,20 @@ module Model.Incoming where
 import Control.Applicative (empty)
 import Data.Aeson
 import ClassyPrelude
--- import Data.Aeson (toJSON, Value(..))
 import qualified Data.Text as T
 
-data ChatRoom = ChatRoom
-  { title       :: T.Text
-  , description :: T.Text
+data Channel = Channel
+  { channelTitle :: T.Text
+  , channelTopic :: T.Text
   } deriving (Show)
 
 
-instance ToJSON ChatRoom where
-  toJSON (ChatRoom t d) = object [ "title" .= t,
-                                  "description" .= d]
+instance ToJSON Channel where
+  toJSON (Channel title topic) = object [ "title" .= title
+                                        , "topic" .= topic]
 
-instance FromJSON ChatRoom where
-  parseJSON (Object v) = ChatRoom <$>
+instance FromJSON Channel where
+  parseJSON (Object v) = Channel <$>
                          v .: "title" <*>
-                         v .: "description"
+                         v .: "topic"
   parseJSON _          = empty
