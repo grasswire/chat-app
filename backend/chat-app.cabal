@@ -127,6 +127,7 @@ library
                  , text-regex-replace
                  , hedis
                  , esqueleto
+                 , binary
 
 
 executable         chat-app

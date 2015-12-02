@@ -19,7 +19,7 @@ import qualified Database.Esqueleto as E
 import qualified Database.Redis as Redis
 import Database.Redis (runRedis, zincrby, zrevrange)
 import qualified Data.ByteString.Char8 as C8
-
+import Data.Binary (encode, decode)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -28,7 +28,7 @@ channelSetKey :: ByteString
 channelSetKey = C8.pack "chan_set"
 
 mkChannelSetValue :: Key Channel -> ByteString
-mkChannelSetValue  = C8.pack . show . fromSqlKey
+mkChannelSetValue  = toStrict . encode . fromSqlKey
 
 
 chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
@@ -112,7 +112,7 @@ getHomeR = do
                           chans <- zrevrange channelSetKey 0 8
                           case chans of
                             Left  e -> return []
-                            Right r -> return (toSqlKey . fromIntegral <$> catMaybes (fmap fst <$> C8.readInteger <$> r) :: [Key Channel])
+                            Right r -> return (toSqlKey . decode . fromStrict <$> r :: [Key Channel])
     channels <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
     authId <- maybeAuthId
     let signature = "home" :: String
