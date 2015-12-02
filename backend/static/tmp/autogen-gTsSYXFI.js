@@ -1,0 +1,1 @@
+App.routes.newChat="http://localhost:3000/newchat"

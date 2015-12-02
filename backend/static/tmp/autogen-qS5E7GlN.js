@@ -1,0 +1,1 @@
+App.routes.chatRoom="http://localhost:3000/room/hello"
