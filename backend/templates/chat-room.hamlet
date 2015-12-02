@@ -7,8 +7,8 @@
           <a href="#" class="avatar">Username
           <a href="#" class="notification">21
       <section class="room-info">
-        <h1>#{chatRoomTitle room}
-        <h2>#{chatRoomDescription room}
+        <h1>#{channelTitle room}
+        <h2>#{channelTopic room}
       <section class="room-actions">
         <nav>
           <ul class="room-actions__list">
