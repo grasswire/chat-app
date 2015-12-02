@@ -125,6 +125,7 @@ library
                  , text-show-instances
                  , yesod-persistent
                  , text-regex-replace
+                 , hedis
 
 
 executable         chat-app

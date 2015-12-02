@@ -20,7 +20,6 @@ import Network.Wai.Handler.Warp    (HostPreference)
 import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
-
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
@@ -56,7 +55,9 @@ data AppSettings = AppSettings
     , appAnalytics              :: Maybe Text
     -- ^ Google Analytics code
     , twitterConf               :: TwitterConf
--- ^ Twitter API credentials
+    -- ^ Twitter API credentials
+    , redisConf                 :: RedisConf
+    -- ^ Redis connection info
     }
 
 instance FromJSON AppSettings where
@@ -83,6 +84,7 @@ instance FromJSON AppSettings where
         appCopyright              <- o .: "copyright"
         appAnalytics              <- o .:? "analytics"
         twitterConf               <- o .: "twitter"
+        redisConf                 <- o .: "redis"
 
         return AppSettings {..}
 
@@ -106,6 +108,12 @@ instance FromJSON TwitterAccessSecret
 instance FromJSON TwitterAccessKey
 instance FromJSON TwitterConsumerKey
 instance FromJSON TwitterConsumerSecret
+
+newtype RedisHost = RedisHost Text deriving (Show, Generic)
+data RedisConf = RedisConf { redisHost :: Text } deriving (Show, Generic)
+
+instance FromJSON RedisConf
+instance FromJSON RedisHost
 
 -- | Settings for 'widgetFile', such as which template languages to support and
 -- default Hamlet settings.

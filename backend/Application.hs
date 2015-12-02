@@ -38,6 +38,9 @@ import Handler.Rtm
 import Handler.Auth
 import qualified Data.Map as Map
 import Server
+import qualified Database.Redis as Redis
+import Database.Redis (runRedis, ConnectInfo(..), defaultConnectInfo)
+
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
 -- comments there for more details.
@@ -60,6 +63,10 @@ makeFoundation appSettings = do
     chatServer <- newServer
 
     twitterTokenStore <- newIORef Map.empty
+
+    let redisConnInfo = defaultConnectInfo {connectHost = (unpack . redisHost) $ redisConf appSettings}
+
+    redisConn <- Redis.connect redisConnInfo
     -- We need a log function to create a connection pool. We need a connection
     -- pool to create our foundation. And we need our foundation to get a
     -- logging function. To get out of this loop, we initially create a

@@ -31,5 +31,8 @@ twitter:
   consumerKey:    "_env:TWITTER_CONSUMER_KEY:jQLyz9tL4N1dH3JgoRjt7oXJd"
   consumerSecret: "_env:TWITTER_CONSUMER_SECRET:xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"
 
+redis:
+  redisHost: "_env:REDIS_HOST:localhost"
+
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE

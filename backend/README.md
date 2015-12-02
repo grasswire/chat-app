@@ -28,6 +28,14 @@ me=# grant all privileges on database taplike_test to taplike;
 GRANT
 ```
 
+### Installing and running Redis
+
+Installation:
+
+**Mac OS**: `brew install redis`
+**Ubuntu**: `sudo apt-get install redis-server`
+
+Running Redis server: `redis-server`
 
 
 ## Build

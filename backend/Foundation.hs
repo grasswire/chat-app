@@ -2,21 +2,22 @@
 
 module Foundation where
 
-import Import.NoFoundation
-import Database.Persist.Sql (ConnectionPool, runSqlPool)
-import Text.Hamlet          (hamletFile)
-import Text.Jasmine         (minifym)
-import Yesod.Auth.Message   (AuthMessage (InvalidLogin))
-import Yesod.Default.Util   (addStaticContentExternal)
-import Yesod.Core.Types     (Logger)
-import qualified Yesod.Core.Unsafe as Unsafe
-import Web.Authenticate.OAuth (Credential(..))
-import qualified Data.ByteString as BS
-import qualified Data.ByteString.Char8 as S8
-import qualified Data.Map              as M
-import Server
-import Taplike.ChannelSlug
-import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import           Import.NoFoundation
+import           Database.Persist.Sql ( ConnectionPool, runSqlPool)
+import           Text.Hamlet            (hamletFile)
+import           Text.Jasmine           (minifym)
+import           Yesod.Auth.Message     (AuthMessage (InvalidLogin))
+import           Yesod.Default.Util     (addStaticContentExternal)
+import           Yesod.Core.Types       (Logger)
+import qualified Yesod.Core.Unsafe      as Unsafe
+import           Web.Authenticate.OAuth (Credential(..))
+import qualified Data.ByteString        as BS
+import qualified Data.ByteString.Char8  as S8
+import qualified Data.Map               as M
+import           Server
+import           Taplike.ChannelSlug
+import           Database.Persist.Sql  (fromSqlKey, toSqlKey)
+import qualified Database.Redis        as Redis
 
 
 type OAuthToken = BS.ByteString
@@ -36,6 +37,7 @@ data App = App
     , appLogger         :: Logger
     , chatServer        :: Server
     , twitterTokenStore :: IORef (M.Map OAuthToken Credential)
+    , redisConn         :: Redis.Connection
     }
 
 
