@@ -18,6 +18,7 @@ library
                      Import
                      Import.NoFoundation
                      Model
+                     Model.Instances
                      Settings
                      Settings.StaticFiles
                      Handler.Common
@@ -26,8 +27,6 @@ library
                      Handler.Auth
                      Server
                      Taplike.Shared
-                     Taplike.Outgoing
-                     Model.Incoming
                      Taplike.TextShowOrphans
                      Taplike.ChannelSlug
 

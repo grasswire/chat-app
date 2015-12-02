@@ -9,7 +9,6 @@ import qualified Server as S
 import Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
-import qualified Model.Incoming as Incoming
 import Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
 import qualified Taplike.Shared as SH
 import Database.Persist.Sql (fromSqlKey)
@@ -70,13 +69,13 @@ getChatR slug = do
 
 postNewChatR :: Handler ()
 postNewChatR = do
-    channel <- requireJsonBody :: Handler Incoming.Channel
+    channel <- requireJsonBody :: Handler NewChannel
     authId  <- maybeAuthId
     case authId of
       Just chanCreator -> do
         currentTime <- liftIO getCurrentTime
-        let slug = slugify $ Incoming.channelTitle channel
-            newChannel  = Channel (Incoming.channelTitle channel) (Incoming.channelTopic channel) slug currentTime chanCreator
+        let slug = slugify $ newChannelTitle channel
+            newChannel  = Channel (newChannelTitle channel) (newChannelTopic channel) slug currentTime chanCreator
         runDB (insert newChannel) >>= \key -> sendResponseStatus status201 (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 

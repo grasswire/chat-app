@@ -10,7 +10,9 @@ import TextShow (TextShow)
 import TextShow.TH (deriveTextShow)
 import TextShow.Data.Time ()
 import Taplike.TextShowOrphans ()
+import Model.Instances ()
 import Types
+
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
