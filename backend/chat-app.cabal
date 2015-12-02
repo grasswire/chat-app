@@ -24,7 +24,6 @@ library
                      Handler.Chat
                      Handler.Rtm
                      Handler.Auth
-                     Types
                      Server
                      Taplike.Shared
                      Taplike.Outgoing
@@ -62,6 +61,7 @@ library
                 TypeFamilies
 
     build-depends: base                          >= 4          && < 5
+                 , shared
                  , yesod                         >= 1.4.1      && < 1.5
                  , yesod-core                    >= 1.4.6      && < 1.5
                  , yesod-auth                    >= 1.4.0      && < 1.5

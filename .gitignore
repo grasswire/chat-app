@@ -1,6 +1,6 @@
 dist*
-static/tmp/
-static/combined/
+backend/static/tmp/
+backend/static/combined/
 config/client_session_key.aes
 *.hi
 *.o
@@ -21,10 +21,11 @@ dash/
 *.sublime-*
 .sass-cache
 /vendor
-/node_modules
-src/bower/
-static/js/
-static/css/
-static/fonts/
-static/images/
-src/js/templates.tpl
+node_modules
+bower
+backend/src/bower/
+backend/static/js/
+backend/static/css/
+backend/static/fonts/
+backend/static/images/
+backend/src/js/templates.tpl

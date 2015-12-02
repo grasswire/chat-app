@@ -25,7 +25,7 @@ chatApp channelId channelName userEntity = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
     (outChan, channel) <- atomically $ do
-                chan <- S.lookupOrCreateChannel (chatServer app) (fromStrict channelName)
+                chan <- S.lookupOrCreateChannel (chatServer app) channelId
                 return (S.channelBroadcastChan chan, chan)
     inChan <- atomically (dupTChan outChan)
     case userEntity of

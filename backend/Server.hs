@@ -17,6 +17,9 @@ import Data.Maybe
 import qualified Data.Text.Lazy as T
 import Data.Text.Lazy (Text)
 import Taplike.Shared (RtmEvent(..))
+import Model (ChannelId(..), Message(..))
+
+type ClientId = Int64
 
 data LeaveReason
     = LeaveReasonLeft
@@ -45,12 +48,12 @@ newClient name  = do
 
 -- Chat channel datatype, not to be confused with a TChan.
 data Channel = Channel
-    { channelName          :: ChannelName
+    { channelId          :: ChannelId
     , channelClients       :: TVar (S.Set ClientId)
     , channelBroadcastChan :: TChan RtmEvent
     }
 
-newChannel :: ChannelName -> STM Channel
+newChannel :: ChannelId -> STM Channel
 newChannel name = Channel name <$> newTVar S.empty <*> newBroadcastTChan
 
 -- Send a Notice to the channel.
@@ -66,14 +69,14 @@ chanNotifyHasConnected :: Channel -> ClientId -> STM ()
 chanNotifyHasConnected chan name = chanNotify chan RtmHello
 
 data Server = Server
-    { serverChannels :: TVar (Map ChannelName Channel)
+    { serverChannels :: TVar (Map ChannelId Channel)
     , serverClients  :: TVar (Map ClientId Client)
     }
 
 lookupClient :: Server -> ClientId -> STM (Maybe Client)
 lookupClient Server{..} name = M.lookup name <$> readTVar serverClients
 
-lookupOrCreateChannel :: Server -> ChannelName -> STM Channel
+lookupOrCreateChannel :: Server -> ChannelId -> STM Channel
 lookupOrCreateChannel server@Server{..} name = lookupChannel server name >>= \case
     Nothing -> do
         chan <- newChannel name
@@ -82,7 +85,7 @@ lookupOrCreateChannel server@Server{..} name = lookupChannel server name >>= \ca
     Just chan -> return chan
 
     -- Look up a channel on the server, by name.
-lookupChannel :: Server -> ChannelName -> STM (Maybe Channel)
+lookupChannel :: Server -> ChannelId -> STM (Maybe Channel)
 lookupChannel Server{..} name = M.lookup name <$> readTVar serverChannels
 
 newServer :: IO Server
@@ -90,7 +93,7 @@ newServer = atomically $ do
     server <- Server <$> newTVar M.empty <*> newTVar M.empty
     return server
 
-addChannel :: Server -> ChannelName -> STM ()
+addChannel :: Server -> ChannelId -> STM ()
 addChannel Server{..} name = newChannel name >>= modifyTVar serverChannels . M.insert name
 
 -- Try to add a client to the server; fail if the requested name is taken.

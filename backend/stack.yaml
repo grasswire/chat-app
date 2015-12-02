@@ -5,6 +5,8 @@ flags:
 extra-package-dbs: []
 packages:
 - '.'
+- location: ../shared
+  extra-dep: true
 extra-deps:
 - stm-lifted-0.1.0.0
 - twitter-conduit-0.1.1.1

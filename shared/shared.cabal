@@ -1,0 +1,21 @@
+name:                shared
+version:             0.1.0.0
+synopsis:            Shared types for the chat app
+description:         Please see README.md
+homepage:            http://github.com/grasswire/chat-app
+license:             BSD3
+license-file:        LICENSE
+author:              Chris Allen
+maintainer:          cma@bitemyapp.com
+copyright:           2015, Chris Allen
+category:            Web
+build-type:          Simple
+cabal-version:       >=1.10
+
+library
+  hs-source-dirs:      src
+  exposed-modules:     Types
+  default-language:    Haskell2010
+  build-depends:       base >= 4.7 && < 5
+                     , text >= 1.1 && < 1.3
+                     , time >= 1.5.0.1 && < 1.6

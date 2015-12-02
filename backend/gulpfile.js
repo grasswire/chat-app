@@ -185,7 +185,7 @@ gulp.task('js', ['handlebars'], function() {
 });
 
 // Compile the Sass ...........................................................
-gulp.task('sass', function () {
+gulp.task('sass', ['bower'], function () {
    gulp.src(config.src.sass + '*.scss')
        .pipe(plumber({errorHandler: notify.onError("Sass Error:\n<%= error.message %>")}))
        .pipe(sourcemaps.init())
