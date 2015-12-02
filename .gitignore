@@ -1,6 +1,5 @@
 dist*
-backend/static/tmp/
-backend/static/combined/
+backend/static/*
 config/client_session_key.aes
 *.hi
 *.o
