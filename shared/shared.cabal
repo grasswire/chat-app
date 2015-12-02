@@ -3,11 +3,8 @@ version:             0.1.0.0
 synopsis:            Shared types for the chat app
 description:         Please see README.md
 homepage:            http://github.com/grasswire/chat-app
-license:             BSD3
-license-file:        LICENSE
 author:              Chris Allen
 maintainer:          cma@bitemyapp.com
-copyright:           2015, Chris Allen
 category:            Web
 build-type:          Simple
 cabal-version:       >=1.10
