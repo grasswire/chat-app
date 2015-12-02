@@ -47,7 +47,6 @@ chatApp channelId channelName userEntity = do
         liftIO $ runRedis (redisConn app) $ do
           res <- zincrby channelSetKey 1 (mkChannelSetValue channelId)
           print res
--- :: RedisCtx m f => ByteString key -> Integer increment -> ByteString member -> m (f Double)
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \event -> do
@@ -110,7 +109,7 @@ getHomeR :: Handler Html
 getHomeR = do
     app <- getYesod
     popularChannelIds <- liftIO $ runRedis (redisConn app) $ do
-                          chans <- zrevrange channelSetKey 0 10
+                          chans <- zrevrange channelSetKey 0 8
                           case chans of
                             Left  e -> return []
                             Right r -> return (toSqlKey . fromIntegral <$> catMaybes (fmap fst <$> C8.readInteger <$> r) :: [Key Channel])
