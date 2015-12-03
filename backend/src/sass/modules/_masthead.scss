@@ -8,17 +8,43 @@
    width: 100%;
 
    &--full-width {
-      @include flex-container(stretch, stretch);
+      @include flex-container(center, center, flex-start);
       font-weight: get-font-weight(light);
+      padding: 0;
       position: fixed;
       height: $masthead-height;
       width: 100%;
    }
 
    &__branding {
+      @include flex-container(center, center);
       background: darken(get-color(alto), 3%);
+      padding: 0 $page-boundary;
       width: 30%;
    }
+
+   &__description {
+      padding: 0 10px 0 40px;
+      width: 50%;
+   }
+
+   &__room-title {
+      @include font-size(24px);
+      font-weight: get-font-weight(regular);
+   }
+   &__room-overview {
+      @include font-size(14px);
+      font-weight: get-font-weight(regular);
+   }
+
+   &__actions {
+      padding: 0 10px 0 10px;
+      width: 20%;
+   }
+}
+
+.userinfo {
+   width: 30%;
 }
 
 .logo {
