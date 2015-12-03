@@ -2,24 +2,29 @@
 
 module Handler.Chat where
 
-import Import hiding (toLower)
-import Yesod.WebSockets
+import           Import hiding (toLower)
+import           Yesod.WebSockets
 import qualified Server as S
-
-import Network.Wai (remoteHost)
+import           Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
-import Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
+import           Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
 import qualified Taplike.Shared as SH
-import Database.Persist.Sql (fromSqlKey, toSqlKey)
-import Taplike.ChannelSlug
-import Data.Char (toLower)
-import Data.Text.ICU.Replace
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import           Taplike.ChannelSlug
+import           Data.Char (toLower)
+import           Data.Text.ICU.Replace
 import qualified Database.Esqueleto as E
 import qualified Database.Redis as Redis
-import Database.Redis (runRedis, zincrby, zrevrange)
+import           Database.Redis (runRedis, zincrby, zrangeWithscores)
 import qualified Data.ByteString.Char8 as C8
-import Data.Binary (encode, decode)
+import           Data.Binary (encode, decode)
+import qualified Data.ByteString as BS
+import qualified Data.Aeson as Aeson
+import qualified Types as TP
+import qualified Data.Map.Strict as MS
+
+import Model.Instances ()
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -29,7 +34,6 @@ channelSetKey = C8.pack "chan_set"
 
 mkChannelSetValue :: Key Channel -> ByteString
 mkChannelSetValue  = toStrict . encode . fromSqlKey
-
 
 chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp channelId channelName userEntity = do
@@ -87,13 +91,13 @@ getChatR slug = do
 
 postNewChatR :: Handler ()
 postNewChatR = do
-    channel <- requireJsonBody :: Handler NewChannel
+    channel <- requireJsonBody :: Handler TP.NewChannel
     authId  <- maybeAuthId
     case authId of
       Just chanCreator -> do
         currentTime <- liftIO getCurrentTime
-        let slug = slugify $ newChannelTitle channel
-            newChannel  = Channel (newChannelTitle channel) (newChannelTopic channel) slug currentTime chanCreator
+        let slug = slugify $ TP.unNewChannelTitle $ TP.newChannelTitle channel
+            newChannel  = Channel (TP.unNewChannelTitle $ TP.newChannelTitle channel) (TP.unNewChannelTopic $ TP.newChannelTopic channel) slug currentTime chanCreator
         runDB (insert newChannel) >>= \key -> sendResponseStatus status201 (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
@@ -108,12 +112,15 @@ makeSlug =  replaceAll "[ _]" "-"
 getHomeR :: Handler Html
 getHomeR = do
     app <- getYesod
-    popularChannelIds <- liftIO $ runRedis (redisConn app) $ do
-                          chans <- zrevrange channelSetKey 0 8
+    chansWithScores <- liftIO $ runRedis (redisConn app) $ do
+                          chans <- zrangeWithscores channelSetKey 0 8
                           case chans of
                             Left  e -> return []
-                            Right r -> return (toSqlKey . decode . fromStrict <$> r :: [Key Channel])
-    channels <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
+                            Right r -> return ((\(chanKey, score) -> ((toSqlKey . decode . fromStrict) chanKey, score)) <$> r :: [(Key Channel, Double)])
+    let popularChannelIds = fmap fst chansWithScores
+    let chanScoreMap = MS.fromList chansWithScores
+    chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
+    let channels = (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) ((TP.NumberUsersPresent . fromIntegral . round) <$> MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
     authId <- maybeAuthId
     let signature = "home" :: String
     defaultLayout $ do

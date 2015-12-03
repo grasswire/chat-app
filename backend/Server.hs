@@ -12,7 +12,7 @@ import           System.IO
 import           Prelude                  ((.), ($))
 import Data.Int (Int64)
 import Data.String
-import Types
+import qualified Types as TP
 import Data.Maybe
 import qualified Data.Text.Lazy as T
 import Data.Text.Lazy (Text)

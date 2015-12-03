@@ -1,17 +1,14 @@
-module Model
-       ( module Model
-       , module Types
-       ) where
+module Model where
 
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
-import Taplike.ChannelSlug (ChannelSlug)
+import Taplike.ChannelSlug (ChannelSlug, unSlug)
 import TextShow (TextShow)
 import TextShow.TH (deriveTextShow)
 import TextShow.Data.Time ()
 import Taplike.TextShowOrphans ()
-import Model.Instances ()
-import Types
+import qualified Types as TP
+import Database.Persist.Sql  (fromSqlKey)
 
 
 -- You can define all of your database entities in the entities file.
@@ -26,3 +23,12 @@ deriving instance TextShow (Key Channel)
 
 deriveTextShow ''User
 deriveTextShow ''Channel
+
+chanFromEntity :: Entity Channel -> TP.NumberUsersPresent -> TP.Channel
+chanFromEntity entity numPresent = TP.Channel { TP.channelCreator = TP.UserId (fromSqlKey $ entityKey entity)
+                                              , TP.channelCreated = channelCreated $ entityVal entity
+                                              , TP.channelTopic = TP.ChannelTopic $ channelTopic $ entityVal entity
+                                              , TP.channelSlug = TP.ChannelSlug $ unSlug $ channelCrSlug $ entityVal entity
+                                              , TP.channelTitle = TP.ChannelTitle $ channelTitle $ entityVal entity
+                                              , TP.channelNumUsersPresent = numPresent
+                                              }
