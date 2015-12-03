@@ -1,44 +1,9 @@
 <body class="#{signature}">
-  <header class="masthead">
-    <div class="content-flex-wrapper">
-      <section class="branding">
-        <a href="#" class="logo">TapLike
-        <div class="userinfo">
-          <a href="#" class="avatar">Username
-          <a href="#" class="notification">21
-      <section class="room-info">
-        <h1>#{channelTitle room}
-        <h2>#{channelTopic room}
-      <section class="room-actions">
-        <nav>
-          <ul class="room-actions__list">
-            <li class="room-actions__item">
-              <a href="#">
-                <span class="fa fa-upload">
-            <li class="room-actions__item">
-              <a href="#">
-                <span class="fa fa-users">
-            <li class="room-actions__item">
-              <a href="#">
-                <span class="fa fa-star-o">
+  ^{masthead room}
+
   <main role="main">
     <div class="room">
-      <aside class="sidebar js-sidebar">
-        <a href="#" class="sidebar__toggler js-sidebar-toggler">
-          <span class="fa fa-bars">
-        <div class="sidebar__wrapper js-sidebar-contents">
-          <h3>Most Liked
-          <ul class="liked__list">
-            <li class="liked__item">
-              <div class="liked__metadata">
-                <a href="">
-                  <span class="fa fa-heart">2,012
-                <a href="">
-                  <img class="avatar--liked" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
-                  <span class="meta__username">Username
-                  <span class="meta__timestamp">10:20pm
-              <blockquote class="liked__content">
-                <p>Now this is a story all about how my life got twist-turned-upside-down.
+      ^{sidebar}
 
       <section class="realtime">
         <div class="realtime__output js-chat-output">

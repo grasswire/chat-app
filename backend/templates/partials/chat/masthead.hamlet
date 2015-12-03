@@ -1,0 +1,21 @@
+<header class="masthead--full-width">
+  <section class="masthead__branding">
+    <a href="#" class="logo">TapLike
+    <div class="userinfo">
+      <a href="#" class="avatar">Username
+      <a href="#" class="notification">21
+  <section class="masthead__description">
+    <h1 class="masthead__room-title">#{channelTitle room}
+    <h2 class="masthead__room-overview">#{channelTopic room}
+  <section class="masthead__actions">
+    <nav>
+      <ul class="action__list">
+        <li class="action__item">
+          <a href="#">
+            <span class="fa fa-upload">
+        <li class="action__item">
+          <a href="#">
+            <span class="fa fa-users">
+        <li class="action__item">
+          <a href="#">
+            <span class="fa fa-star-o">
