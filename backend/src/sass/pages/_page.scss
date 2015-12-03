@@ -3,11 +3,6 @@
     margin: 0 auto;
     max-width: $max-page-width;
     padding: 0 10px;
-
-}
-
-.content-flex-container {
-   @include flex-container();
 }
 
 .content-flex-wrapper {
@@ -41,6 +36,7 @@ main {
    padding-top: $masthead-height;
 }
 
+
 .button {
    &--callout {
       @include button(16px);
@@ -67,4 +63,43 @@ main {
       padding: 20px 0;
       width: 100%;
    }
+
+   &--like {
+      display: flex;
+      align-items: center;
+      float: left;
+      width: 120px;
+   }
+   &--liked-icon {
+      @include font-size(18px);
+      padding: 0 5px;
+      display: inline-block;
+   }
+   &--liked-text {
+      @include font-size(14px);
+      padding: 0 5px;
+      display: inline-block;
+   }
+   &--profile {
+      display: flex;
+      align-items: center;
+      float: left;
+      width: 220px;
+   }
+   &--profile-icon {
+      @include font-size(18px);
+      border-radius: 50%;
+      height: 20px;
+      width: 20px;
+      display: inline-block;
+   }
+   &--profile-text {
+      @include font-size(14px);
+      padding: 0 5px;
+      display: inline-block;
+   }
 }
+
+
+
+

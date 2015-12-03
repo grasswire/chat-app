@@ -75,6 +75,8 @@ getChatR slug = do
     case channel of
       Just c -> do
         let room = entityVal c
+        let masthead room = $(widgetFile "partials/chat/masthead")
+        let sidebar = $(widgetFile "partials/chat/sidebar")
         webSockets $ chatApp (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR

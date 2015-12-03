@@ -1,4 +1,5 @@
 dist*
+dump.rdb
 backend/static/*
 config/client_session_key.aes
 *.hi

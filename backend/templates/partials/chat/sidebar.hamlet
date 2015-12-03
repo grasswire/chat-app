@@ -1,0 +1,39 @@
+<aside class="sidebar js-sidebar">
+  <a href="#" class="sidebar__toggler js-sidebar-toggler">
+    <span class="fa fa-bars">
+  <div class="sidebar__wrapper js-sidebar-contents">
+    <h3 class="sidebar__headline">Most Liked
+    <ul class="liked__list">
+      <li class="liked__item">
+        <div class="liked__metadata">
+          <a href="" class="button--like">
+            <span class="button--liked-icon fa fa-heart">
+            <span class="button--liked-text">2,012
+          <a href="" class="button--profile">
+            <img class="button--profile-icon" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <span class="button--profile-text">Username
+            <span class="button--profile-text">10:20pm
+        <blockquote class="liked__content">
+          <p>Now this is a story all about how my life got twist-turned-upside-down.
+      <li class="liked__item">
+        <div class="liked__metadata">
+          <a href="" class="button--like">
+            <span class="button--liked-icon fa fa-heart">
+            <span class="button--liked-text">2,012
+          <a href="" class="button--profile">
+            <img class="button--profile-icon" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <span class="button--profile-text">Username
+            <span class="button--profile-text">10:20pm
+        <blockquote class="liked__content">
+          <p>Now this is a story all about how my life got twist-turned-upside-down.
+      <li class="liked__item">
+        <div class="liked__metadata">
+          <a href="" class="button--like">
+            <span class="button--liked-icon fa fa-heart">
+            <span class="button--liked-text">2,012
+          <a href="" class="button--profile">
+            <img class="button--profile-icon" src="https://placeholdit.imgix.net/~text?txtsize=5&bg=9b9b9b&txt=25%C3%9725&w=35&h=35">
+            <span class="button--profile-text">Username
+            <span class="button--profile-text">10:20pm
+        <blockquote class="liked__content">
+          <p>Now this is a story all about how my life got twist-turned-upside-down.
