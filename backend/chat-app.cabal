@@ -29,6 +29,7 @@ library
                      Taplike.Shared
                      Taplike.TextShowOrphans
                      Taplike.ChannelSlug
+                     DataStore
 
     if flag(dev) || flag(library-only)
         cpp-options:   -DDEVELOPMENT

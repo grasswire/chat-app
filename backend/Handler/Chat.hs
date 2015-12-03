@@ -14,26 +14,16 @@ import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Taplike.ChannelSlug
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
-import qualified Database.Esqueleto as E
-import qualified Database.Redis as Redis
 import           Database.Redis (runRedis, zincrby, zrangeWithscores)
-import qualified Data.ByteString.Char8 as C8
-import           Data.Binary (encode, decode)
+import           Data.Binary (decode)
 import qualified Data.ByteString as BS
-import qualified Data.Aeson as Aeson
 import qualified Types as TP
 import qualified Data.Map.Strict as MS
-
+import DataStore (channelPresenceSetKey, mkChannelPresenceSetValue)
 import Model.Instances ()
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
-
-channelSetKey :: ByteString
-channelSetKey = C8.pack "chan_set"
-
-mkChannelSetValue :: Key Channel -> ByteString
-mkChannelSetValue  = toStrict . encode . fromSqlKey
 
 chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp channelId channelName userEntity = do
@@ -49,7 +39,7 @@ chatApp channelId channelName userEntity = do
         void $ lift $ updateLastSeen (entityKey u) currentTime
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
         liftIO $ runRedis (redisConn app) $ do
-          res <- zincrby channelSetKey 1 (mkChannelSetValue channelId)
+          res <- zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
           print res
         race_
           (ingest inChan)
@@ -113,7 +103,7 @@ getHomeR :: Handler Html
 getHomeR = do
     app <- getYesod
     chansWithScores <- liftIO $ runRedis (redisConn app) $ do
-                          chans <- zrangeWithscores channelSetKey 0 8
+                          chans <- zrangeWithscores channelPresenceSetKey 0 8
                           case chans of
                             Left  e -> return []
                             Right r -> return ((\(chanKey, score) -> ((toSqlKey . decode . fromStrict) chanKey, score)) <$> r :: [(Key Channel, Double)])

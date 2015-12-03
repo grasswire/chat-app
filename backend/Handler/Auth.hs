@@ -10,7 +10,7 @@ import qualified Web.Authenticate.OAuth as OA
 import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.Map as M
 import qualified Web.Twitter.Types as TT
-import Database.Persist.Sql (toSqlKey, fromSqlKey)
+import Database.Persist.Sql (fromSqlKey)
 
 
 getRequestToken :: Text -> TwitterConf -> OAuth
