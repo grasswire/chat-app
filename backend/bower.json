@@ -7,8 +7,8 @@
   ],
   "dependencies": {
     "amplify": "~1.1.2",
-    "fontawesome": "~4.4.0",
-    "handlebars": "~4.0.2",
+    "fontawesome": "~4.5.0",
+    "handlebars": "~4.0.5",
     "include-media": "~1.4.1",
     "jquery": "~2.1.4",
     "jquery-validation": "~1.14.0",

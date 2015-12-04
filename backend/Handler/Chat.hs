@@ -1,7 +1,7 @@
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
 module Handler.Chat where
-
+import           Text.Julius
 import           Import hiding (toLower)
 import           Yesod.WebSockets
 import qualified Server as S
