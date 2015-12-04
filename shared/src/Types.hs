@@ -58,7 +58,7 @@ data User = User
 
 newtype NumberUsersPresent =
   NumberUsersPresent { unNumberUsersPresent :: Int64 }
-  deriving (Eq, Show, Typeable)
+  deriving (Eq, Show, Typeable, Ord)
 
 data Channel = Channel
   { channelCreator         :: UserId

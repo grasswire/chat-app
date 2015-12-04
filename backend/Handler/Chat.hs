@@ -21,6 +21,9 @@ import qualified Types as TP
 import qualified Data.Map.Strict as MS
 import DataStore (channelPresenceSetKey, mkChannelPresenceSetValue)
 import Model.Instances ()
+-- import Data.List (sortBy)
+
+import DataStore
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
@@ -103,21 +106,20 @@ makeSlug =  replaceAll "[ _]" "-"
 
 getHomeR :: Handler Html
 getHomeR = do
-    app <- getYesod
-    chansWithScores <- liftIO $ runRedis (redisConn app) $ do
-                          chans <- zrangeWithscores channelPresenceSetKey 0 8
-                          case chans of
-                            Left  e -> return []
-                            Right r -> return ((\(chanKey, score) -> ((toSqlKey . decode . fromStrict) chanKey, score)) <$> r :: [(Key Channel, Double)])
-    let popularChannelIds = fmap fst chansWithScores
-    let chanScoreMap = MS.fromList chansWithScores
-    chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
-    let channels = (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) ((TP.NumberUsersPresent . fromIntegral . round) <$> MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
     authId <- maybeAuthId
+    app <- getYesod
     let signature = "home" :: String
+    chansWithScores <- liftIO $ runRedisAction (redisConn app) (channelsByPresenceDesc 27)
+    (topChannels, allChannels) <- case chansWithScores of
+      Right cs -> do
+        let popularChannelIds = fmap fst cs
+        let chanScoreMap = MS.fromList cs
+        chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
+        return $ splitAt 8 $ sortBy (\chanA chanB -> flip compare (TP.channelNumUsersPresent chanA) (TP.channelNumUsersPresent chanB) ) $ (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) (MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
+      Left e -> return ([], [])
     defaultLayout $ do
-        setTitle "Taplike / Home"
-        $(widgetFile "homepage")
+      setTitle "Taplike / Home"
+      $(widgetFile "homepage")
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR

@@ -1,19 +1,19 @@
 module DataStore where
 
-import ClassyPrelude
-import qualified Database.Redis as Redis
-import           Database.Redis (runRedis, zscore)
+import           ClassyPrelude
+import           Database.Redis
 import qualified Types as TP
-import           Database.Persist.Sql (fromSqlKey)
-import Model
-import Database.Persist (Key)
-import Control.Monad.Trans.Except
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
+import           Model
+import           Database.Persist (Key)
+import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
 import           Data.Binary (encode)
+import qualified Data.Binary as Bin
 
-type RedisAction a = ExceptT Redis.Reply (ReaderT Redis.Connection IO) a
+type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 
-runRedisAction :: Redis.Connection -> RedisAction a -> IO (Either Redis.Reply a)
+runRedisAction :: Connection -> RedisAction a -> IO (Either Reply a)
 runRedisAction conn action = runReaderT (runExceptT action) conn
 
 channelPresenceSetKey :: ByteString
@@ -26,4 +26,14 @@ numUsersPresent :: Key Channel -> RedisAction (Maybe TP.NumberUsersPresent)
 numUsersPresent key = ExceptT $ ReaderT $ \conn -> do
     score <- runRedis conn $ zscore channelPresenceSetKey (mkChannelPresenceSetValue key)
     return $ fmap toUsersPresent <$> score
-    where toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
+
+channelsByPresenceDesc :: Integer -> RedisAction [(Key Channel, TP.NumberUsersPresent)]
+channelsByPresenceDesc maxChans = do
+   res <- ExceptT $ ReaderT $ \conn -> runRedis conn $ zrangeWithscores channelPresenceSetKey 0 (maxChans - 1)
+   return ((\(chanKey, score) -> (keyToChanKey chanKey, toUsersPresent score)) <$> res)
+
+keyToChanKey :: ByteString -> Key Channel
+keyToChanKey = toSqlKey . Bin.decode . fromStrict
+
+toUsersPresent :: Double -> TP.NumberUsersPresent
+toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
