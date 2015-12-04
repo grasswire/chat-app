@@ -44,10 +44,10 @@ chatApp channelId channelName userEntity = do
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \event -> do
-            let outEvent = processMessage u event
+            currentTime <- liftIO getCurrentTime
+            let outEvent = processMessage u event currentTime
             case event of
                  RtmHeartbeat beat -> do
-                   currentTime <- liftIO getCurrentTime
                    void $ lift $ updateLastSeen (entityKey u) currentTime
                  _ -> return ()
             atomically $ writeTChan outChan outEvent
@@ -56,9 +56,9 @@ chatApp channelId channelName userEntity = do
     where ingest chan                       = forever $ atomically (readTChan chan) >>= sendTextData
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
 
-processMessage :: Entity User -> RtmEvent -> RtmEvent
-processMessage userEntity event = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (TS "0") (Just $ TS "0") (SH.incomingMessageChannelId incoming))
+processMessage :: Entity User -> RtmEvent -> UTCTime -> RtmEvent
+processMessage userEntity event eventTS = case event of
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (TS "0") (Just eventTS) (SH.incomingMessageChannelId incoming))
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text

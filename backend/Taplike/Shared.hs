@@ -107,7 +107,7 @@ data Message = Message
   { _messageUser         :: UserId
   , _messageText         :: MessageText
   , _messageTS           :: TS
-  , _messageEventTS      :: Maybe TS
+  , _messageEventTS      :: Maybe UTCTime
   , _messageChannel      :: ChannelId
   }
 

@@ -22,7 +22,7 @@ App.Modules.Chat = function () {
    };
 
    var displayMessage = function(response) {
-     var p = document.createElement("p");
+     var p = document.createElement("h2");
      p.appendChild(document.createTextNode(response.e.data));
 
      $(".js-chat-output").append(p);
