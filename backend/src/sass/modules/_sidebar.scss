@@ -1,0 +1,23 @@
+.sidebar {
+   background: get-color(alto);
+   overflow: scroll;
+   padding: 0 $page-boundary;
+   position: relative;
+   min-width: 240px;
+   width: 30%;
+
+   &__headline {
+      @include font-size(18px);
+   }
+
+   &__wrapper {
+      max-width: 500px;
+   }
+
+   &__toggler {
+      @include font-size(18px);
+      display: block;
+      padding: 10px 21px;
+      text-align: right;
+   }
+}

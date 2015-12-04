@@ -1,0 +1,23 @@
+.liked {
+   &__list {
+      list-style-type: none;
+      margin: 0;
+      padding: 10px 0;
+   }
+
+   &__item {
+      padding: 10px 0;
+   }
+
+   &__metadata:after {
+      clear: both;
+      content: "";
+      display: table;
+   }
+
+   &__content {
+      @include font-size(14px)
+      padding: 8px 5px;
+      margin: 0;
+   }
+}
