@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# need the latest handlebars compiler
+npm install handlebars -g
+
+# because fucking node
+rm -Rf node_modules
+npm install
+
+# because I updated some stuff and
+# npm and bower are funny
+bower install
+
+# OMFG! No this isn't a mistake
+# you need to run npm install
+# twice or it won't work
+npm install
+
+# just to test...again
+gulp compile

@@ -98,7 +98,7 @@ var scripts = {
       config.src.bower + "underscore/underscore.js",
       config.src.bower + "underscore.string/dist/underscore.string.js",
       config.src.bower + "momentjs/moment.js",
-      //config.src.bower + "handlebars/handlebars.runtime.js",
+      config.src.bower + "handlebars/handlebars.runtime.js",
       config.src.bower + "amplify/lib/amplify.js",
       config.src.js    + config.src.templates,
       config.src.js    + "app.js",
@@ -147,7 +147,9 @@ gulp.task('imagemin', function () {
 gulp.task('handlebars', function () {
     gulp.src(config.src.hbs+'*.hbs')
       .pipe(plumber({errorHandler: notify.onError("Handlebars Error:\n<%= error.message %>")}))
-      .pipe(handlebars())
+      .pipe(handlebars({
+            handlebars: require('handlebars')
+       }))
       .pipe(wrap('Handlebars.template(<%= contents %>)'))
       .pipe(declare({
           namespace: 'Handlebars.templates',
