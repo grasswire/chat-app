@@ -106,7 +106,7 @@ data Chat
 data Message = Message
   { _messageUser         :: UserId
   , _messageText         :: MessageText
-  , _messageTS           :: TS
+  , _messageTS           :: UTCTime
   , _messageEventTS      :: Maybe UTCTime
   , _messageChannel      :: ChannelId
   }
@@ -118,11 +118,11 @@ data IncomingMessage = IncomingMessage
  , incomingMessageMessageText :: MessageText
  }
 
-testMessage :: Int64 -> UserId -> Text -> Message
-testMessage chat from text = Message
+testMessage :: UTCTime -> Int64 -> UserId -> Text -> Message
+testMessage ts chat from text = Message
   { _messageUser         = from
   , _messageText         = MessageText text
-  , _messageTS           = TS "0"
+  , _messageTS           = ts
   , _messageEventTS      = Nothing
   , _messageChannel      = ChannelId $ ChannelKey 1
  }

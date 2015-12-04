@@ -58,7 +58,7 @@ chatApp channelId channelName userEntity = do
 
 processMessage :: Entity User -> RtmEvent -> UTCTime -> RtmEvent
 processMessage userEntity event eventTS = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (TS "0") (Just eventTS) (SH.incomingMessageChannelId incoming))
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text
