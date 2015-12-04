@@ -19,16 +19,13 @@ import           Data.Binary (decode)
 import qualified Data.ByteString as BS
 import qualified Types as TP
 import qualified Data.Map.Strict as MS
-import DataStore (channelPresenceSetKey, mkChannelPresenceSetValue)
 import Model.Instances ()
--- import Data.List (sortBy)
-
 import DataStore
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
-chatApp :: (Key Channel) -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp :: Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp channelId channelName userEntity = do
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
@@ -115,7 +112,7 @@ getHomeR = do
         let popularChannelIds = fmap fst cs
         let chanScoreMap = MS.fromList cs
         chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
-        return $ splitAt 9 $ sortBy (\chanA chanB -> flip compare (TP.channelNumUsersPresent chanA) (TP.channelNumUsersPresent chanB) ) $ (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) (MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) (MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
       Left e -> return ([], [])
     defaultLayout $ do
       setTitle "Taplike / Home"

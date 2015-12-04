@@ -10,6 +10,7 @@ import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
 import           Data.Binary (encode)
 import qualified Data.Binary as Bin
+import Control.Arrow ((***))
 
 type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 
@@ -30,7 +31,7 @@ numUsersPresent key = ExceptT $ ReaderT $ \conn -> do
 channelsByPresenceDesc :: Integer -> RedisAction [(Key Channel, TP.NumberUsersPresent)]
 channelsByPresenceDesc maxChans = do
    res <- ExceptT $ ReaderT $ \conn -> runRedis conn $ zrangeWithscores channelPresenceSetKey 0 (maxChans - 1)
-   return ((\(chanKey, score) -> (keyToChanKey chanKey, toUsersPresent score)) <$> res)
+   return ((keyToChanKey *** toUsersPresent) <$> res)
 
 keyToChanKey :: ByteString -> Key Channel
 keyToChanKey = toSqlKey . Bin.decode . fromStrict
