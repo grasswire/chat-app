@@ -1,3 +1,10 @@
+.logo {
+   @include font-size(28px);
+   font-family: get-stack(sans-condensed);
+   text-decoration: none;
+   padding: 0 10px;
+}
+
 .masthead {
    @include container();
    background: get-color(white);
@@ -32,6 +39,7 @@
       @include font-size(24px);
       font-weight: get-font-weight(regular);
    }
+
    &__room-overview {
       @include font-size(14px);
       font-weight: get-font-weight(regular);
@@ -43,44 +51,5 @@
    }
 }
 
-.userinfo {
-   width: 30%;
-}
 
-.logo {
-   @include font-size(28px);
-   font-family: get-stack(sans-condensed);
-   text-decoration: none;
-   padding: 0 10px;
-}
 
-.nav {
-   &__list {
-      text-align: right;
-   }
-
-   &__item {
-      @include font-size(16px);
-      display: inline-block;
-      margin: 0 5px;
-
-      a {
-         text-decoration: none;
-      }
-
-      @include last {
-         margin: 0;
-      }
-   }
-
-   &__signin {
-      @include button-inline(14px);
-      border: 0;
-      font-weight: get-font-weight(regular);
-      padding: 0 10px;
-
-      @include last() {
-         padding-right: 0;
-      }
-   }
-}
