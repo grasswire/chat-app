@@ -61,7 +61,7 @@ If a user is not authenticated (because they’re not “logged in”) a 401 sta
 
 After a successful room creation, the user should be directed to the newly created room. The `id` returned in the http response can be used to construct a type safe url to redirect with.
 
-After navigating to the url for the new room, a GET /api/rtm.start?room_id{$roomId} should be sent. The response is a JSON body:
+After navigating to the url for the new room, a GET /api/rtm.start?channel_slug{$slug} should be sent. The response is a JSON body:
 
 ```json
 {
