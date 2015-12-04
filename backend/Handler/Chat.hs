@@ -70,6 +70,8 @@ getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
+    renderFunc <- getUrlRenderParams
+    let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
     let signature = "chatroom" :: String
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
