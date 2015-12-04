@@ -41,7 +41,7 @@
       <h2 class="secondary__headline">All Chats
       <div class="content-flex-container">
         $forall channel <- allChannels
-          <a class="card--listing" href="">
+          <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
             <h3 class="card__title--listing">#{TP.unChannelTitle $ TP.channelTitle channel}
               <div class="card__meta--listing">
                 <span class="fa fa-user">
