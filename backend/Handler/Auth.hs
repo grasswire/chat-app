@@ -58,7 +58,7 @@ getTwitterCallbackR = do
    modalParam     <- lookupGetParam "modal"
    let tokenStore = twitterTokenStore app
    let conf = twitterConf . appSettings $ app
-   let params = (if (isJust modalParam) then createRoomModalParams else [])
+   let params = if isJust modalParam then createRoomModalParams else []
    renderFunc <- getUrlRenderParams
    let callback = renderFunc TwitterCallbackR params
    let homeR = renderFunc HomeR params
