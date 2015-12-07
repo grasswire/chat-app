@@ -165,7 +165,7 @@ instance YesodAuth App where
     -- maybeAuthId = return Nothing
     maybeAuthId = do
         userIdFromSession <- lookupSession sessionUserIdKey
-        return $ (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+        return (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
 
 
     authHttpManager = getHttpManager
