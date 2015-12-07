@@ -39,7 +39,7 @@ getTwitterAuthR = do
   let conf = twitterConf . appSettings $ app
   modalParam <- lookupGetParam "modal"
   renderFunc <- getUrlRenderParams
-  let callback = renderFunc TwitterCallbackR (if (isJust modalParam) then createRoomModalParams else [])
+  let callback = renderFunc TwitterCallbackR (if isJust modalParam then createRoomModalParams else [])
   let token = getRequestToken callback conf
   manager <- appHttpManager <$> getYesod
   cred <- liftIO $ OA.getTemporaryCredential token manager
