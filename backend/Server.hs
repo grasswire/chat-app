@@ -152,7 +152,7 @@ chanAddClient' notifyAction chan@Channel{..} name = do
     modifyTVar channelClients . S.insert $ name
 
 listUsers :: Channel -> STM [Int64]
-listUsers channel = S.toList <$> (readTVar $ channelClients channel)
+listUsers channel = S.toList <$> readTVar $ channelClients channel
 
 -- Notify the channel a client has left.
 chanNotifyHasLeft :: Channel -> ClientId -> STM ()
