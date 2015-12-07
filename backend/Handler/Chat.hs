@@ -33,49 +33,24 @@ chatApp channelId channelName userEntity = do
     inChan <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u -> do
+        currentTime <- liftIO getCurrentTime
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal u)
-        liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
+        _ <- liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
+        void $ lift $ updateLastSeen (entityKey u) currentTime
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \inEvent -> do
-            currentTime <- liftIO getCurrentTime
-            liftIO $ runRedisAction (redisConn app) (S.broadcastEvent channelId inEvent)
-            void $ lift $ updateLastSeen (entityKey u) currentTime
+            case inEvent of
+              RtmHeartbeat beat -> void $ lift $ updateLastSeen (entityKey u) currentTime
+              _ -> liftIO $ runRedisAction (redisConn app) (S.broadcastEvent channelId (processMessage (entityKey u) inEvent currentTime)) >> return ()
             )
       Nothing -> ingest inChan
-
-
-
-    -- (outChan, channel) <- atomically $ do
-    --             chan <- S.lookupOrCreateChannel (chatServer app) channelId
-    --             return (S.channelBroadcastChan chan, chan)
-    -- inChan <- atomically newTChan -- (dupTChan outChan)
-    -- case userEntity of
-    --   Just u -> do
-    --     currentTime <- liftIO getCurrentTime
-    --     void $ lift $ updateLastSeen (entityKey u) currentTime
-    --     liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected channel (userTwitterUserId $ entityVal u)
-    --     liftIO $ runRedis (redisConn app) $ do
-    --       res <- zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
-    --       print res
-    --     race_
-    --       (ingest inChan)
-    --       (sourceWS $$ mapM_C $ \event -> do
-    --         currentTime <- liftIO getCurrentTime
-    --         let outEvent = processMessage u event currentTime
-    --         case event of
-    --              RtmHeartbeat beat -> do
-    --                void $ lift $ updateLastSeen (entityKey u) currentTime
-    --              _ -> return ()
-    --         atomically $ writeTChan outChan outEvent
-    --      )
-      -- Nothing -> ingest inChan
-    where ingest chan                       = forever $ atomically (readTChan chan) >>= sendTextData
+    where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
 
-processMessage :: Entity User -> RtmEvent -> UTCTime -> RtmEvent
-processMessage userEntity event eventTS = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message (entityKey userEntity) ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
+processMessage :: UserId -> RtmEvent -> UTCTime -> RtmEvent
+processMessage userId event eventTS = case event of
+                              (RtmSendMessage incoming) -> RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
                               _ -> RtmHello
 
 getUsername :: YesodRequest -> Maybe TL.Text

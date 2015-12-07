@@ -24,7 +24,6 @@ import           Database.Redis hiding    (Message)
 import qualified Database.Redis as Redis
 import qualified Data.ByteString.Char8 as C8
 import qualified Data.ByteString.Lazy.Char8 as LC8
-
 import           Data.Monoid              ((<>), mempty)
 import           DataStore
 import           Control.Monad.Trans.Except
@@ -34,8 +33,6 @@ import           Database.Persist.Sql     (fromSqlKey)
 import           Debug.Trace
 import           Control.Concurrent       (forkIO)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-
-
 
 type ClientId = Int64
 
@@ -125,7 +122,6 @@ messageCallback server@Server{..} = \msg -> do
           Nothing   -> return ()
   return mempty
 
-
 broadcastEvent :: ChannelId -> RtmEvent -> RedisAction Integer
 broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
 
@@ -135,11 +131,8 @@ lookupClient Server{..} name = M.lookup name <$> readTVar serverClients
 chanId2Bs :: ChannelId -> BS.ByteString
 chanId2Bs = C8.pack . show .fromSqlKey
 
-
-    -- Look up a channel on the server, by name.
 lookupChannel :: Server -> ChannelId -> STM (Maybe Channel)
 lookupChannel Server{..} name = M.lookup name <$> readTVar serverChannels
-
 
 tryAddClient :: Server -> ClientId  -> IO (Maybe Client)
 tryAddClient server@Server{..} name = atomically $ do
