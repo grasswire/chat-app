@@ -24,7 +24,7 @@ getRtmStartR = do
       maybeChan <- runDB (getBy $ UniqueChannelSlug channelSlug)
       users <- case maybeChan of
                 Just channel -> do
-                  timeNow <- liftIO $ getCurrentTime
+                  timeNow <- liftIO getCurrentTime
                   let fiveMinsAgo = addUTCTime ((negate 300) :: NominalDiffTime) timeNow
                   runDB (usersPresentQuery (entityKey channel) fiveMinsAgo)
                 _ ->  return []
