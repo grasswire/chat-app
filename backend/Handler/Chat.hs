@@ -64,7 +64,7 @@ getChatR slug = do
     authId <- maybeAuthId
     renderFunc <- getUrlRenderParams
     let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
-    let signature = "chatroom" :: String
+    let signature = "chatroom" :: Text
     let modalSignin = $(widgetFile "partials/modals/signin")
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
