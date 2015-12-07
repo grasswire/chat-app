@@ -39,6 +39,7 @@ App.Modules.Modal = function () {
          Events.bind("load").to(checkQueryString, window);
          Events.bind("click", ".js-trigger-modal").to(openModal);
          Events.bind("click", ".js-trigger-modal-close").to(closeModal);
+         Events.bind("key", [27]).to(closeModal, window);
 
          Events.subscribe('tl/modal/closing', closeModal);
          Events.subscribe('tl/modal/open', openModal);
