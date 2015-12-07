@@ -38,7 +38,7 @@ usersPresentQuery ::  MonadIO m => Key Channel -> UTCTime -> SqlPersistT m [Enti
 usersPresentQuery chanKey lastseen = E.select $
                                      E.from $ \user -> do
                                      E.where_ $ E.exists $
-                                                E.from $ \heartbeat -> do
+                                                E.from $ \heartbeat ->
                                                 E.where_ (heartbeat E.^. HeartbeatChannel E.==. (E.val chanKey) E.&&.
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
                                                   heartbeat E.^. HeartbeatLastSeen E.>=. (E.val lastseen))
