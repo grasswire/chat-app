@@ -41,5 +41,5 @@ usersPresentQuery chanKey lastseen = E.select $
                                                 E.from $ \heartbeat ->
                                                 E.where_ (heartbeat E.^. HeartbeatChannel E.==. (E.val chanKey) E.&&.
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
-                                                  heartbeat E.^. HeartbeatLastSeen E.>=. (E.val lastseen))
+                                                  heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
                                      return user
