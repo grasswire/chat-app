@@ -22,7 +22,7 @@ import           Data.Maybe (fromJust)
 
 newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
-  toJSON (ChannelId key) = Number $ (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
+  toJSON (ChannelId key) = Number (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
 instance FromJSON ChannelId where
   parseJSON = withScientific "channel_id" $ \ s ->
     case (toBoundedInteger s :: Maybe Int64) of
