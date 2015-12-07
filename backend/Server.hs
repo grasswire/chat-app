@@ -117,6 +117,7 @@ messageCallback server@Server{..} msg = do
         case broadcastMsg of
           Just bMsg -> writeTChan (channelBroadcastChan chan) bMsg
           Nothing   -> return ()
+      Nothing -> return ()
   return mempty
 
 broadcastEvent :: ChannelId -> RtmEvent -> RedisAction Integer
