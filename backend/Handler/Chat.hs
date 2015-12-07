@@ -33,16 +33,17 @@ chatApp channelId channelName userEntity = do
     inChan <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u -> do
-        currentTime <- liftIO getCurrentTime
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal u)
         _ <- liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
-        void $ lift $ updateLastSeen (entityKey u) currentTime
+        liftIO getCurrentTime >>= \t -> void $ lift $ updateLastSeen (entityKey u) t
         race_
           (ingest inChan)
           (sourceWS $$ mapM_C $ \inEvent -> do
             case inEvent of
-              RtmHeartbeat beat -> void $ lift $ updateLastSeen (entityKey u) currentTime
-              _ -> liftIO $ runRedisAction (redisConn app) (S.broadcastEvent channelId (processMessage (entityKey u) inEvent currentTime)) >> return ()
+              RtmHeartbeat beat -> do
+                now <- liftIO getCurrentTime
+                void $ lift $ updateLastSeen (entityKey u) now
+              _ -> liftIO getCurrentTime >>= (\t -> liftIO $ runRedisAction (redisConn app) (S.broadcastEvent channelId (processMessage (entityKey u) inEvent t))) >> return ()
             )
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
