@@ -39,5 +39,7 @@ usersPresentQuery chanKey lastseen = E.select $
                                      E.from $ \user -> do
                                      E.where_ $ E.exists $
                                                 E.from $ \heartbeat -> do
-                                                E.where_ (heartbeat E.^. HeartbeatChannel E.==. (E.val chanKey) E.&&. heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&. heartbeat E.^. HeartbeatLastSeen E.>=. (E.val lastseen))
+                                                E.where_ (heartbeat E.^. HeartbeatChannel E.==. (E.val chanKey) E.&&.
+                                                  heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
+                                                  heartbeat E.^. HeartbeatLastSeen E.>=. (E.val lastseen))
                                      return user
