@@ -72,7 +72,7 @@ newChannel name = Channel name <$> newTVar S.empty <*> newBroadcastTChan
 
 -- Send a Notice to the channel.
 chanNotify :: Channel -> RtmEvent -> STM ()
-chanNotify chan event = chanMessage chan event
+chanNotify = chanMessage
 
 -- Send a Message to the channel.
 chanMessage :: Channel -> RtmEvent -> STM ()
