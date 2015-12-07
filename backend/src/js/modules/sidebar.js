@@ -43,9 +43,9 @@ App.Modules.Sidebar = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.bind("load").where("body[class]", "chatroom").to(checkPageWidth, this);
-         Events.bind("resize").where("body[class]", "chatroom").to(checkPageWidth, this);
-         Events.bind("click", ".js-sidebar-toggler").to(toggleSidebar, this);
+         // Events.bind("load").where("body[class]", "chatroom").to(checkPageWidth, this);
+         // Events.bind("resize").where("body[class]", "chatroom").to(checkPageWidth, this);
+         // Events.bind("click", ".js-sidebar-toggler").to(toggleSidebar, this);
          return this;
       }
    };

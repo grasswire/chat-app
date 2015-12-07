@@ -72,6 +72,7 @@ getChatR slug = do
         let room = entityVal c
         let masthead room = $(widgetFile "partials/chat/masthead")
         let sidebar = $(widgetFile "partials/chat/sidebar")
+        let isLoggedIn = if (isJust authId) then True else False
         webSockets $ chatApp (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
