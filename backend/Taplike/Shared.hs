@@ -159,8 +159,7 @@ class TapLikeTyped a where
 instance TapLikeTyped Channel where
   isTypedID _ = isPrefixOf "C" . unID
 instance TapLikeTyped Chat where
-   isTypedID _ i
-    =  isTypedID (Proxy :: Proxy Channel) i
+   isTypedID _ =  isTypedID (Proxy :: Proxy Channel)
 
 instance TapLikeTyped User where
   isTypedID _ = isPrefixOf "U" . unID
