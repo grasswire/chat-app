@@ -100,7 +100,7 @@ lookupOrCreateChannel conn server@Server{..} name = do
           (subs, newChan) <- atomically $ do
               chan <- newChannel name
               modifyTVar serverChannels . M.insert name $ chan
-              modifyTVar serverSubscriptions ((subscribe [pubSubChan]) <>)
+              modifyTVar serverSubscriptions (subscribe [pubSubChan] <>)
               currentSubscriptions <- readTVar serverSubscriptions
               return (currentSubscriptions, chan)
           forkIO $ runRedis conn (pubSub subs (messageCallback server))
