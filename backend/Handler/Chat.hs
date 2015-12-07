@@ -38,13 +38,12 @@ chatApp channelId channelName userEntity = do
         liftIO getCurrentTime >>= \t -> void $ lift $ updateLastSeen (entityKey u) t
         race_
           (ingest inChan)
-          (sourceWS $$ mapM_C $ \inEvent -> do
+          (sourceWS $$ mapM_C $ \inEvent ->
             case inEvent of
               RtmHeartbeat beat -> do
                 now <- liftIO getCurrentTime
                 void $ lift $ updateLastSeen (entityKey u) now
-              _ -> liftIO getCurrentTime >>= (\t -> liftIO $ runRedisAction (redisConn app) (S.broadcastEvent channelId (processMessage (entityKey u) inEvent t))) >> return ()
-            )
+              _ -> liftIO getCurrentTime >>= (liftIO . runRedisAction (redisConn app) . S.broadcastEvent channelId . processMessage (entityKey u) inEvent) >> return ())
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
