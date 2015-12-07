@@ -266,7 +266,7 @@ instance FromJSON RtmEvent where
           Just seqnum ->
             o .: "ok" >>= \ case
               True  -> RtmReplyOk seqnum <$> o .:? "ts" <*> o .:? "text"
-              False -> o .: "error" >>= (withObject "RTM error" $ \ o2 -> RtmReplyNotOk seqnum <$> o2 .: "code" <*> o2 .: "msg")
+              False -> o .: "error" >>= withObject "RTM error" (\o2 -> RtmReplyNotOk seqnum <$> o2 .: "code" <*> o2 .: "msg")
           Nothing ->
             o .: "type" >>= pure . asText >>= \ case
               "hello"                   -> pure RtmHello
