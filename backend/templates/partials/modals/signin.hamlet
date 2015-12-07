@@ -5,4 +5,4 @@
         <span class="modal__close fa fa-times">
     <section class="modal__body">
       <h1 class="modal__title">Sign In
-        <button type="submit" class="create__button">Something
+      <a href="@{TwitterAuthR}" class="create__button">Sign in with Twitter

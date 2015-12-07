@@ -29,6 +29,7 @@
       @include flex-container(center, center);
       background: darken(get-color(alto), 3%);
       padding: 0 $page-boundary;
+      min-width: 240px;
       width: 30%;
    }
 

@@ -1,4 +1,4 @@
-<body class="#{signature}">
+<body class="#{signature}" data-is-logged-in="#{isLoggedIn}">
   ^{masthead room}
 
   <main role="main">
@@ -11,7 +11,7 @@
           $maybe userId <- authId
             <input class="realtime__input js-chat-input" placeholder="Type something and press enter..." autofocus>
           $nothing
-            <input class="realtime__input js-chat-input" placeholder="Sign in to chat" disabled>
+            <input class="realtime__input js-chat-input" placeholder="Sign in to chat">
         <div class="dropdown js-dropdown-content" data-dropdown="user-list" style="display: none;">
           <div class="js-userlist-output">
 
