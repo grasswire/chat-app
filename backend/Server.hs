@@ -29,7 +29,6 @@ import           DataStore
 import           Control.Monad.Trans.Except
 import           Control.Monad.Trans.Reader
 import qualified Data.Aeson as Aeson
-import           Database.Persist.Sql     (fromSqlKey)
 import           Debug.Trace
 import           Control.Concurrent       (forkIO)
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
