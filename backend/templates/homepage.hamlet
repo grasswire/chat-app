@@ -1,7 +1,7 @@
 <body class="#{signature}">
   <section class="masthead">
     <div class="content-flex-wrapper">
-      <a href="#" class="logo">TapLike
+      <a href="/" class="logo">TapLike
       <nav class="nav__main">
         <ul class="nav__list">
           $maybe userId <- authId
@@ -51,3 +51,5 @@
     <footer class="content-container">
       <div class="loader">
         <a href="" class="loader__button">Load More
+
+  ^{modalCreate}

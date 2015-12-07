@@ -13,6 +13,7 @@
    position: fixed;
    height: $masthead-height;
    width: 100%;
+   z-index: get-zindex(1);
 
    &--full-width {
       @include flex-container(center, center, flex-start);
@@ -21,6 +22,7 @@
       position: fixed;
       height: $masthead-height;
       width: 100%;
+      z-index: get-zindex(1);
    }
 
    &__branding {

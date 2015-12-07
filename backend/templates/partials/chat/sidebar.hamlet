@@ -1,7 +1,6 @@
 <aside class="sidebar js-sidebar">
   <a href="#" class="sidebar__toggler js-sidebar-toggler">
     <span class="fa fa-bars">
-  <div class="js-userlist-output">
   <div class="sidebar__wrapper js-sidebar-contents">
     <h3 class="sidebar__headline">Most Liked
     <ul class="liked__list">

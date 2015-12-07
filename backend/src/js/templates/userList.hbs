@@ -1,8 +1,10 @@
-<ul class="contributors__list">
-    {{#each this}}
-       <li class="contributors__item">
-           <img class="contributors__avatar" src="{{this.profileImageUrl}}" alt="{{this.screenName}}">
-           <p>@{{this.screenName}}</p>
-       </li>
-    {{/each}}
+<ul class="user__list">
+   {{#each this}}
+      <li class="user__item">
+         <a href="" class="user__profile-button">
+            <img class="user__avatar" src="{{this.profileImageUrl}}" alt="{{this.screenName}}">
+            <div class="user__name">@{{this.screenName}}</div>
+         </a>
+      </li>
+   {{/each}}
 </ul>

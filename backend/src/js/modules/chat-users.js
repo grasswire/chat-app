@@ -27,7 +27,6 @@ App.Modules.ChatUsers = function () {
    };
 
    var generateUserList = function(data) {
-      console.log(data);
       $('.js-userlist-output').html(Handlebars.templates.userList(data.users));
    };
 
@@ -35,11 +34,16 @@ App.Modules.ChatUsers = function () {
       console.log("click");
    };
 
+   var displayUserCount = function(data) {
+      $(".js-user-count").html("("+data.users.length+")");
+   };
+
    return {
       init: function() { return this; },
       events: function() {
          Events.subscribe("tl/chat/setup", getChattingUsers);
          Events.subscribe("tl/chat/usersMapped", generateUserList);
+         Events.subscribe("tl/chat/usersMapped", displayUserCount);
 
          Events.bind(".js-toggle-users").to(displayUsers, this);
          return this;
