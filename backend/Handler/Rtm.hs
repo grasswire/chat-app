@@ -25,7 +25,7 @@ getRtmStartR = do
       users <- case maybeChan of
                 Just channel -> do
                   timeNow <- liftIO getCurrentTime
-                  let fiveMinsAgo = addUTCTime ((negate 300) :: NominalDiffTime) timeNow
+                  let fiveMinsAgo = addUTCTime (negate 300 :: NominalDiffTime) timeNow
                   runDB (usersPresentQuery (entityKey channel) fiveMinsAgo)
                 _ ->  return []
       let jsonResp = case user of
