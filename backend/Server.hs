@@ -107,8 +107,8 @@ lookupOrCreateChannel conn server@Server{..} name = do
           return newChan
         Just chan -> return chan
 
-messageCallback :: Server -> (Redis.Message -> IO PubSub)
-messageCallback server@Server{..} = \msg -> do
+messageCallback :: Server -> Redis.Message -> IO PubSub
+messageCallback server@Server{..} msg = do
   atomically $ do
     channel <- lookupChannel server (toSqlKey (read $ C8.unpack $ msgChannel msg :: Int64))
     case channel of
