@@ -3,7 +3,6 @@
 module Foundation where
 
 import           Import.NoFoundation
-import           Database.Persist.Sql ( ConnectionPool, runSqlPool)
 import           Text.Hamlet            (hamletFile)
 import           Text.Jasmine           (minifym)
 import           Yesod.Auth.Message     (AuthMessage (InvalidLogin))
@@ -16,7 +15,7 @@ import qualified Data.ByteString.Char8  as S8
 import qualified Data.Map               as M
 import           Server
 import           Taplike.ChannelSlug
-import           Database.Persist.Sql  (fromSqlKey, toSqlKey)
+import Database.Persist.Sql (ConnectionPool, runSqlPool, fromSqlKey, toSqlKey)
 import qualified Database.Redis        as Redis
 
 
