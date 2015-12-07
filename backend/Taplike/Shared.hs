@@ -6,7 +6,7 @@ import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(String), FromJSON(p
 import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
 import qualified Data.HashMap.Strict as HM
 import           Data.Proxy (Proxy(Proxy))
-import           Data.Scientific (toBoundedInteger)
+import           Data.Scientific (toBoundedInteger, Scientific)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
 import           Network.WebSockets hiding (Message, Response)
@@ -14,7 +14,6 @@ import           Taplike.TextShowOrphans ()
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Class (Key(..))
 import           Data.UUID
-import           Data.Scientific (Scientific)
 import           Model hiding (ChannelId, MessageText, Message, Heartbeat)
 import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
