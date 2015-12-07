@@ -48,7 +48,7 @@ App.Modules.ChatMessages = function () {
          };
       };
 
-      Events.publish("tl/chat/message/received", {
+      Events.publish("tl/chat/message/parsed", {
          message: message
       });
    };
@@ -58,7 +58,7 @@ App.Modules.ChatMessages = function () {
       events: function() {
          Events.subscribe("tl/chat/setup", chatReady);
          Events.subscribe("tl/chat/message/sent", messageReceived);
-         Events.subscribe("tl/chat/message/received", displayMessage);
+         Events.subscribe("tl/chat/message/parsed", displayMessage);
 
          Events.bind("submit", ".js-chat-form").to(sendMessage, this);
          return this;

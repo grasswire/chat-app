@@ -14,8 +14,9 @@
           <a href="#">
             <span class="fa fa-upload">
         <li class="action__item">
-          <a href="#">
+          <a href="#" class="js-dropdown-button" data-dropdown="user-list">
             <span class="fa fa-users">
+            <span class="js-user-count">
         <li class="action__item">
           <a href="#">
             <span class="fa fa-star-o">
