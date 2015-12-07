@@ -89,9 +89,7 @@ data Server = Server
     }
 
 newServer :: IO Server
-newServer = atomically $ do
-    server <- Server <$> newTVar M.empty <*> newTVar M.empty <*> newTVar mempty
-    return server
+newServer = atomically $ Server <$> newTVar M.empty <*> newTVar M.empty <*> newTVar mempty
 
 lookupOrCreateChannel :: Connection -> Server -> ChannelId -> IO Channel
 lookupOrCreateChannel conn server@Server{..} name = do
