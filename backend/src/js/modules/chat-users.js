@@ -27,7 +27,6 @@ App.Modules.ChatUsers = function () {
    };
 
    var generateUserList = function(data) {
-      console.log(data);
       $('.js-userlist-output').html(Handlebars.templates.userList(data.users));
    };
 

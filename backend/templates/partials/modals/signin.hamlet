@@ -1,0 +1,8 @@
+<div class="modal--full-screen js-modal" data-modal-name="signin" data-modal-type="full-screen" style="display: none;">
+  <div class="content-container">
+    <header class="modal__header">
+      <a href="#" class="js-trigger-modal-close">
+        <span class="modal__close fa fa-times">
+    <section class="modal__body">
+      <h1 class="modal__title">Sign In
+        <button type="submit" class="create__button">Something

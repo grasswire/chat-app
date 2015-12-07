@@ -73,6 +73,7 @@ getChatR slug = do
     renderFunc <- getUrlRenderParams
     let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
     let signature = "chatroom" :: String
+    let modalSignin = $(widgetFile "partials/modals/signin")
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
       Just c -> do
@@ -108,6 +109,7 @@ getHomeR = do
     authId <- maybeAuthId
     app <- getYesod
     let signature = "home" :: String
+    let modalCreate = $(widgetFile "partials/modals/create")
     chansWithScores <- liftIO $ runRedisAction (redisConn app) (channelsByPresenceDesc 27)
     (topChannels, allChannels) <- case chansWithScores of
       Right cs -> do

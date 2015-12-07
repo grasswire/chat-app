@@ -12,3 +12,5 @@
             <input class="realtime__input js-chat-input" placeholder="Type something and press enter..." autofocus>
           $nothing
             <input class="realtime__input js-chat-input" placeholder="Sign in to chat" disabled>
+
+  ^{modalSignin}
