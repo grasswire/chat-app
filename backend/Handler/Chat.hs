@@ -140,8 +140,9 @@ getHomeR = do
     chansWithScores <- liftIO $ runRedisAction (redisConn app) (channelsByPresenceDesc 27)
     (topChannels, allChannels) <- case chansWithScores of
       Right cs -> do
-        let popularChannelIds = fmap fst cs
-        let chanScoreMap = MS.fromList cs
+        let filtered = filter (not . (< 1) . TP.unNumberUsersPresent . snd) cs
+            popularChannelIds = fmap fst filtered
+            chanScoreMap = MS.fromList filtered
         chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
         return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) (MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
       Left e -> return ([], [])
