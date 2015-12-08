@@ -49,7 +49,7 @@ chatApp channelId channelName userEntity = do
                 ackMessage inEvent
                 liftIO getCurrentTime >>= (liftIO . runRedisAction (redisConn app) . S.broadcastEvent channelId . processMessage (entityKey u) inEvent) >> return ())
       Nothing -> ingest inChan
-    where ingest chan = forever $ atomically (readTChan chan) >>= (\event -> sendTextData event)
+    where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
           ackMessage (RtmSendMessage incoming) = do
             liftIO getCurrentTime >>= \now -> sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
