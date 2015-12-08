@@ -15,18 +15,22 @@ import           Taplike.ChannelSlug
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
 import           Database.Redis (runRedis, zincrby, zrangeWithscores)
+import qualified Database.Redis as Redis
 import           Data.Binary (decode)
 import qualified Data.ByteString as BS
 import qualified Types as TP
 import qualified Data.Map.Strict as MS
 import Model.Instances ()
 import DataStore
+import Control.Concurrent (threadDelay, forkIO, ThreadId)
+import qualified Control.Exception.Lifted as EL
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
 chatApp :: Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp channelId channelName userEntity = do
+chatApp channelId channelName userEntity = (flip EL.catch) wsExceptionHandler $ do
+    $(logInfo) "Running WebSocketsT Handler"
     sendTextData RtmHello
     sendTextData ("Welcome to #" <> channelName)
     app    <- getYesod
@@ -34,6 +38,8 @@ chatApp channelId channelName userEntity = do
     inChan <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u -> do
+        pingThreadId <- liftIO $ pingThread (redisConn app) channelId
+        pingThreadId <- liftIO (newEmptyMVar :: IO (MVar ThreadId))
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal u)
         _ <- liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
         liftIO getCurrentTime >>= \t -> void $ lift $ updateLastSeen (entityKey u) t
@@ -51,9 +57,22 @@ chatApp channelId channelName userEntity = do
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
-          ackMessage (RtmSendMessage incoming) = do
-            liftIO getCurrentTime >>= \now -> sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
+          ackMessage (RtmSendMessage incoming) = liftIO getCurrentTime >>= \now -> sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
           ackMessage _ = return ()
+
+wsExceptionHandler :: SomeException -> WebSocketsT Handler ()
+wsExceptionHandler _ = liftIO $ putStrLn "got some exception!!"
+
+pingThread :: Redis.Connection -> ChannelId -> IO ThreadId
+pingThread conn chanId =
+    forkIO $ do
+      threadDelay thirtySeconds
+      putStrLn "thirty seconds expired, decrementing channel presence"
+      runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
+      return ()
+
+thirtySeconds :: Int
+thirtySeconds = 30000000
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> RtmEvent
 processMessage userId event eventTS = case event of
