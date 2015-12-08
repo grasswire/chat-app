@@ -9,7 +9,7 @@ import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger, Scientific)
 import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
 import           TextShow.TH (deriveTextShow)
-import           Network.WebSockets hiding (Message, Response)
+import           Network.WebSockets (WebSocketsData(fromLazyByteString, toLazyByteString))
 import           Taplike.TextShowOrphans ()
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Class (Key(..))
@@ -145,6 +145,11 @@ data RtmEvent
   | RtmUserTyping UserTyping
   | RtmSendMessage IncomingMessage
   | RtmHeartbeat Heartbeat
+  | RtmPing Ping
+  | RtmPong Pong
+
+data Ping = Ping { pingId :: Int32 }
+data Pong = Pong { pongReplyTo :: Int32 }
 
 instance WebSocketsData RtmEvent where
   fromLazyByteString = fromJust . decode
@@ -184,6 +189,8 @@ deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
 deriving instance Eq ChannelId
 deriving instance Eq Heartbeat
+deriving instance Eq Ping
+deriving instance Eq Pong
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -199,6 +206,8 @@ deriveTextShow ''IncomingMessage
 deriveTextShow ''MessageText
 deriveTextShow ''ChannelId
 deriveTextShow ''Heartbeat
+deriveTextShow ''Ping
+deriveTextShow ''Pong
 
 
 instance ToJSON RtmStartRequest where
@@ -270,6 +279,8 @@ instance FromJSON RtmEvent where
           Nothing ->
             o .: "type" >>= pure . asText >>= \ case
               "hello"                   -> pure RtmHello
+              "ping"                    -> RtmPing <$> recur
+              "pong"                    -> RtmPong <$> recur
               "message"                 -> RtmMessage <$> recur
               "user_typing"             -> RtmUserTyping <$> recur
               "incoming_message"        -> RtmSendMessage <$> recur
@@ -280,8 +291,10 @@ instance ToJSON RtmEvent where
   toJSON event = case event of
                   RtmSendMessage msg -> toJSON msg
                   RtmMessage message -> toJSON message
-                  RtmHeartbeat beat ->  toJSON beat
+                  RtmHeartbeat beat  -> toJSON beat
                   RtmHello           -> object ["type" .= ("hello" :: Text)]
+                  RtmPing ping       -> toJSON ping
+                  RtmPong pong       -> toJSON pong
 
 instance FromJSON UserTyping where
   parseJSON = withObject "user typing event" $ \ o -> UserTyping
@@ -313,5 +326,23 @@ instance ToJSON Heartbeat where
   toJSON (Heartbeat user channel) = object
     [ "type"         .= ("heart_beat" :: Text)
     , "user"         .= user
-    , "channel"    .= channel
+    , "channel"      .= channel
+    ]
+instance FromJSON Ping where
+  parseJSON = withObject "ping" $ \o -> Ping
+    <$> o .: "id"
+
+instance ToJSON Ping where
+  toJSON (Ping pId) = object
+    [ "type"         .= ("ping" :: Text)
+    , "id"           .= pId
+    ]
+instance FromJSON Pong where
+  parseJSON = withObject "pong" $ \o -> Pong
+    <$> o .: "reply_to"
+
+instance ToJSON Pong where
+  toJSON (Pong replyTo) = object
+    [ "type"         .= ("pong" :: Text)
+    , "reply_to"     .= replyTo
     ]

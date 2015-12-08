@@ -43,10 +43,12 @@ chatApp channelId channelName userEntity = do
               RtmHeartbeat beat -> do
                 now <- liftIO getCurrentTime
                 void $ lift $ updateLastSeen (entityKey u) now
+              RtmPing ping -> sendTextData $ RtmPong (SH.Pong $ SH.pingId ping)
               _ -> liftIO getCurrentTime >>= (liftIO . runRedisAction (redisConn app) . S.broadcastEvent channelId . processMessage (entityKey u) inEvent) >> return ())
       Nothing -> ingest inChan
-    where ingest chan = forever $ atomically (readTChan chan) >>= sendTextData
+    where ingest chan = forever $ atomically (readTChan chan) >>= (\event -> sendTextData event)
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
+          wsExceptionHandler = putStrLn "shit"
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> RtmEvent
 processMessage userId event eventTS = case event of
