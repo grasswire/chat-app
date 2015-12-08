@@ -5,6 +5,7 @@ module Handler.Rtm where
 import Import
 
 import Taplike.Shared (RtmStartRp(..), Self(..))
+import qualified Taplike.Shared as Shared
 import Taplike.ChannelSlug
 import qualified Database.Esqueleto as E
 import Data.Time.Clock
@@ -29,8 +30,8 @@ getRtmStartR = do
                   runDB (usersPresentQuery (entityKey channel) fiveMinsAgo)
                 _ ->  return []
       let jsonResp = case user of
-                      Just u -> RtmStartRp url (Just $ Self (entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap entityVal users)
-                      _      -> RtmStartRp url Nothing (fmap entityVal users)
+                      Just u -> RtmStartRp url (Just $ Self (entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)
+                      _      -> RtmStartRp url Nothing (fmap userFromEntity users)
       returnJson jsonResp
     Nothing -> sendResponseStatus badRequest400 ("BADREQUEST: MISSING channel_slug param" :: Text)
 
@@ -43,3 +44,8 @@ usersPresentQuery chanKey lastseen = E.select $
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
                                                   heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
                                      return user
+
+userFromEntity :: Entity User -> Shared.User
+userFromEntity userEntity = Shared.User (userProfileImageUrl userVal) (userTwitterScreenName userVal) key
+  where userVal = entityVal userEntity
+        key     = entityKey userEntity

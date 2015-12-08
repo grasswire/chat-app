@@ -14,7 +14,7 @@ import           Taplike.TextShowOrphans ()
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Database.Persist.Class (Key(..))
 import           Data.UUID
-import           Model hiding (ChannelId, MessageText, Message, Heartbeat)
+import           Model hiding (ChannelId, MessageText, Message, Heartbeat, User)
 import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
 import           Taplike.ChannelSlug
@@ -70,6 +70,12 @@ idedName :: Getter s Text -> Getter s (ID k) -> (s -> Text)
 idedName name ident s = view name s ++ " <" ++ view (ident . to unID) s ++ ">"
 
 data RtmStartRequest = RtmStartRequest { rtmStartToken :: Text }
+
+data User = User
+  { userProfileImageUrl :: Text
+  , userTwitterScreenName :: Text
+  , userUserId :: UserId
+  }
 
 data RtmStartRp = RtmStartRp
   { _rtmStartUrl      :: Text
@@ -203,6 +209,7 @@ deriving instance Eq Ping
 deriving instance Eq Pong
 deriving instance Eq ReplyOk
 deriving instance Eq ReplyNotOk
+deriving instance Eq User
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -222,6 +229,7 @@ deriveTextShow ''Ping
 deriveTextShow ''Pong
 deriveTextShow ''ReplyOk
 deriveTextShow ''ReplyNotOk
+deriveTextShow ''User
 
 
 instance ToJSON RtmStartRequest where
@@ -380,3 +388,16 @@ instance FromJSON ReplyNotOk where
     <$> o .: "reply_to"
     <*> o .: "code"
     <*> o .: "msg"
+
+instance ToJSON User where
+  toJSON (User image screenName userId) = object
+    [ "profile_image_url" .= image
+    , "twitter_screen_name" .= screenName
+    , "user_id" .= userId
+    ]
+
+instance FromJSON User where
+  parseJSON = withObject "User" $ \o -> User
+    <$> o .: "profile_image_url"
+    <*> o .: "twitter_screen_name"
+    <*> o .: "user_id"
