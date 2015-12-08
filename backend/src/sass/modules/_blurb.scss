@@ -1,4 +1,21 @@
 .blurb {
+   @include flex-container(flex-start, flex-start, flex-start);
    @include font-size(18px);
+   height: auto;
+   flex-wrap: nowrap;
    padding-bottom: 10px;
+
+   &__image {
+      padding: 0 15px 0 0;
+      width: 60px;
+      img {
+         border-radius: 50%;
+         height: 35px;
+         width: 35px;
+      }
+   }
+
+   &__content {
+      flex-grow: 2
+   }
 }

@@ -2,7 +2,7 @@ App.Modules = App.Modules || {};
 App.Modules.ChatUsers = function () {
 
   var o = {
-     users: []
+     users: {}
   };
 
    var getChattingUsers = function() {
@@ -14,12 +14,20 @@ App.Modules.ChatUsers = function () {
    }
 
    var mapChatUsers = function(response) {
-      o.users = _.map(response.users, function(user) {
-         return {
-            profileImageUrl: user.profileImageUrl,
-            screenName: user.twitterScreenName,
-         }
-      });
+      o.users = _.object(
+         _.map(
+            _.map(response.users, function(u) {
+               return {
+                  id: u.user_id,
+                  profileImageUrl: u.profile_image_url,
+                  screenName: u.twitter_screen_name
+               }
+            }),
+            function(user) {
+               return [user.id, user]
+            }
+         )
+      );
 
       Events.publish('tl/chat/usersMapped', {
          users: o.users
@@ -31,7 +39,7 @@ App.Modules.ChatUsers = function () {
    };
 
    var displayUserCount = function(data) {
-      $(".js-user-count").html("("+data.users.length+")");
+      $(".js-user-count").html("("+_.keys(o.users).length+")");
    };
 
    return {
