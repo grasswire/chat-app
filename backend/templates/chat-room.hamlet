@@ -1,5 +1,5 @@
 <body class="#{signature}" data-is-logged-in="#{isLoggedIn}">
-  ^{masthead room}
+  ^{masthead}
 
   <main role="main">
     <div class="room">

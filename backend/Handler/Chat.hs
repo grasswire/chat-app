@@ -8,7 +8,7 @@ import qualified Server as S
 import           Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
-import           Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..))
+import           Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..), MessageText)
 import qualified Taplike.Shared as SH
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Taplike.ChannelSlug
@@ -27,6 +27,7 @@ getHealthCheckR = return "all good"
 
 chatApp :: Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp channelId channelName userEntity = do
+    sendTextData RtmHello
     sendTextData ("Welcome to #" <> channelName)
     app    <- getYesod
     chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelId
@@ -44,11 +45,15 @@ chatApp channelId channelName userEntity = do
                 now <- liftIO getCurrentTime
                 void $ lift $ updateLastSeen (entityKey u) now
               RtmPing ping -> sendTextData $ RtmPong (SH.Pong $ SH.pingId ping)
-              _ -> liftIO getCurrentTime >>= (liftIO . runRedisAction (redisConn app) . S.broadcastEvent channelId . processMessage (entityKey u) inEvent) >> return ())
+              _ -> do
+                ackMessage inEvent
+                liftIO getCurrentTime >>= (liftIO . runRedisAction (redisConn app) . S.broadcastEvent channelId . processMessage (entityKey u) inEvent) >> return ())
       Nothing -> ingest inChan
     where ingest chan = forever $ atomically (readTChan chan) >>= (\event -> sendTextData event)
           updateLastSeen userId currentTime = runDB (upsert (Heartbeat userId currentTime channelId ) [HeartbeatLastSeen =. currentTime])
-          wsExceptionHandler = putStrLn "shit"
+          ackMessage (RtmSendMessage incoming) = do
+            liftIO getCurrentTime >>= \now -> sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
+          ackMessage _ = return ()
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> RtmEvent
 processMessage userId event eventTS = case event of
@@ -72,9 +77,9 @@ getChatR slug = do
     case channel of
       Just c -> do
         let room = entityVal c
-        let masthead room = $(widgetFile "partials/chat/masthead")
+        let masthead = $(widgetFile "partials/chat/masthead")
         let sidebar = $(widgetFile "partials/chat/sidebar")
-        let isLoggedIn = if (isJust authId) then True else False
+        let isLoggedIn = isJust authId
         webSockets $ chatApp (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR

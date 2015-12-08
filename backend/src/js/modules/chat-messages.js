@@ -11,12 +11,11 @@ App.Modules.ChatMessages = function () {
             uuid: Utils.generateUUID(),
             channel_id: 9,
             type: "incoming_message",
-            timestamp: new Date().toISOString()
+            ts: new Date().toISOString()
       };
 
       o.connection.send(JSON.stringify(message));
       $(".js-chat-input").val("");
-
       return false;
    };
 
@@ -35,7 +34,7 @@ App.Modules.ChatMessages = function () {
       return false;
    };
 
-   var messageReceived = function(response) {
+   var messageReceived = function(response) {    
       try {
          var msg = JSON.parse(response.message.data);
          var message = {
@@ -47,6 +46,7 @@ App.Modules.ChatMessages = function () {
             text: response.message.data
          };
       };
+
 
       Events.publish("tl/chat/message/parsed", {
          message: message

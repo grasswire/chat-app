@@ -28,7 +28,7 @@ instance FromJSON ChannelId where
     case (toBoundedInteger s :: Maybe Int64) of
       Just i -> pure $ ChannelId (toSqlKey i)
       Nothing  -> fail . unpack $ "out of bound channel id " <> showt (FromStringShow s)
-newtype MessageText = MessageText Text
+newtype MessageText = MessageText { unMessageText :: Text}
 instance ToJSON MessageText where
   toJSON (MessageText text) = String text
 instance FromJSON MessageText where
@@ -68,8 +68,6 @@ deriveTextShow ''ID
 
 idedName :: Getter s Text -> Getter s (ID k) -> (s -> Text)
 idedName name ident s = view name s ++ " <" ++ view (ident . to unID) s ++ ">"
-
-data Response a = ResponseNotOk !Text | ResponseOk a
 
 data RtmStartRequest = RtmStartRequest { rtmStartToken :: Text }
 
@@ -139,14 +137,26 @@ data Heartbeat = Heartbeat
 
 data RtmEvent
   = RtmHello
-  | RtmReplyOk Word64 (Maybe TS) (Maybe Text)
-  | RtmReplyNotOk Word64 Int32 Text
+  | RtmReplyOk ReplyOk
+  | RtmReplyNotOk ReplyNotOk
   | RtmMessage Message
   | RtmUserTyping UserTyping
   | RtmSendMessage IncomingMessage
   | RtmHeartbeat Heartbeat
   | RtmPing Ping
   | RtmPong Pong
+
+data ReplyOk = ReplyOk
+  { replyOkReplyTo :: UUID
+  , replyOkTS      :: Maybe UTCTime
+  , replyOkText    :: Maybe Text
+  }
+
+data ReplyNotOk = ReplyNotOk
+  { replyNotOkReplyTo :: UUID
+  , replyNotOkCode    :: Int32
+  , replyNotOkText    :: Text
+  }
 
 data Ping = Ping { pingId :: Int32 }
 data Pong = Pong { pongReplyTo :: Int32 }
@@ -191,6 +201,8 @@ deriving instance Eq ChannelId
 deriving instance Eq Heartbeat
 deriving instance Eq Ping
 deriving instance Eq Pong
+deriving instance Eq ReplyOk
+deriving instance Eq ReplyNotOk
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -208,17 +220,13 @@ deriveTextShow ''ChannelId
 deriveTextShow ''Heartbeat
 deriveTextShow ''Ping
 deriveTextShow ''Pong
+deriveTextShow ''ReplyOk
+deriveTextShow ''ReplyNotOk
 
 
 instance ToJSON RtmStartRequest where
   toJSON (RtmStartRequest { .. }) = object
     [ ("token", toJSON rtmStartToken) ]
-
-instance FromJSON a => FromJSON (Response a) where
-  parseJSON = withObject "TapLike reply" $ \ o ->
-    o .: "ok" >>= \ case
-    True -> ResponseOk <$> parseJSON (Object o)
-    False -> ResponseNotOk <$> o .:? "error" .!= "unknown error"
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
@@ -271,12 +279,6 @@ instance FromJSON RtmEvent where
     let recur :: FromJSON a => Parser a
         recur = parseJSON v
     in flip (withObject "event object") v $ \ o ->
-        o .:? "reply_to" >>= \ case
-          Just seqnum ->
-            o .: "ok" >>= \ case
-              True  -> RtmReplyOk seqnum <$> o .:? "ts" <*> o .:? "text"
-              False -> o .: "error" >>= withObject "RTM error" (\o2 -> RtmReplyNotOk seqnum <$> o2 .: "code" <*> o2 .: "msg")
-          Nothing ->
             o .: "type" >>= pure . asText >>= \ case
               "hello"                   -> pure RtmHello
               "ping"                    -> RtmPing <$> recur
@@ -285,16 +287,20 @@ instance FromJSON RtmEvent where
               "user_typing"             -> RtmUserTyping <$> recur
               "incoming_message"        -> RtmSendMessage <$> recur
               "heart_beat"              -> RtmHeartbeat <$> recur
+              "ok"                      -> RtmReplyOk <$> recur
+              "not_ok"                  -> RtmReplyNotOk <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
-                  RtmSendMessage msg -> toJSON msg
-                  RtmMessage message -> toJSON message
-                  RtmHeartbeat beat  -> toJSON beat
-                  RtmHello           -> object ["type" .= ("hello" :: Text)]
-                  RtmPing ping       -> toJSON ping
-                  RtmPong pong       -> toJSON pong
+                  RtmSendMessage msg  -> toJSON msg
+                  RtmMessage message  -> toJSON message
+                  RtmHeartbeat beat   -> toJSON beat
+                  RtmHello            -> object ["type" .= ("hello" :: Text)]
+                  RtmPing ping        -> toJSON ping
+                  RtmPong pong        -> toJSON pong
+                  RtmReplyOk ok       -> toJSON ok
+                  RtmReplyNotOk notok -> toJSON notok
 
 instance FromJSON UserTyping where
   parseJSON = withObject "user typing event" $ \ o -> UserTyping
@@ -305,7 +311,7 @@ instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
     [ "type"         .= ("incoming_message" :: Text)
     , "uuid"         .= uuid
-    , "timestamp"    .= ts
+    , "ts"           .= ts
     , "channel_id"   .= channelId
     , "message_text" .= msgText
     ]
@@ -313,7 +319,7 @@ instance ToJSON IncomingMessage where
 instance FromJSON IncomingMessage where
   parseJSON  = withObject "incoming message" $ \ o ->  IncomingMessage
       <$> o .: "uuid"
-      <*> o .: "timestamp"
+      <*> o .: "ts"
       <*> o .: "channel_id"
       <*> o .: "message_text"
 
@@ -346,3 +352,31 @@ instance ToJSON Pong where
     [ "type"         .= ("pong" :: Text)
     , "reply_to"     .= replyTo
     ]
+
+instance ToJSON ReplyOk where
+  toJSON (ReplyOk replyTo ts text) = object
+    [ "type"  .= ("ok" :: Text)
+    , "reply_to" .= replyTo
+    , "ts" .= ts
+    , "text" .= text
+    ]
+
+instance ToJSON ReplyNotOk where
+  toJSON (ReplyNotOk replyTo code msg) = object
+    [ "type"  .= ("not_ok" :: Text)
+    , "reply_to" .= replyTo
+    , "code" .= code
+    , "msg" .= msg
+    ]
+
+instance FromJSON ReplyOk where
+  parseJSON = withObject "reply ok" $ \o -> ReplyOk
+    <$> o .: "reply_to"
+    <*> o .: "ts"
+    <*> o .: "text"
+
+instance FromJSON ReplyNotOk where
+  parseJSON = withObject "reply not ok" $ \o -> ReplyNotOk
+    <$> o .: "reply_to"
+    <*> o .: "code"
+    <*> o .: "msg"
