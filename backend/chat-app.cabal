@@ -129,6 +129,7 @@ library
                  , hedis
                  , esqueleto
                  , binary
+                 , lifted-base
 
 
 executable         chat-app
