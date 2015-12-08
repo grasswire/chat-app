@@ -30,11 +30,14 @@ import Network.WebSockets (ConnectionException)
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
-chatApp :: App -> Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp app channelId channelName userEntity = (flip EL.catch) (wsExceptionHandler (redisConn app) channelId) $ do
+type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
+
+chatApp :: WSExceptionHandler -> Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp exceptionHandler channelId channelName userEntity = (flip EL.catch) exceptionHandler $ do
     $(logInfo) "Running WebSocketsT Handler"
     sendTextData RtmHello
     sendTextData ("Welcome to #" <> channelName)
+    app <- getYesod
     chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelId
     inChan <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
@@ -66,7 +69,6 @@ wsExceptionHandler conn chanId e = do
   liftIO $ TIO.putStrLn ("Exception : " <> (pack $ show e))
   liftIO $ runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
   return ()
-
 
 pingThread :: Redis.Connection -> ChannelId -> IO ThreadId
 pingThread conn chanId =
@@ -105,7 +107,7 @@ getChatR slug = do
         let masthead = $(widgetFile "partials/chat/masthead")
         let sidebar = $(widgetFile "partials/chat/sidebar")
         let isLoggedIn = isJust authId
-        webSockets $ chatApp app (entityKey c) (channelTitle room) chatUser
+        webSockets $ chatApp (wsExceptionHandler (redisConn app) (entityKey c)) (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
