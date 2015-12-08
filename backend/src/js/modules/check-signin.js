@@ -11,14 +11,18 @@ App.Modules.CheckSignin = function () {
             modal: 'signin'
          });
       }
+   };
 
+   var noWriting = function(data) {
+      checkLogin();
+      data.eventElement.blur();
    };
 
    return {
       init: function() { return this; },
       events: function() {
          Events.bind("load").where('body[class]', 'chatroom').to(checkLogin, this);
-         Events.bind("focusin", ".js-chat-input").to(checkLogin, this);
+         Events.bind("focusin", ".js-chat-input").to(noWriting, this);
          return this;
       }
    };
