@@ -17,6 +17,9 @@ type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 runRedisAction :: Connection -> RedisAction a -> IO (Either Reply a)
 runRedisAction conn action = runReaderT (runExceptT action) conn
 
+withRedisExcept :: (Connection -> IO (Either Reply a)) -> RedisAction a
+withRedisExcept = ExceptT . ReaderT
+
 channelPresenceSetKey :: ByteString
 channelPresenceSetKey = C8.pack "chan_set"
 
@@ -24,7 +27,7 @@ mkChannelPresenceSetValue :: Key Channel -> ByteString
 mkChannelPresenceSetValue = toStrict . encode . fromSqlKey
 
 numUsersPresent :: Key Channel -> RedisAction (Maybe TP.NumberUsersPresent)
-numUsersPresent key = ExceptT $ ReaderT $ \conn -> do
+numUsersPresent key = withRedisExcept $ \conn -> do
     score <- runRedis conn $ zscore channelPresenceSetKey (mkChannelPresenceSetValue key)
     return $ fmap toUsersPresent <$> score
 
@@ -38,3 +41,10 @@ keyToChanKey = toSqlKey . Bin.decode . fromStrict
 
 toUsersPresent :: Double -> TP.NumberUsersPresent
 toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
+
+setChannelPresenceCount :: Integer -> Key Channel -> RedisAction Double
+setChannelPresenceCount score channelId = withRedisExcept $ \conn -> do
+  let memb = mkChannelPresenceSetValue channelId
+  runRedis conn $ zrem channelPresenceSetKey [memb]
+  res <- runRedis conn $ zincrby channelPresenceSetKey score memb
+  return res
