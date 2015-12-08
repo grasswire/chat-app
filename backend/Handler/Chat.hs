@@ -8,6 +8,7 @@ import qualified Server as S
 import           Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
+import qualified Data.Text.IO as TIO
 import           Taplike.Shared (RtmEvent(..), TS(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..), MessageText)
 import qualified Taplike.Shared as SH
 import           Database.Persist.Sql (fromSqlKey, toSqlKey)
@@ -24,22 +25,22 @@ import Model.Instances ()
 import DataStore
 import Control.Concurrent (threadDelay, forkIO, ThreadId)
 import qualified Control.Exception.Lifted as EL
+import Network.WebSockets (ConnectionException)
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good"
 
-chatApp :: Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp channelId channelName userEntity = (flip EL.catch) wsExceptionHandler $ do
+chatApp :: App -> Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp app channelId channelName userEntity = (flip EL.catch) (wsExceptionHandler (redisConn app) channelId) $ do
     $(logInfo) "Running WebSocketsT Handler"
     sendTextData RtmHello
     sendTextData ("Welcome to #" <> channelName)
-    app    <- getYesod
     chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelId
     inChan <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u -> do
-        pingThreadId <- liftIO $ pingThread (redisConn app) channelId
-        pingThreadId <- liftIO (newEmptyMVar :: IO (MVar ThreadId))
+        -- pingThreadId <- liftIO $ pingThread (redisConn app) channelId
+        -- pingThreadId <- liftIO (newEmptyMVar :: IO (MVar ThreadId))
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal u)
         _ <- liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
         liftIO getCurrentTime >>= \t -> void $ lift $ updateLastSeen (entityKey u) t
@@ -60,8 +61,12 @@ chatApp channelId channelName userEntity = (flip EL.catch) wsExceptionHandler $ 
           ackMessage (RtmSendMessage incoming) = liftIO getCurrentTime >>= \now -> sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
           ackMessage _ = return ()
 
-wsExceptionHandler :: SomeException -> WebSocketsT Handler ()
-wsExceptionHandler _ = liftIO $ putStrLn "got some exception!!"
+wsExceptionHandler :: Redis.Connection -> ChannelId -> ConnectionException -> WebSocketsT Handler ()
+wsExceptionHandler conn chanId e = do
+  liftIO $ TIO.putStrLn ("Exception : " <> (pack $ show e))
+  liftIO $ runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
+  return ()
+
 
 pingThread :: Redis.Connection -> ChannelId -> IO ThreadId
 pingThread conn chanId =
@@ -86,6 +91,7 @@ newtype RoomId = RoomId Integer
 
 getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
+    app <- getYesod
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
     renderFunc <- getUrlRenderParams
@@ -99,7 +105,7 @@ getChatR slug = do
         let masthead = $(widgetFile "partials/chat/masthead")
         let sidebar = $(widgetFile "partials/chat/sidebar")
         let isLoggedIn = isJust authId
-        webSockets $ chatApp (entityKey c) (channelTitle room) chatUser
+        webSockets $ chatApp app (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
