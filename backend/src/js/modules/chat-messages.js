@@ -2,7 +2,8 @@ App.Modules = App.Modules || {};
 App.Modules.ChatMessages = function () {
 
   var o = {
-     connection: null
+     connection: null,
+     users: {}
   };
 
    var sendMessage = function(data) {
@@ -34,23 +35,29 @@ App.Modules.ChatMessages = function () {
       return false;
    };
 
-   var messageReceived = function(response) {    
+   var messageReceived = function(response) {
       try {
          var msg = JSON.parse(response.message.data);
-         var message = {
-            text: msg.text
-         };
-
+         if (msg.type === "message") {
+            var message = {
+               type: true,
+               text: msg.text,
+               user: o.users[msg.user]
+            };
+         }
       } catch (e) {
          var message = {
             text: response.message.data
          };
       };
 
-
       Events.publish("tl/chat/message/parsed", {
          message: message
       });
+   };
+
+   var getUserList = function(data) {
+      o.users = data.users;
    };
 
    return {
@@ -59,6 +66,7 @@ App.Modules.ChatMessages = function () {
          Events.subscribe("tl/chat/setup", chatReady);
          Events.subscribe("tl/chat/message/sent", messageReceived);
          Events.subscribe("tl/chat/message/parsed", displayMessage);
+         Events.subscribe("tl/chat/usersMapped", getUserList);
 
          Events.bind("submit", ".js-chat-form").to(sendMessage, this);
          return this;
