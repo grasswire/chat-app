@@ -45,6 +45,7 @@ chatApp exceptionHandler channelId channelName userEntity = (flip EL.catch) exce
         -- pingThreadId <- liftIO $ pingThread (redisConn app) channelId
         -- pingThreadId <- liftIO (newEmptyMVar :: IO (MVar ThreadId))
         liftIO $ atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal u)
+        liftIO $ runRedisAction (redisConn app) $ S.broadcastEvent channelId (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity u) SH.PresenceActive)) >> return ()
         _ <- liftIO $ runRedis (redisConn app) $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
         liftIO getCurrentTime >>= \t -> void $ lift $ updateLastSeen (entityKey u) t
         race_

@@ -4,7 +4,7 @@ module Handler.Rtm where
 
 import Import
 
-import Taplike.Shared (RtmStartRp(..), Self(..))
+import Taplike.Shared (RtmStartRp(..), Self(..), userFromEntity)
 import qualified Taplike.Shared as Shared
 import Taplike.ChannelSlug
 import qualified Database.Esqueleto as E
@@ -50,8 +50,3 @@ usersPresentQuery chanKey lastseen = E.select $
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
                                                   heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
                                      return user
-
-userFromEntity :: Entity User -> Shared.User
-userFromEntity userEntity = Shared.User (userProfileImageUrl userVal) (userTwitterScreenName userVal) key
-  where userVal = entityVal userEntity
-        key     = entityKey userEntity

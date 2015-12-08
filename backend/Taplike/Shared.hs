@@ -19,6 +19,10 @@ import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
 import           Taplike.ChannelSlug
 import           Data.Maybe (fromJust)
+import qualified Model as Model
+import Database.Persist.Types (Entity(..))
+
+
 
 newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
@@ -76,6 +80,11 @@ data User = User
   , userTwitterScreenName :: Text
   , userUserId :: UserId
   }
+
+userFromEntity :: Entity Model.User -> User
+userFromEntity userEntity = User (Model.userProfileImageUrl userVal) (Model.userTwitterScreenName userVal) key
+  where userVal = entityVal userEntity
+        key     = entityKey userEntity
 
 data RtmStartRp = RtmStartRp
   { _rtmStartUrl      :: Text
@@ -151,6 +160,7 @@ data RtmEvent
   | RtmHeartbeat Heartbeat
   | RtmPing Ping
   | RtmPong Pong
+  | RtmPresenceChange PresenceChange
 
 data ReplyOk = ReplyOk
   { replyOkReplyTo :: UUID
@@ -166,6 +176,11 @@ data ReplyNotOk = ReplyNotOk
 
 data Ping = Ping { pingId :: Int32 }
 data Pong = Pong { pongReplyTo :: Int32 }
+
+data PresenceChange = PresenceChange
+  { presenceChangeUser     :: User
+  , presenceChangePresence :: Presence
+  }
 
 instance WebSocketsData RtmEvent where
   fromLazyByteString = fromJust . decode
@@ -210,6 +225,8 @@ deriving instance Eq Pong
 deriving instance Eq ReplyOk
 deriving instance Eq ReplyNotOk
 deriving instance Eq User
+deriving instance Eq Presence
+deriving instance Eq PresenceChange
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -230,7 +247,8 @@ deriveTextShow ''Pong
 deriveTextShow ''ReplyOk
 deriveTextShow ''ReplyNotOk
 deriveTextShow ''User
-
+deriveTextShow ''PresenceChange
+deriveTextShow ''Presence
 
 instance ToJSON RtmStartRequest where
   toJSON (RtmStartRequest { .. }) = object
@@ -282,6 +300,17 @@ instance ToJSON Message where
            , "event_ts" .= eventTs, "channel" .= channel
            ]
 
+instance FromJSON Presence where
+ parseJSON = withText "presence value" $ \ case
+   "active" -> pure PresenceActive
+   "away"   -> pure PresenceAway
+   other    -> fail . unpack $ "unknown presence value " <> other
+
+instance FromJSON PresenceChange where
+ parseJSON = withObject "presence change event" $ \ o -> PresenceChange
+   <$> o .: "user"
+   <*> o .: "presence"
+
 instance FromJSON RtmEvent where
   parseJSON v =
     let recur :: FromJSON a => Parser a
@@ -297,6 +326,7 @@ instance FromJSON RtmEvent where
               "heart_beat"              -> RtmHeartbeat <$> recur
               "ok"                      -> RtmReplyOk <$> recur
               "not_ok"                  -> RtmReplyNotOk <$> recur
+              "presence_change"         -> RtmPresenceChange <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
@@ -309,6 +339,7 @@ instance ToJSON RtmEvent where
                   RtmPong pong        -> toJSON pong
                   RtmReplyOk ok       -> toJSON ok
                   RtmReplyNotOk notok -> toJSON notok
+                  RtmPresenceChange change -> toJSON change
 
 instance FromJSON UserTyping where
   parseJSON = withObject "user typing event" $ \ o -> UserTyping
@@ -401,3 +432,14 @@ instance FromJSON User where
     <$> o .: "profile_image_url"
     <*> o .: "twitter_screen_name"
     <*> o .: "user_id"
+
+instance ToJSON PresenceChange where
+  toJSON (PresenceChange user presence) = object
+    [ "type"  .= ("presence_change" :: Text)
+    , "user" .= user
+    , "presence" .= presence
+    ]
+
+instance ToJSON Presence where
+  toJSON PresenceActive = String "active"
+  toJSON PresenceAway   = String "away"
