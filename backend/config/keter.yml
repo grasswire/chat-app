@@ -12,7 +12,7 @@ stanzas:
 
     # Name of your executable. You are unlikely to need to change this.
     # Note that all file paths are relative to the keter.yml file.
-    exec: ../dist/build/chat-app/chat-app
+    exec: ../.stack-work/dist/x86_64-linux/Cabal-1.22.4.0/build/chat-app/chat-app
 
     # Command line options passed to your application.
     args: []
@@ -22,7 +22,7 @@ stanzas:
       # to. The primary hostname will be used for generating your application
       # root.
       # - www.chat-app.com
-      - 127.0.0.1
+      - ENV_HOST
 
     # Enable to force Keter to redirect to https
     # Can be added to any stanza
@@ -32,7 +32,7 @@ stanzas:
   - type: static-files
     hosts:
       # - static.chat-app.com
-      - 127.0.0.1
+      - ENV_HOST
     root: ../static
 
     # Uncomment to turn on directory listings.
