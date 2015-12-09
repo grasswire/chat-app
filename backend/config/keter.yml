@@ -22,7 +22,7 @@ stanzas:
       # to. The primary hostname will be used for generating your application
       # root.
       # - www.chat-app.com
-      - ENV_HOST
+      - beta.taplike.com
 
     # Enable to force Keter to redirect to https
     # Can be added to any stanza
@@ -32,7 +32,7 @@ stanzas:
   - type: static-files
     hosts:
       # - static.chat-app.com
-      - ENV_HOST
+      - beta.taplike.com
     root: ../static
 
 plugins:
