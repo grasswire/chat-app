@@ -35,10 +35,10 @@ stanzas:
       - beta.taplike.com
     root: ../static
 
-plugins:
-  postgres: 
-     - server: taplikedbinstancestage.cjggh3kf4zau.us-west-2.rds.amazonaws.com
-       port: 5432
+# plugins:
+#   postgres: 
+#      - server: taplikedbinstancestage.cjggh3kf4zau.us-west-2.rds.amazonaws.com
+#        port: 5432
 
     # Uncomment to turn on directory listings.
     # directory-listing: true
