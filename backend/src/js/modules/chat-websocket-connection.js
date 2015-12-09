@@ -5,7 +5,7 @@ App.Modules.ChatWebSocketConnection = function () {
 
    var setup = function() {
       var url = App.routes.chatRoom;
-      App.socket = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""));
+      App.socket = new WebSocket(url.replace("http:", "wss:").replace("https:", "wss:").replace("?", "").replace("#", ""));
       Events.publish("tl/chat/socket/ready", {});
    }
 
