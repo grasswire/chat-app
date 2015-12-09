@@ -1,10 +1,15 @@
 App.Modules = App.Modules || {};
 App.Modules.ChatMessages = function () {
 
-  var o = {
-     connection: null,
-     users: {}
-  };
+  var o = { };
+
+   var chatReady = function (response) {
+      App.socket.onmessage = function(e) {
+         Events.publish("tl/chat/messages/received", {
+            message: e
+         });
+      };
+   };
 
    var sendMessage = function(data) {
       var message = {
@@ -15,19 +20,10 @@ App.Modules.ChatMessages = function () {
             ts: new Date().toISOString()
       };
 
-      o.connection.send(JSON.stringify(message));
+      App.socket.send(JSON.stringify(message));
       $(".js-chat-input").val("");
+
       return false;
-   };
-
-   var chatReady = function (response) {
-      o.connection = response.connection;
-
-      o.connection.onmessage = function(e) {
-         Events.publish("tl/chat/message/sent", {
-            message: e
-         });
-      };
    };
 
    var displayMessage = function(response) {
@@ -42,8 +38,9 @@ App.Modules.ChatMessages = function () {
             var message = {
                type: true,
                text: msg.text,
-               user: o.users[msg.user]
+               user: App.data.users[msg.user]
             };
+            console.log(message);
          }
       } catch (e) {
          var message = {
@@ -51,22 +48,17 @@ App.Modules.ChatMessages = function () {
          };
       };
 
-      Events.publish("tl/chat/message/parsed", {
+      Events.publish("tl/chat/messages/parsed", {
          message: message
       });
-   };
-
-   var getUserList = function(data) {
-      o.users = data.users;
    };
 
    return {
       init: function() { return this; },
       events: function() {
-         Events.subscribe("tl/chat/setup", chatReady);
-         Events.subscribe("tl/chat/message/sent", messageReceived);
-         Events.subscribe("tl/chat/message/parsed", displayMessage);
-         Events.subscribe("tl/chat/usersMapped", getUserList);
+         Events.subscribe("tl/chat/socket/ready", chatReady);
+         Events.subscribe("tl/chat/messages/received", messageReceived);
+         Events.subscribe("tl/chat/messages/parsed", displayMessage);
 
          Events.bind("submit", ".js-chat-form").to(sendMessage, this);
          return this;
