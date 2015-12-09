@@ -33,6 +33,7 @@ type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 chatApp :: WSExceptionHandler -> Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp exceptionHandler channelId channelName userEntity =
   flip EL.catch exceptionHandler $ do
+    addHeader "Access-Control-Allow-Origin" "*"
     sendTextData RtmHello
     sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
