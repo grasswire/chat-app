@@ -101,6 +101,7 @@ newtype RoomId = RoomId Integer
 
 getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
+    addHeader "Access-Control-Allow-Origin" "*"
     app <- getYesod
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId

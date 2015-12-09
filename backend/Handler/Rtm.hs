@@ -13,6 +13,7 @@ import Control.Concurrent (forkIO)
 
 getRtmStartR :: Handler Value
 getRtmStartR = do
+  addHeader "Access-Control-Allow-Origin" "*"
   app <- getYesod
   authId <- maybeAuthId
   user <- case authId of
