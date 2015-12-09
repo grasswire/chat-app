@@ -149,19 +149,8 @@ instance YesodAuth App where
     -- Override the above two destinations when a Referer: header is present
     redirectToReferer _ = True
 
-    -- authenticate creds = runDB $ do
-    --     x <- getBy $ UniqueUser $ credsIdent creds
-    --     return $ case x of
-    --         Just (Entity uid _) -> Authenticated uid
-    --         Nothing -> UserError InvalidLogin
-    authenticate creds = lift $ return (UserError InvalidLogin)
-
-    -- You can add other plugins like BrowserID, email or OAuth here
---    authPlugins _ = [authBrowserId def]
-
     authPlugins _ = []
 
-    -- maybeAuthId = return Nothing
     maybeAuthId = do
         userIdFromSession <- lookupSession sessionUserIdKey
         return (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
