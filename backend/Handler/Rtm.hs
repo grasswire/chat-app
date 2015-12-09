@@ -5,7 +5,6 @@ module Handler.Rtm where
 import Import
 
 import Taplike.Shared (RtmStartRp(..), Self(..), userFromEntity)
-import qualified Taplike.Shared as Shared
 import Taplike.ChannelSlug
 import qualified Database.Esqueleto as E
 import Data.Time.Clock
@@ -29,8 +28,8 @@ getRtmStartR = do
       users <- case maybeChan of
                 Just channel -> do
                   timeNow <- liftIO getCurrentTime
-                  let fiveMinsAgo = addUTCTime (negate 300 :: NominalDiffTime) timeNow
-                  runDB (usersPresentQuery (entityKey channel) fiveMinsAgo)
+                  let minActiveAgo = addUTCTime (negate 30 :: NominalDiffTime) timeNow
+                  runDB (usersPresentQuery (entityKey channel) minActiveAgo)
                 _ ->  return []
       case maybeChan of
         Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresenceCount (fromIntegral $ length users :: Integer) (entityKey chan)))
