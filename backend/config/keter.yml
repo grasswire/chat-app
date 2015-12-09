@@ -21,7 +21,8 @@ stanzas:
       # You can specify one or more hostnames for your application to respond
       # to. The primary hostname will be used for generating your application
       # root.
-      - www.chat-app.com
+      # - www.chat-app.com
+      - ENV_HOST
 
     # Enable to force Keter to redirect to https
     # Can be added to any stanza
@@ -30,19 +31,20 @@ stanzas:
   # Static files.
   - type: static-files
     hosts:
-      - static.chat-app.com
+      # - static.chat-app.com
+      - ENV_HOST
     root: ../static
 
     # Uncomment to turn on directory listings.
     # directory-listing: true
 
   # Redirect plain domain name to www.
-  - type: redirect
-
-    hosts:
-      - chat-app.com
-    actions:
-      - host: www.chat-app.com
+  # - type: redirect
+  #
+  #   hosts:
+  #     - chat-app.com
+  #   actions:
+  #     - host: www.chat-app.com
         # secure: false
         # port: 80
 
