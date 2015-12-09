@@ -1,22 +1,33 @@
 App.Modules = App.Modules || {};
 App.Modules.ChatUsers = function () {
 
-  var o = {
-     users: {}
-  };
+  var o = { };
 
-   var getChattingUsers = function() {
+   var getChatroomList = function() {
       AjaxRoute.as("get")
          .to(App.routes.rtmStartUrl, {})
          .on({
-            complete: mapChatUsers
+            success: sanitizeUsers
          });
    }
 
-   var mapChatUsers = function(response) {
-      o.users = _.object(
+   var sanitizeUsers = function(response) {
+      App.data.users = _.extend(mapUsers(response.users), mapUsers([response.self]));
+      Events.publish('tl/chat/users/sanitized', {});
+   };
+
+   var generateUserList = function(data) {
+      $('.js-userlist-output').html(Handlebars.templates.userList(App.data.users));
+   };
+
+   var displayUserCount = function(data) {
+      $(".js-user-count").html("("+_.keys(App.data.users).length+")");
+   };
+
+   var mapUsers = function(userList) {
+      var mapped = _.object(
          _.map(
-            _.map(response.users, function(u) {
+            _.map(userList, function(u) {
                return {
                   id: u.user_id,
                   profileImageUrl: u.profile_image_url,
@@ -29,25 +40,15 @@ App.Modules.ChatUsers = function () {
          )
       );
 
-      Events.publish('tl/chat/usersMapped', {
-         users: o.users
-      });
+      return mapped;
    };
-
-   var generateUserList = function(data) {
-      $('.js-userlist-output').html(Handlebars.templates.userList(data.users));
-   };
-
-   var displayUserCount = function(data) {
-      $(".js-user-count").html("("+_.keys(o.users).length+")");
-   };
-
    return {
       init: function() { return this; },
       events: function() {
-         Events.subscribe("tl/chat/setup", getChattingUsers);
-         Events.subscribe("tl/chat/usersMapped", generateUserList);
-         Events.subscribe("tl/chat/usersMapped", displayUserCount);
+         Events.bind("load").where('body[class]', 'chatroom').to(getChatroomList, this);
+
+         Events.subscribe("tl/chat/users/sanitized", generateUserList);
+         Events.subscribe("tl/chat/users/sanitized", displayUserCount);
 
          return this;
       }
