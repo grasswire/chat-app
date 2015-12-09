@@ -269,15 +269,15 @@ instance ToJSON RtmStartRp where
 
 instance FromJSON Self where
   parseJSON = withObject "self object" $ \ o -> Self
-    <$> o .: "id"
-    <*> o .: "name"
+    <$> o .: "user_id"
+    <*> o .: "twitter_screen_name"
     <*> o .: "profile_image_url"
 
 instance ToJSON Self where
   toJSON (Self sId name profileImageUrl) = object
-    [ "id"                .= sId
-    , "name"              .= name
-    , "profile_image_url" .= profileImageUrl
+    [ "user_id"             .= sId
+    , "twitter_screen_name" .= name
+    , "profile_image_url"   .= profileImageUrl
     ]
 
 instance FromJSON a => FromJSON (TapLikeTracked a) where
