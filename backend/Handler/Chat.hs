@@ -55,7 +55,7 @@ chatApp exceptionHandler channelId channelName userEntity = flip EL.catch except
               RtmPing ping -> sendTextData $ RtmPong (SH.Pong $ SH.pingId ping)
               _ -> do
                 ackMessage inEvent
-                runInnerHandler <- lift (handlerToIO :: HandlerT App IO (HandlerT App IO () -> IO ()))
+                runInnerHandler <- lift handlerToIO
                 _ <- liftIO $ forkIO $ runInnerHandler $ do
                   now <-  liftIO getCurrentTime
                   void $ updateLastSeen (entityKey u) now
