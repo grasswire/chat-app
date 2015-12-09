@@ -40,6 +40,8 @@ import qualified Data.Map as Map
 import Server
 import qualified Database.Redis as Redis
 import Database.Redis (ConnectInfo(..), defaultConnectInfo)
+import Network.Wai.Middleware.Cors
+
 
 -- This line actually creates our YesodDispatch instance. It is the second half
 -- of the call to mkYesodData which occurs in Foundation.hs. Please see the
@@ -107,7 +109,7 @@ makeApplication foundation = do
 
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
-    return $ logWare $ defaultMiddlewaresNoLogging appPlain
+    return $ simpleCors $ logWare $ defaultMiddlewaresNoLogging appPlain
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings

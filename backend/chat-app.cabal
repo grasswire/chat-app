@@ -131,6 +131,7 @@ library
                  , esqueleto
                  , binary
                  , lifted-base
+                 , wai-cors
 
 
 executable         chat-app
