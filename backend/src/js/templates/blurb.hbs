@@ -1,5 +1,4 @@
 <div class="blurb">
-   {{#if this.type }}
    <div class="blurb__image">
       <img src="{{this.user.profileImageUrl}}">
    </div>
@@ -9,11 +8,4 @@
          {{this.text}}
       </p>
    </div>
-   {{else}}
-   <div class="blurb__content">
-      <p>
-         <strong>{{this.text}}</strong>
-      </p>
-   </div>
-   {{/if}}
 </div>

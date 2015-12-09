@@ -4,7 +4,6 @@ App.Modules.ChatWebSocketConnection = function () {
    var o = { };
 
    var setup = function() {
-      console.log("Connection Setup");
       var url = App.routes.chatRoom;
       App.socket = new WebSocket(url.replace("http:", "ws:").replace("https:", "wss:").replace("?", "").replace("#", ""));
       Events.publish("tl/chat/socket/ready", {});
@@ -13,7 +12,7 @@ App.Modules.ChatWebSocketConnection = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.subscribe("tl/chat/users/sanitized", setup);
+         Events.subscribe("tl/chat/users/init", setup);
 
          return this;
       }
