@@ -9,7 +9,7 @@ html {
    font: {
       family: get-stack(sans-serif);
       size: get-stack(base-size);
-      weight: get-weight(light);
+      weight: get-weight(regular);
    }
    height: 100%;
    letter-spacing: get-stack(letter-spacing);
@@ -40,7 +40,7 @@ img {
 
 h1, h2, h3, h4, h5, h6 {
    font: {
-      family: get-stack(serif);
+      family: get-stack(sans-serif);
       weight: get-font-weight(bold);
    }
    padding: 0;

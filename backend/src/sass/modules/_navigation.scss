@@ -20,7 +20,7 @@
    &__signin {
       @include button-inline(14px);
       border: 0;
-      font-weight: get-font-weight(regular);
+      font-weight: get-font-weight(normal);
       padding: 0 10px;
 
       @include last() {

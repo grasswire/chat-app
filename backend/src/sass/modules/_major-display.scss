@@ -19,7 +19,7 @@
 
    &__headline {
       @include font-size(28px);
-      font-family: get-stack(sans-condensed);
+      font-family: get-stack(sans-serif);
       margin-bottom: 20px;
    }
 }
