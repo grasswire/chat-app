@@ -16,6 +16,13 @@ stanzas:
 
     # Command line options passed to your application.
     args: []
+    
+    forward-env:
+      - PGPASS 
+      - PGDATABASE
+      - POSTGRES_HOST
+      - PGUSER
+      - REDIS_HOST
 
     hosts:
       # You can specify one or more hostnames for your application to respond
