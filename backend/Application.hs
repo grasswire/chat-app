@@ -109,7 +109,7 @@ makeApplication foundation = do
 
     -- Create the WAI application and apply middlewares
     appPlain <- toWaiAppPlain foundation
-    return $ simpleCors $ logWare $ defaultMiddlewaresNoLogging appPlain
+    return $ logWare $ defaultMiddlewaresNoLogging $ simpleCors appPlain
 
 -- | Warp settings for the given foundation value.
 warpSettings :: App -> Settings
