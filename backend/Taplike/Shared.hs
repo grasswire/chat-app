@@ -116,11 +116,11 @@ data Bot = Bot
 data Chat
 
 data Message = Message
-  { _messageUser         :: UserId
-  , _messageText         :: MessageText
-  , _messageTS           :: UTCTime
-  , _messageEventTS      :: Maybe UTCTime
-  , _messageChannel      :: ChannelId
+  { messageUser         :: UserId
+  , messageText         :: MessageText
+  , messageTS           :: UTCTime
+  , messageEventTS      :: Maybe UTCTime
+  , messageChannel      :: ChannelId
   }
 
 data IncomingMessage = IncomingMessage
@@ -132,11 +132,11 @@ data IncomingMessage = IncomingMessage
 
 testMessage :: UTCTime -> Int64 -> UserId -> Text -> Message
 testMessage ts chat from text = Message
-  { _messageUser         = from
-  , _messageText         = MessageText text
-  , _messageTS           = ts
-  , _messageEventTS      = Nothing
-  , _messageChannel      = ChannelId $ ChannelKey 1
+  { messageUser         = from
+  , messageText         = MessageText text
+  , messageTS           = ts
+  , messageEventTS      = Nothing
+  , messageChannel      = ChannelId $ ChannelKey 1
  }
 
 data TapLikeTracked a = TapLikeTracked

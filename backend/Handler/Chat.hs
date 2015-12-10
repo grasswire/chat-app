@@ -21,7 +21,7 @@ import qualified Types as TP
 import qualified Data.Map.Strict as MS
 import Model.Instances ()
 import DataStore
-import Control.Concurrent (threadDelay, forkIO, ThreadId)
+import Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
 
@@ -49,7 +49,7 @@ chatApp exceptionHandler channelId channelName userEntity =
 
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ (S.broadcastEvent channelId (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive)))
+        void . runRedisAction redisConn $ S.broadcastEvent channelId (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
         runRedis redisConn $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
 
       lift wasSeen
@@ -62,10 +62,16 @@ chatApp exceptionHandler channelId channelName userEntity =
           runInnerHandler <- lift handlerToIO
           void $ liftIO $ forkIO $ runInnerHandler $ do
             wasSeen
-            void $ liftIO $ getCurrentTime >>= runRedisAction redisConn . S.broadcastEvent channelId . processMessage (entityKey user) inEvent
-            pure ()
+            ts <- liftIO getCurrentTime
+            let processedMsg = processMessage (entityKey user) inEvent ts
+            maybe (return ()) (\e -> void (liftIO $ runRedisAction redisConn $ S.broadcastEvent channelId e) >> persistEvent (entityKey user) e) processedMsg
           pure ()
-
+    
+    persistEvent :: UserId -> RtmEvent -> Handler ()
+    persistEvent userId event = case event of 
+                                  RtmMessage msg -> void $ runDB $ insert (Message userId (SH.unMessageText $ SH.messageText msg) (SH.messageTS msg) channelId)
+                                  _              -> return ()  
+    
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
       sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
@@ -77,26 +83,13 @@ wsExceptionHandler conn chanId e = do
   _ <- liftIO $ runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
   return ()
 
-pingThread :: Redis.Connection -> ChannelId -> IO ThreadId
-pingThread conn chanId =
-    forkIO $ do
-      threadDelay thirtySeconds
-      putStrLn "thirty seconds expired, decrementing channel presence"
-      _ <- runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
-      return ()
-
-thirtySeconds :: Int
-thirtySeconds = 30000000
-
-processMessage :: UserId -> RtmEvent -> UTCTime -> RtmEvent
+processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
-                              (RtmSendMessage incoming) -> RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
-                              _ -> RtmHello
+                              (RtmSendMessage incoming) -> Just $ RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
+                              _                         -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
-
-newtype RoomId = RoomId Integer
 
 getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
