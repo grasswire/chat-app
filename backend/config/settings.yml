@@ -19,8 +19,8 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 
 database:
   user:     "_env:PGUSER:taplike"
-  password: "_env:PGPASS:D9SXyZZlVDZz"
-  host:     "_env:POSTGRES_HOST:taplikedbinstancestage.cjggh3kf4zau.us-west-2.rds.amazonaws.com"
+  password: "_env:PGPASS:taplike"
+  host:     "_env:POSTGRES_HOST:localhost"
   port:     "_env:PGPORT:5432"
   database: "_env:PGDATABASE:taplike"
   poolsize: "_env:PGPOOLSIZE:10"
@@ -32,7 +32,7 @@ twitter:
   consumerSecret: "_env:TWITTER_CONSUMER_SECRET:xcKEmKUQb216M8VZ0rZx0zYd2jshBV7w4vZd9nBFZga16c09zx"
 
 redis:
-  redisHost: "_env:REDIS_HOST:taplike-stage.7vxias.0001.usw2.cache.amazonaws.com"
+  redisHost: "_env:REDIS_HOST:localhost"
 
 copyright: Insert copyright statement here
 #analytics: UA-YOURCODE
