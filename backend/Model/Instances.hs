@@ -12,14 +12,18 @@ import Data.Aeson.Types (Value(..))
 instance FromJSON NewChannel where
   parseJSON (Object v) = NewChannel <$>
                          v .: "title" <*>
-                         v .: "topic"
+                         v .: "topic" <*>
+                         v .: "color"
   parseJSON _          = empty
 
 instance ToJSON NewChannel where
-  toJSON (NewChannel title topic) = object [ "title" .= title
-                                           , "topic" .= topic]
+  toJSON (NewChannel title topic color) = object [ "title" .= title
+                                                 , "topic" .= topic
+                                                 , "color" .= color]
 
-deriving instance FromJSON NewChannelTopic
-deriving instance FromJSON NewChannelTitle
-deriving instance ToJSON NewChannelTitle
-deriving instance ToJSON NewChannelTopic
+deriving instance FromJSON ChannelTopic
+deriving instance FromJSON ChannelTitle
+deriving instance FromJSON ChannelColor
+deriving instance ToJSON ChannelTitle
+deriving instance ToJSON ChannelTopic
+deriving instance ToJSON ChannelColor

@@ -8,17 +8,14 @@ import Data.Time (UTCTime)
 import Data.Typeable
 import Data.Word (Word64)
 
-newtype NewChannelTitle =
-  NewChannelTitle { unNewChannelTitle :: Text }
+newtype ChannelColor =
+  ChannelColor { unChannelColor :: Text }
   deriving (Eq, Show, Typeable, Read)
 
-newtype NewChannelTopic =
-  NewChannelTopic { unNewChannelTopic :: Text }
-  deriving (Eq, Show, Typeable)
-
 data NewChannel = NewChannel
-  { newChannelTitle :: NewChannelTitle
-  , newChannelTopic :: NewChannelTopic
+  { newChannelTitle :: ChannelTitle
+  , newChannelTopic :: ChannelTopic
+  , newChannelColor :: ChannelColor
   } deriving (Eq, Show, Typeable)
 
 newtype UserId =
@@ -67,4 +64,6 @@ data Channel = Channel
   , channelSlug            :: ChannelSlug
   , channelTitle           :: ChannelTitle
   , channelNumUsersPresent :: NumberUsersPresent
+  , channelColor           :: ChannelColor
+  
   }

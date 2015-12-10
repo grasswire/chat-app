@@ -118,8 +118,8 @@ postNewChatR = do
     case authId of
       Just chanCreator -> do
         currentTime <- liftIO getCurrentTime
-        let slug = slugify $ TP.unNewChannelTitle $ TP.newChannelTitle channel
-            newChannel  = Channel (TP.unNewChannelTitle $ TP.newChannelTitle channel) (TP.unNewChannelTopic $ TP.newChannelTopic channel) slug currentTime chanCreator
+        let slug = slugify $ TP.unChannelTitle $ TP.newChannelTitle channel
+            newChannel  = Channel (TP.unChannelTitle $ TP.newChannelTitle channel) (TP.unChannelTopic $ TP.newChannelTopic channel) slug currentTime chanCreator (TP.unChannelColor $ TP.newChannelColor channel)
         runDB (insert newChannel) >>= \key -> sendResponseStatus status201 (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 

@@ -9,6 +9,7 @@ import TextShow.Data.Time ()
 import Taplike.TextShowOrphans ()
 import qualified Types as TP
 import Database.Persist.Sql  (fromSqlKey)
+-- import Data.Monoid ((<>))
 
 
 -- You can define all of your database entities in the entities file.
@@ -31,4 +32,5 @@ chanFromEntity entity numPresent = TP.Channel { TP.channelCreator = TP.UserId (f
                                               , TP.channelSlug = TP.ChannelSlug $ unSlug $ channelCrSlug $ entityVal entity
                                               , TP.channelTitle = TP.ChannelTitle $ channelTitle $ entityVal entity
                                               , TP.channelNumUsersPresent = numPresent
+                                              , TP.channelColor = TP.ChannelColor $ ("#" <> (channelColor $ entityVal entity))
                                               }

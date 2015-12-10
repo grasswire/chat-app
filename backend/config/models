@@ -14,6 +14,7 @@ Channel json
     UniqueChannelSlug crSlug
     created UTCTime
     creator UserId
+    color Text sqltype=char(6) default='3774bd'
     deriving Eq Show Typeable
 
 Message
