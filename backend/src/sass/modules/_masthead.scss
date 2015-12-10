@@ -1,3 +1,10 @@
+.logo {
+   @include font-size(28px);
+   font-family: get-stack(sans-serif);
+   text-decoration: none;
+   padding: 0 10px;
+}
+
 .masthead {
    @include container();
    background: get-color(fun-blue);
@@ -28,6 +35,16 @@
 
    h2 {
       @include font-size(24px);
-      color: get-color(white);
+      font-weight: get-font-weight(normal);
+   }
+
+   &__room-overview {
+      @include font-size(14px);
+      font-weight: get-font-weight(normal);
+   }
+
+   &__actions {
+      padding: 0 10px 0 10px;
+      width: 20%;
    }
 }

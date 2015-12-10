@@ -9,7 +9,8 @@ html {
    font: {
       family: get-stack(sans-serif);
       size: get-stack(base-size);
-      weight: get-font-weight(normal);
+      weight: get-weight(regular);
+
    }
    height: 100%;
    letter-spacing: get-stack(letter-spacing);
