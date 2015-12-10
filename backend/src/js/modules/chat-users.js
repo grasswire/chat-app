@@ -44,17 +44,12 @@ App.Modules.ChatUsers = function () {
    };
 
    var updateUserList = function(data) {
-      AjaxRoute.as("get")
-         .to(App.routes.rtmStartUrl, {})
-         .on({
-            success: updateUsers
-         });
+      if (!_.has(App.data.users, data.user.user_id)) {
+         App.data.users = _.extend(App.data.users, mapUsers([data.user]));
+         $('.js-chat-output').append(Handlebars.templates.userJoinedChat(App.data.users[data.user.user_id]));
+      }
    };
 
-   var updateUsers = function(response) {
-      App.data.users = _.extend(mapUsers(response.users), mapUsers([response.self]));
-      Events.publish('tl/chat/users/updated', {});
-   };
    return {
       init: function() { return this; },
       events: function() {
@@ -64,8 +59,8 @@ App.Modules.ChatUsers = function () {
          Events.subscribe("tl/chat/users/init", displayUserCount);
          Events.subscribe("tl/chat/users/updated", generateUserList);
          Events.subscribe("tl/chat/users/updated", displayUserCount);
-         Events.subscribe("tl/chat/messages/presence_change", updateUserList);
 
+         Events.subscribe("tl/chat/messages/presence_change", updateUserList);
          return this;
       }
    };
