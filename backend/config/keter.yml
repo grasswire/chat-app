@@ -17,13 +17,13 @@ stanzas:
     # Command line options passed to your application.
     args: []
     
-    forward-env:
-      - PGPASS 
-      - PGDATABASE
-      - POSTGRES_HOST
-      - PGUSER
-      - REDIS_HOST
-
+    env:
+        PGPASS: D9SXyZZlVDZz
+        PGDATABASE: taplike
+        POSTGRES_HOST: taplikedbinstancestage.cjggh3kf4zau.us-west-2.rds.amazonaws.com
+        PGUSER: taplike 
+        REDIS_HOST: taplike-stage.7vxias.0001.usw2.cache.amazonaws.com
+    
     hosts:
       # You can specify one or more hostnames for your application to respond
       # to. The primary hostname will be used for generating your application
