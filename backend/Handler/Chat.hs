@@ -26,7 +26,7 @@ import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
 
 getHealthCheckR :: Handler Text
-getHealthCheckR = return "all good"
+getHealthCheckR = return "all good!!"
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
