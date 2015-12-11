@@ -12,7 +12,7 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 #
 # development: false
 # detailed-logging: false
-# should-log-all: false
+should-log-all: true
 # reload-templates: false
 # mutable-static: false
 # skip-combining: false

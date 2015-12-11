@@ -24,6 +24,10 @@ import DataStore
 import Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
+import Database.Persist.Sql (rawSql)
+import Database.Persist.Types (PersistValue(..))
+import Data.Time.Clock
+
 
 getHealthCheckR :: Handler Text
 getHealthCheckR = return "all good!!"
@@ -50,7 +54,7 @@ chatApp exceptionHandler channelId channelName userEntity =
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal user)
         void . runRedisAction redisConn $ S.broadcastEvent channelId (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
-        runRedis redisConn $ zincrby channelPresenceSetKey 1 (mkChannelPresenceSetValue channelId)
+        void . runRedisAction redisConn $ incrChannelPresence channelId
 
       lift wasSeen
 
@@ -80,7 +84,7 @@ chatApp exceptionHandler channelId channelName userEntity =
 wsExceptionHandler :: Redis.Connection -> ChannelId -> ConnectionException -> WebSocketsT Handler ()
 wsExceptionHandler conn chanId e = do
   liftIO $ TIO.putStrLn ("Exception : " <> pack (show e))
-  _ <- liftIO $ runRedis conn $ zincrby channelPresenceSetKey (-1) (mkChannelPresenceSetValue chanId)
+  _ <- liftIO . void . runRedisAction conn $ decrChannelPresence chanId
   return ()
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
@@ -137,18 +141,24 @@ getHomeR = do
     app <- getYesod
     let signature = "home" :: String
     let modalCreate = $(widgetFile "partials/modals/create")
-    chansWithScores <- liftIO $ runRedisAction (redisConn app) (channelsByPresenceDesc 27)
-    (topChannels, allChannels) <- case chansWithScores of
-      Right cs -> do
-        let filtered = filter ((>= 1) . TP.unNumberUsersPresent . snd) cs
-            popularChannelIds = fmap fst filtered
-            chanScoreMap = MS.fromList filtered
-        chanEntities <- runDB (selectList [ChannelId <-. popularChannelIds] []) :: Handler [Entity Channel]
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\c -> chanFromEntity c (fromMaybe (TP.NumberUsersPresent 0) (MS.lookup (entityKey c) chanScoreMap))) <$> chanEntities
-      Left _ -> return ([], [])
+    timeNow <- liftIO getCurrentTime
+    let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
+    (topChannels, allChannels) <- do 
+        chanEntities <- runDB (popularChannels minActiveAgo)
+        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (entityKey <$> chanEntities)
+        let zipped = case presences of 
+                      Right ps -> chanEntities `zip` ps
+                      Left _   -> chanEntities `zip` (replicate (length chanEntities) (TP.NumberUsersPresent 0))      
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\(c, numPresent) -> chanFromEntity c numPresent) <$> zipped
     defaultLayout $ do
       setTitle "Taplike / Home"
       $(widgetFile "homepage")
+      
+popularChannelsStatement :: Text
+popularChannelsStatement = "select ?? from channel where id in (select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
+
+popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
+popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]      
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR

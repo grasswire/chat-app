@@ -2,7 +2,7 @@
 
 module Handler.Rtm where
 
-import Import
+import Import hiding ((==.), (>=.))
 
 import Taplike.Shared (RtmStartRp(..), Self(..), userFromEntity)
 import Taplike.ChannelSlug
@@ -10,6 +10,8 @@ import qualified Database.Esqueleto as E
 import Data.Time.Clock
 import DataStore
 import Control.Concurrent (forkIO)
+import Database.Esqueleto.Internal.Language ((^.), (==.), (>=.))
+
 
 getRtmStartR :: Handler Value
 getRtmStartR = do
@@ -28,11 +30,11 @@ getRtmStartR = do
       users <- case maybeChan of
                 Just channel -> do
                   timeNow <- liftIO getCurrentTime
-                  let minActiveAgo = addUTCTime (negate 60 :: NominalDiffTime) timeNow
-                  runDB (usersPresentQuery (entityKey channel) minActiveAgo)
+                  let hourAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
+                  runDB (usersPresentQuery (entityKey channel) hourAgo)
                 _ ->  return []
       case maybeChan of
-        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresenceCount (fromIntegral $ length users :: Integer) (entityKey chan)))
+        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (entityKey chan)))
         _ -> return ()
       let jsonResp = case user of
                       Just u -> RtmStartRp url (Just $ Self (entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)
@@ -49,3 +51,4 @@ usersPresentQuery chanKey lastseen = E.select $
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
                                                   heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
                                      return user
+
