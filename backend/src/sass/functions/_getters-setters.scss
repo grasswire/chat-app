@@ -26,3 +26,7 @@
 @function get-stack($setting) {
    @return get-by($setting, $stack-settings);
 }
+
+@function get-line-height($font-size, $line-height) {
+   @return get-value($line-height / $font-size);
+}

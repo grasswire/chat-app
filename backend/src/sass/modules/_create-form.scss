@@ -2,25 +2,33 @@
    text-align: center;
 
    &__label {
-      @include font-size(20px);
+      @include font-size(16px);
+      font-weight: get-font-weight(semi-bold);
       display: block;
       text-align: left;
       width: 100%;
    }
 
-   &__title,
-   &__description {
-      @include font-size(18px);
+   &__input {
+      @include font-size(24px);
       border: none;
-      border-bottom: 1px solid get-color(charcoal);
-      margin: 2em 0;
+      border-bottom: 1px solid get-color(mercury);
+      font-weight: get-font-weight(light);
+      line-height: get-line-height(26px, 32px);
+      margin-bottom: 50px;
+      margin-top: 20px;
       outline: none;
       width: 100%;
+
+      &--description {
+         @extend .create__input;
+         min-height: 75px;
+      }
    }
 
-   &__button {
-      @include button(22px);
-      padding: 10px 30px;
-      text-align: center;
+   &__links {
+      @include font-size(15px);
+      color: get-color(boston-blue);
+      line-height: get-line-height(15px, 20px);
    }
 }
