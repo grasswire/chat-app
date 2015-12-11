@@ -14,8 +14,8 @@
               <a href="@{TwitterAuthR}">Log in
     <div class="masthead__content-container">
       <div class="wrapper">
-        <h1>Welcome Back.
-        <h2>Simple chat rooms. The way it used to be
+        <h1>Chat about anything
+        <h2>Join a live community or start your own
         <p>
           $maybe userId <- authId
             <a href="#" class="js-trigger-modal button" data-modal-trigger="create">Create a Room
