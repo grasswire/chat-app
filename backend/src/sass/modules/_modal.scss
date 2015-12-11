@@ -1,13 +1,17 @@
 .modal {
+   background: get-color(white);
+   left: 20%;
+   position: absolute;
+   right: 20%;
+   top: 20%;
+   z-index: get-zindex(20);
 
    &--full-screen {
-      background: get-color(white);
+      @extend .modal;
       bottom: 0;
       left: 0;
-      position: absolute;
       right: 0;
       top: 0;
-      z-index: get-zindex(20);
    }
 
    &__header {
@@ -16,12 +20,13 @@
    }
 
    &__close {
-      @include font-size(33px);
-      color: get-color(charcoal);
+      @include font-size(26px);
+      color: get-color(cadet-blue);
    }
 
    &__title {
-      @include font-size(45px);
+      @include font-size(32px);
+      color: get-color(ebony-clay);
       text-align: center;
    }
 }
