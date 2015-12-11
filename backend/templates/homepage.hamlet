@@ -39,34 +39,20 @@
     <div class="secondary-content">
       <div class="content-container">
         <h3 class="headline__standard">All Chats
-        <div class="content-flex-container">
-          <a class="card--listing" href="#">
-            <h3 class="card__title--listing">Joe's #5
-              <div class="card__meta--listing">
-                <span class="fa fa-user">
-                <strong>43
-            <p class="card__text--listing">Joe's mambo number 5
-          <a class="card--listing" href="#">
-            <h3 class="card__title--listing">Joe's #5
-              <div class="card__meta--listing">
-                <span class="fa fa-user">
-                <strong>43
-            <p class="card__text--listing">Joe's mambo number 5
-          <a class="card--listing" href="#">
-            <h3 class="card__title--listing">Joe's #5
-              <div class="card__meta--listing">
-                <span class="fa fa-user">
-                <strong>43
-            <p class="card__text--listing">Joe's mambo number 5
+        <div class="card__container">
           $forall channel <- allChannels
             <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
               <h3 class="card__title--listing">#{TP.unChannelTitle $ TP.channelTitle channel}
                 <div class="card__meta--listing">
                   <span class="fa fa-user">
-                  <strong>#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
+                  <span class="card__count--listing">#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
               <p class="card__text--listing">#{TP.unChannelTopic $ TP.channelTopic channel}
-          <p class="center">
-            <a href="#" class="button">Load More
+        <p class="center">
+          <a href="#" class="button">Load More
+  <footer class="page__footer">
+    <div class="content-container">
+      <a href="/" class="logo--small-dark">Tap
+        <strong>Like
 
 
   ^{modalCreate}

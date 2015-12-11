@@ -9,7 +9,6 @@ App.Modules.CreateChatroom = function () {
             title: $('.js-create-title-input').val(),
             topic: $('.js-create-description-input').val(),
             color: "f8f8f8"
-            
          })
          .on({
             complete: redirectToRoom
