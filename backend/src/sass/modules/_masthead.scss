@@ -1,58 +1,33 @@
-.logo {
-   @include font-size(28px);
-   font-family: get-stack(sans-serif);
-   text-decoration: none;
-   padding: 0 10px;
-}
-
 .masthead {
    @include container();
-   background: get-color(white);
+   background: get-color(fun-blue);
+   background: linear-gradient(to bottom, get-color(fun-blue) 0%,get-color(tawny-port) 100%);
    font-weight: get-font-weight(light);
-   padding: 0 $page-boundary;
-   position: fixed;
-   height: $masthead-height;
+   height: 471px;
    width: 100%;
-   z-index: get-zindex(1);
 
-   &--full-width {
-      @include flex-container(center, center, flex-start);
-      font-weight: get-font-weight(light);
-      padding: 0;
-      position: fixed;
-      height: $masthead-height;
-      width: 100%;
-      z-index: get-zindex(1);
+   &__navigation-container {
+      @include flex-container();
+      padding: 21px 30px 0 30px;
+      margin: 0 auto;
+      max-width: $max-page-width;
+      height: 70px;
    }
 
-   &__branding {
-      @include flex-container(center, center);
-      background: darken(get-color(alto), 3%);
-      padding: 0 $page-boundary;
-      min-width: 240px;
-      width: 30%;
+   &__content-container {
+      @include flex-container(center, center, center);
+      text-align: center;
+      margin-top: -70px; // pull it up by the masthead
    }
 
-   &__description {
-      padding: 0 10px 0 40px;
-      width: 50%;
+   h1 {
+      @include font-size(48px);
+      color: get-color(white);
+      text-transform: uppercase;
    }
 
-   &__room-title {
+   h2 {
       @include font-size(24px);
-      font-weight: get-font-weight(normal);
-   }
-
-   &__room-overview {
-      @include font-size(14px);
-      font-weight: get-font-weight(normal);
-   }
-
-   &__actions {
-      padding: 0 10px 0 10px;
-      width: 20%;
+      color: get-color(white);
    }
 }
-
-
-
