@@ -17,6 +17,9 @@ App.Modules.CreateChatroom = function () {
    };
 
    var finished = function(response) {
+      $('.js-create-title-input').val("");
+      $('.js-create-description-input').val("");
+
       location.href = '/room/'+response.slug;
    };
 

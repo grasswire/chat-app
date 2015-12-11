@@ -14,4 +14,4 @@
           <textarea type="text" name="" class="create__input--description js-create-description-input">
         <button type="submit" class="button">Create It
         <p>
-          <a href="/" class="create__links">Nevermind
+          <a href="#" class="create__links js-trigger-modal-close">Nevermind

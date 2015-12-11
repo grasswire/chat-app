@@ -5,13 +5,16 @@
         <strong>Like
       <nav>
         <ul class="navigation-main__list">
-          <li class="navigation-main__item">
-            <a href="">Create
-          <li class="navigation-main__item">
-            $maybe userId <- authId
-              <a href="">Log Out
-            $nothing
-              <a href="@{TwitterAuthR}">Log in
+          $maybe userId <- authId
+            <li class="navigation-main__item">
+              <a href="#" class="js-trigger-modal" data-modal-trigger="create">Create
+            <li class="navigation-main__item">
+                <a href="/logout">Log Out
+          $nothing
+            <li class="navigation-main__item">
+              <a href="@{TwitterAuthR}?modal=create" class="js-trigger-modal" data-modal-trigger="create">Create
+            <li class="navigation-main__item">
+                <a href="@{TwitterAuthR}">Log In
     <div class="masthead__content-container">
       <div class="wrapper">
         <h1>Chat about anything
