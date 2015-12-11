@@ -27,7 +27,7 @@
 
   <main>
     <div class="content-container">
-      <h3 class="headline__standard">Trending Chats
+      <h3 class="page__headline">Trending Chats
       <div class="card__container">
         $forall channel <- topChannels
           <a class="card" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
@@ -36,9 +36,9 @@
               <span class="fa fa-user">
               <span class="card__count">#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
             <p class="card__text">#{TP.unChannelTopic $ TP.channelTopic channel}
-    <div class="secondary-content">
+    <div class="page__secondary">
       <div class="content-container">
-        <h3 class="headline__standard">All Chats
+        <h3 class="page__headline">All Chats
         <div class="card__container">
           $forall channel <- allChannels
             <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
@@ -49,7 +49,7 @@
               <p class="card__text--listing">#{TP.unChannelTopic $ TP.channelTopic channel}
         <p class="center">
           <a href="#" class="button">Load More
-  <footer class="page__footer">
+  <footer class="standard-page__footer">
     <div class="content-container">
       <a href="/" class="logo--small-dark">Tap
         <strong>Like

@@ -19,10 +19,6 @@
       padding-right: 30px;
    }
 
-   &__button {
-      @include button();
-   }
-
    &__title {
       @include font-size(20px);
 
