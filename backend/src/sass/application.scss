@@ -34,7 +34,7 @@
 
 /**
  * This is where you start editing.  We don't make any assumptions so these are
- * all just bare files.  With a little text to explain the thoughts behind it all/
+ * all just bare files.  With a little text to explain the thoughts behind it all
  */
 // Base .......................................................................
 @import "base/variables";
@@ -73,7 +73,6 @@
  * and move all the modules around and your site should work fine.  No cascade.
  */
 // Modules ....................................................................
-@import "modules/major-display";
 @import "modules/create-form";
 @import "modules/navigation";
 @import "modules/like-list";
@@ -83,7 +82,6 @@
 @import "modules/profile";
 @import "modules/actions";
 @import "modules/sidebar";
-@import "modules/loader";
 @import "modules/blurb";
 @import "modules/modal";
 @import "modules/logo";

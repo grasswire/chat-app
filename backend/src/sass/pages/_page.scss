@@ -2,7 +2,7 @@
     @include container();
     margin: 0 auto;
     max-width: $max-page-width;
-    padding: 0 10px;
+    padding: 0 40px;
 }
 
 .content-flex-wrapper {
@@ -31,17 +31,40 @@
    }
 }
 
-main {
-   height: 100%;
-   padding-top: $masthead-height;
+.center {
+   text-align: center;
+}
+
+.headline {
+   &__standard {
+      @include font-size(18px);
+      font-weight: get-font-weight(light);
+      margin: 10px 0;
+      text-transform: uppercase;
+   }
 }
 
 
 .button {
-   &--callout {
-      @include button(16px);
-      padding: 15px 60px;
-   }
+    @include font-size(15px);
+    background: get-color(boston-blue);
+    border: 0;
+    border-radius: $button-border-radius;
+    color: get-color(white);
+    display: inline-block;
+    font-weight: get-font-weight(bold);
+    padding: 15px 40px;
+    margin: 15px 0;
+    text-align: center;
+    text-decoration: none;
+    transition: background 0.3s ease-out;
+    width: 246px;
+
+    &:hover {
+        background: darken(get-color(boston-blue), 5%);
+        transition: background 0.3s ease-in;
+    }
+
 
    &--member-toggle {
       @include font-size(14px);

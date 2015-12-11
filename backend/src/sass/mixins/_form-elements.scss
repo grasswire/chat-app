@@ -38,35 +38,25 @@
     }
 }
 
-@mixin button($size: 16px) {
+@mixin button($size: 15px, $width: auto) {
     @include font-size($size);
-    background: get-color(alto);
-    border: 1px solid get-color(dove-gray);
-    color: get-color(dove-gray);
+    background: get-color(boston-blue);
+    border: 0;
+    border-radius: $button-border-radius;
+    color: get-color(white);
     display: inline-block;
     font-weight: get-font-weight(bold);
-    padding: 10px 40px;
+    padding: 15px 40px;
+    text-align: center;
     text-decoration: none;
     transition: background 0.3s ease-out;
+    width: $width;
+
     &:hover {
-        background: darken(get-color(alto), 5%);
+        background: darken(get-color(boston-blue), 5%);
         transition: background 0.3s ease-in;
     }
 }
 
-@mixin button-inline($size: 16px) {
-   @include button($size);
-   background: transparent;
-   border-radius: 0;
-   color: get-color(black);
-   transition: none;
-   transition: color 0.3s ease-out;
-
-   &:hover {
-      background: transparent;
-      color: get-color(shark);
-      transition: color 0.3s ease-in;
-   }
-}
 
 
