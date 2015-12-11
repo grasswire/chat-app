@@ -1,30 +1,21 @@
-.nav {
-   &__list {
-      text-align: right;
-   }
-
+.navigation-main {
    &__item {
-      @include font-size(16px);
+      @include font-size(14px);
       display: inline-block;
-      margin: 0 5px;
+      margin: 0;
+      padding: 0;
 
       a {
+         color: get-color(white);
+         display: inline-block;
          text-decoration: none;
+         padding: 0 22px;
       }
-
-      @include last {
-         margin: 0;
-      }
-   }
-
-   &__signin {
-      @include button-inline(14px);
-      border: 0;
-      font-weight: get-font-weight(normal);
-      padding: 0 10px;
 
       @include last() {
-         padding-right: 0;
+         a {
+            margin-right: -22px;
+         }
       }
    }
 }

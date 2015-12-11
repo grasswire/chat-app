@@ -1,6 +1,7 @@
 <header class="masthead--full-width">
   <section class="masthead__branding">
-    <a href="/" class="logo">TapLike
+    <a href="/" class="logo">Tap
+      <strong>Like
     <div class="userinfo">
       <a href="#" class="avatar">Username
       <a href="#" class="notification">21
