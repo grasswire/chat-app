@@ -12,13 +12,13 @@ App.Modules.CreateChatroom = function () {
             
          })
          .on({
-            complete: finished
+            complete: redirectToRoom
          });
 
          return false;
    };
 
-   var finished = function(response) {
+   var redirectToRoom = function(response) {
       $('.js-create-title-input').val("");
       $('.js-create-description-input').val("");
 

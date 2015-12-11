@@ -31,6 +31,10 @@
    }
 }
 
+.secondary-content {
+   background: get-color(athens-gray);
+}
+
 .center {
    text-align: center;
 }
@@ -39,7 +43,7 @@
    &__standard {
       @include font-size(18px);
       font-weight: get-font-weight(light);
-      margin: 10px 0;
+      margin: 46px 0 15px 0;
       text-transform: uppercase;
    }
 }
