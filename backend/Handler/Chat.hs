@@ -70,12 +70,12 @@ chatApp exceptionHandler channelId channelName userEntity =
             let processedMsg = processMessage (entityKey user) inEvent ts
             maybe (return ()) (\e -> void (liftIO $ runRedisAction redisConn $ S.broadcastEvent channelId e) >> persistEvent (entityKey user) e) processedMsg
           pure ()
-    
+
     persistEvent :: UserId -> RtmEvent -> Handler ()
-    persistEvent userId event = case event of 
+    persistEvent userId event = case event of
                                   RtmMessage msg -> void $ runDB $ insert (Message userId (SH.unMessageText $ SH.messageText msg) (SH.messageTS msg) channelId)
-                                  _              -> return ()  
-    
+                                  _              -> return ()
+
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
       sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
@@ -108,8 +108,6 @@ getChatR slug = do
     case channel of
       Just c -> do
         let room = entityVal c
-            masthead = $(widgetFile "partials/chat/masthead")
-            sidebar = $(widgetFile "partials/chat/sidebar")
             isLoggedIn = isJust authId
         webSockets $ chatApp (wsExceptionHandler (redisConn app) (entityKey c)) (entityKey c) (channelTitle room) chatUser
         defaultLayout $(widgetFile "chat-room")
@@ -143,22 +141,22 @@ getHomeR = do
     let modalCreate = $(widgetFile "partials/modals/create")
     timeNow <- liftIO getCurrentTime
     let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
-    (topChannels, allChannels) <- do 
+    (topChannels, allChannels) <- do
         chanEntities <- runDB (popularChannels minActiveAgo)
         presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (entityKey <$> chanEntities)
-        let zipped = case presences of 
+        let zipped = case presences of
                       Right ps -> chanEntities `zip` ps
-                      Left _   -> chanEntities `zip` (replicate (length chanEntities) (TP.NumberUsersPresent 0))      
+                      Left _   -> chanEntities `zip` (replicate (length chanEntities) (TP.NumberUsersPresent 0))
         return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\(c, numPresent) -> chanFromEntity c numPresent) <$> zipped
     defaultLayout $ do
       setTitle "Taplike / Home"
       $(widgetFile "homepage")
-      
+
 popularChannelsStatement :: Text
 popularChannelsStatement = "select ?? from channel where id in (select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
 
 popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
-popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]      
+popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR

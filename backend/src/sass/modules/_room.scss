@@ -1,34 +1,53 @@
 .room {
    @include flex-container(stretch, stretch);
-}
 
-.realtime {
-   background: get-color(white);
-   height: 100%;
-   position: relative;
-   flex-grow: 2;
-
-   &__input {
-      @include font-size(13px);
-      background-color: get-color(gallery);
-      padding: 15px 20px;
+   &__sidebar {
+      background: get-color(ebony-clay);
+      height: 100%;
+      min-width: 240px;
+      width: 30%;
    }
 
-   &__output {
-      bottom: 125px;
-      overflow:hidden;
-      overflow-y: scroll;
-      padding: 20px 40px;
-      position: absolute;
-      top: 0;
-      width: 100%;
+   &__masthead {
+      background: get-color(boston-blue);
    }
 
-   &__form {
-      bottom: 10px;
-      padding: 20px 40px;
-      position: absolute;
-      width: 100%;
+   &__chat {
+      border: 1px solid blue;
+      height: 100%;
+      flex-grow: 2;
    }
 }
+
+
+
+// .realtime {
+//    background: get-color(white);
+//    height: 100%;
+//    position: relative;
+//    flex-grow: 2;
+
+//    &__input {
+//       @include font-size(13px);
+//       background-color: get-color(gallery);
+//       padding: 15px 20px;
+//    }
+
+//    &__output {
+//       bottom: 125px;
+//       overflow:hidden;
+//       overflow-y: scroll;
+//       padding: 20px 40px;
+//       position: absolute;
+//       top: 0;
+//       width: 100%;
+//    }
+
+//    &__form {
+//       bottom: 10px;
+//       padding: 20px 40px;
+//       position: absolute;
+//       width: 100%;
+//    }
+// }
 
