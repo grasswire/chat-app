@@ -9,7 +9,6 @@
    flex-grow: 2;
 
    &__input {
-      @include input();
       @include font-size(13px);
       background-color: get-color(gallery);
       padding: 15px 20px;

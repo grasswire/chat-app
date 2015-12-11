@@ -26,11 +26,11 @@
  * everwhere.
  */
 // Functions & Mixins .........................................................
-@import "functions/getters-setters";
-@import "mixins/pseudo-elements";
-@import "mixins/form-elements";
-@import "mixins/flexbox";
-@import "mixins/font";
+@import "utilities/getters-setters";
+@import "utilities/pseudo-elements";
+@import "utilities/flexbox";
+@import "utilities/font";
+@import "utilities/text";
 
 /**
  * This is where you start editing.  We don't make any assumptions so these are
@@ -39,6 +39,7 @@
 // Base .......................................................................
 @import "base/variables";
 @import "base/elements";
+@import "base/inputs";
 
 /**
  * Most of your code *should* nicely fit into modules, but I'd the truth is that
@@ -88,8 +89,3 @@
 @import "modules/card";
 @import "modules/room";
 
-/**
- * I use a BEM style of CSS development, so sometimes I have classes that don't
- * really fit or span multiple modules.  Those go here.
- */
-// Utility Classes ............................................................
