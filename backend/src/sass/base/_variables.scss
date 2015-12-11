@@ -107,8 +107,9 @@ $colors: (
   global-box-sizing: border-box
 ));
 
-$current-zindex:  100;
-$max-page-width:  1024px;
-$masthead-height: 75px;
-$page-boundary:   15px;
-
+$current-zindex:        100;
+$max-page-width:        1024px;
+$masthead-height:       70px;
+$page-boundary:         30px;
+$button-border-radius:  4px;
+$menu-border-radius:    8px;
