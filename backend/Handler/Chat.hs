@@ -12,20 +12,17 @@ import qualified Data.Text.IO as TIO
 import           Taplike.Shared (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import qualified Taplike.Shared as SH
 import           Database.Persist.Sql (fromSqlKey)
-import           Taplike.ChannelSlug
+import           Taplike.Schema
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
-import           Database.Redis (runRedis, zincrby)
 import qualified Database.Redis as Redis
 import qualified Types as TP
-import qualified Data.Map.Strict as MS
 import Model.Instances ()
 import DataStore
 import Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
 import Database.Persist.Sql (rawSql)
-import Database.Persist.Types (PersistValue(..))
 import Data.Time.Clock
 
 
@@ -73,7 +70,7 @@ chatApp exceptionHandler channelId channelName userEntity =
     
     persistEvent :: UserId -> RtmEvent -> Handler ()
     persistEvent userId event = case event of 
-                                  RtmMessage msg -> void $ runDB $ insert (Message userId (SH.unMessageText $ SH.messageText msg) (SH.messageTS msg) channelId)
+                                  RtmMessage msg -> void $ runDB $ insert (Message userId (SH.unMessageText $ SH.messageText msg) (SH.messageTS msg) channelId (MessageUUID $ SH.messageUUID msg))
                                   _              -> return ()  
     
     ackMessage (RtmSendMessage incoming) = do
@@ -89,7 +86,7 @@ wsExceptionHandler conn chanId e = do
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
-                              (RtmSendMessage incoming) -> Just $ RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming))
+                              (RtmSendMessage incoming) -> Just $ RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming) (SH.incomingMessageUUID incoming))
                               _                         -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text

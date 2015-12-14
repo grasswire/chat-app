@@ -7,6 +7,7 @@ import Data.Text (Text)
 import Data.Time (UTCTime)
 import Data.Typeable
 import Data.Word (Word64)
+import Data.UUID
 
 newtype ChannelColor =
   ChannelColor { unChannelColor :: Text }
@@ -21,6 +22,10 @@ data NewChannel = NewChannel
 newtype UserId =
   UserId { unUserId :: Int64 }
   deriving (Eq, Show, Typeable)
+  
+newtype MessageId = 
+  MessageId { unMessageId :: UUID } 
+  deriving (Eq, Show, Typeable) 
 
 newtype ChannelSlug =
   ChannelSlug { unChannelSlug :: Text }
@@ -67,3 +72,10 @@ data Channel = Channel
   , channelColor           :: ChannelColor
   
   }
+
+data NewMessageLike = NewMessageLike 
+  { messageLikeMessageId :: MessageId
+  , messageLikeChannel   :: ChannelSlug
+  } deriving (Eq, Show)
+
+data OkResponse = OkResponse deriving (Eq, Show)

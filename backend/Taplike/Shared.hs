@@ -17,7 +17,7 @@ import           Data.UUID
 import           Model hiding (ChannelId, MessageText, Message, Heartbeat, User)
 import           Data.UUID.Aeson()
 import           TextShow.Data.Time()
-import           Taplike.ChannelSlug
+import           Taplike.Schema
 import           Data.Maybe (fromJust)
 import qualified Model as Model
 import Database.Persist.Types (Entity(..))
@@ -121,6 +121,7 @@ data Message = Message
   , messageTS           :: UTCTime
   , messageEventTS      :: Maybe UTCTime
   , messageChannel      :: ChannelId
+  , messageUUID         :: UUID
   }
 
 data IncomingMessage = IncomingMessage
@@ -128,15 +129,6 @@ data IncomingMessage = IncomingMessage
  , incomingMessageTS          :: UTCTime
  , incomingMessageChannelId   :: ChannelId
  , incomingMessageMessageText :: MessageText
- }
-
-testMessage :: UTCTime -> Int64 -> UserId -> Text -> Message
-testMessage ts chat from text = Message
-  { messageUser         = from
-  , messageText         = MessageText text
-  , messageTS           = ts
-  , messageEventTS      = Nothing
-  , messageChannel      = ChannelId $ ChannelKey 1
  }
 
 data TapLikeTracked a = TapLikeTracked
@@ -161,6 +153,12 @@ data RtmEvent
   | RtmPing Ping
   | RtmPong Pong
   | RtmPresenceChange PresenceChange
+  | RtmMessageLikeAdded MessageLikeAdded 
+  
+data MessageLikeAdded = MessageLikeAdded 
+  { messageLikeAddedUser      :: UserId
+  , messageLikeAddedMessageId :: UUID  
+  }
 
 data ReplyOk = ReplyOk
   { replyOkReplyTo :: UUID
@@ -227,6 +225,7 @@ deriving instance Eq ReplyNotOk
 deriving instance Eq User
 deriving instance Eq Presence
 deriving instance Eq PresenceChange
+deriving instance Eq MessageLikeAdded
 
 instance TextShow Chat where
   showb _ = "Chat"
@@ -249,6 +248,7 @@ deriveTextShow ''ReplyNotOk
 deriveTextShow ''User
 deriveTextShow ''PresenceChange
 deriveTextShow ''Presence
+deriveTextShow ''MessageLikeAdded
 
 instance ToJSON RtmStartRequest where
   toJSON (RtmStartRequest { .. }) = object
@@ -293,11 +293,12 @@ instance FromJSON Message where
     <*> o .: "ts"
     <*> o .:? "event_ts"
     <*> o .: "channel"
+    <*> o .: "uuid"
 
 instance ToJSON Message where
-  toJSON (Message user text ts eventTs channel) =
+  toJSON (Message user text ts eventTs channel uuid) =
     object ["type" .=  ("message" :: Text), "user" .= user, "text" .= text, "ts" .= ts
-           , "event_ts" .= eventTs, "channel" .= channel
+           , "event_ts" .= eventTs, "channel" .= channel, "uuid" .= uuid
            ]
 
 instance FromJSON Presence where
@@ -327,19 +328,21 @@ instance FromJSON RtmEvent where
               "ok"                      -> RtmReplyOk <$> recur
               "not_ok"                  -> RtmReplyNotOk <$> recur
               "presence_change"         -> RtmPresenceChange <$> recur
+              "message_like_added"      -> RtmMessageLikeAdded <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
-                  RtmSendMessage msg  -> toJSON msg
-                  RtmMessage message  -> toJSON message
-                  RtmHeartbeat beat   -> toJSON beat
-                  RtmHello            -> object ["type" .= ("hello" :: Text)]
-                  RtmPing ping        -> toJSON ping
-                  RtmPong pong        -> toJSON pong
-                  RtmReplyOk ok       -> toJSON ok
-                  RtmReplyNotOk notok -> toJSON notok
-                  RtmPresenceChange change -> toJSON change
+                  RtmSendMessage msg            -> toJSON msg
+                  RtmMessage message            -> toJSON message
+                  RtmHeartbeat beat             -> toJSON beat
+                  RtmHello                      -> object ["type" .= ("hello" :: Text)]
+                  RtmPing ping                  -> toJSON ping
+                  RtmPong pong                  -> toJSON pong
+                  RtmReplyOk ok                 -> toJSON ok
+                  RtmReplyNotOk notok           -> toJSON notok
+                  RtmMessageLikeAdded likeAdded -> toJSON likeAdded
+                  RtmPresenceChange change      -> toJSON change
 
 instance FromJSON UserTyping where
   parseJSON = withObject "user typing event" $ \ o -> UserTyping
@@ -438,6 +441,18 @@ instance ToJSON PresenceChange where
     [ "type"  .= ("presence_change" :: Text)
     , "user" .= user
     , "presence" .= presence
+    ]
+
+instance FromJSON MessageLikeAdded where
+  parseJSON = withObject "Message Like Added" $ \o -> MessageLikeAdded
+    <$> o .: "user_id"
+    <*> o .: "message_id"
+
+instance ToJSON MessageLikeAdded where
+  toJSON (MessageLikeAdded user message) = object
+    [ "type"       .= ("message_like_added" :: Text)
+    , "user_id"    .= user
+    , "message_id" .= message
     ]
 
 instance ToJSON Presence where

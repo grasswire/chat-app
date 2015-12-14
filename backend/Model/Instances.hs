@@ -8,6 +8,8 @@ import Types
 import Control.Applicative (empty)
 import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (Value(..))
+import Data.UUID
+import Data.UUID.Aeson ()
 
 instance FromJSON NewChannel where
   parseJSON (Object v) = NewChannel <$>
@@ -21,9 +23,29 @@ instance ToJSON NewChannel where
                                                  , "topic" .= topic
                                                  , "color" .= color]
 
+instance FromJSON NewMessageLike where
+  parseJSON (Object v) = NewMessageLike <$>
+                         v .: "message_id" <*>
+                         v .: "channel"
+  parseJSON _          = empty
+
+instance ToJSON NewMessageLike where
+  toJSON (NewMessageLike messageId channel) = object [ "message_id" .= messageId
+                                                     , "channel"    .= channel
+                                                     ]
+
 deriving instance FromJSON ChannelTopic
 deriving instance FromJSON ChannelTitle
 deriving instance FromJSON ChannelColor
+deriving instance FromJSON MessageId
+deriving instance FromJSON UserId 
+deriving instance FromJSON ChannelSlug
 deriving instance ToJSON ChannelTitle
 deriving instance ToJSON ChannelTopic
 deriving instance ToJSON ChannelColor
+deriving instance ToJSON MessageId
+deriving instance ToJSON ChannelSlug
+deriving instance ToJSON UserId 
+
+instance ToJSON OkResponse where 
+  toJSON _ = object [ "ok" .= True ]
