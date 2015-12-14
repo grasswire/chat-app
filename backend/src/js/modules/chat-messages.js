@@ -28,7 +28,9 @@ App.Modules.ChatMessages = function () {
 
    var displayMessage = function(response) {
       $('.js-chat-output').append(Handlebars.templates.blurb(response.message));
-      return false;
+      //.animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
+      //$('.js-chat-output')
+      //return false;
    };
 
    var message = function(response) {

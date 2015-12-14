@@ -6,11 +6,30 @@
           <a href="/" class="logo--light">Tap
             <strong>Like
         <div class="notification-center">
-
+          <div class="notification-center__unread" style="display: none;">
+          <p>
+            <a href="#" class="js-dropdown" data-dropdown-name="notification">
+              <img src="@{StaticR images_avatar_png}" class="js-avatar avatar">
     <main class="room__chat">
-      <header>
-        <h1>#{channelTitle room}
-        <h2>#{channelTopic room}
+      <header class="room__details-bar">
+        <div class="room__description">
+          <h1>#{channelTitle room}
+            <a href="#" class="js-dropdown room__search" data-dropdown-name="search">
+              <span class="fa fa-chevron-down">
+          <h2>#{channelTopic room}
+        <div class="room__buttons">
+          <nav>
+            <ul class="room__buttons-list">
+              <li class="room__buttons-item">
+                <a href="#" class="js-dropdown" data-dropdown-name="users">
+                  <span class="fa fa-users">
+                  <span class="js-user-count room__buttons-user-count">
+              <li class="room__buttons-item">
+                <a href="#" class="js-dropdown" data-dropdown-name="share">
+                  <span class="fa fa-share-alt">
+              <li class="room__buttons-item">
+                <a href="#" class="js-star-room" data-room-is-starred="false">
+                  <span class="fa fa-star-o">
       <article class="realtime">
         <div class="realtime__output js-chat-output">
         <form class="js-chat-form realtime__form">

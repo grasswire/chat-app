@@ -74,6 +74,7 @@
  * and move all the modules around and your site should work fine.  No cascade.
  */
 // Modules ....................................................................
+@import "modules/notification-center";
 @import "modules/create-form";
 @import "modules/navigation";
 @import "modules/like-list";
