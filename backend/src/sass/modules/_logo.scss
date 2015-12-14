@@ -1,0 +1,22 @@
+.logo {
+   @include font-size(30px);
+   font-family: get-stack(sans-serif);
+   text-decoration: none;
+   padding: 0 10px;
+
+
+   &--light {
+      @extend .logo;
+      color: get-color(white);
+   }
+
+   &--dark {
+      @extend .logo;
+      color: get-color(ebony-clay);
+   }
+
+   &--small-dark {
+      @extend .logo--dark; // holy shit this works!
+      @include font-size(20px);
+   }
+}

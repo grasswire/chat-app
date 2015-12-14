@@ -3,15 +3,8 @@
         @return map-get($map, $key);
     }
     @else {
-       @each $k, $v in $map {
-         @if ($v == $key) {
-            @return $v;
-         }
-       }
+       @error "Unknown #{$key}";
     }
-
-    @error "Unknown `#{$key}` in `#{$map}` map.";
-    @return null;
 }
 
 @function get-zindex($increment: 1) {
@@ -32,4 +25,8 @@
 
 @function get-stack($setting) {
    @return get-by($setting, $stack-settings);
+}
+
+@function get-line-height($font-size, $line-height) {
+   @return get-value($line-height / $font-size);
 }

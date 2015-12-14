@@ -21,7 +21,7 @@ App.Modules.ChatUsers = function () {
    };
 
    var displayUserCount = function(data) {
-      $(".js-user-count").html("("+_.keys(App.data.users).length+")");
+      $(".js-user-count").html(_.keys(App.data.users).length);
    };
 
    var mapUsers = function(userList) {

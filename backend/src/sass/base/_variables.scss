@@ -11,24 +11,22 @@
  */
 
 $stack-settings: (
-   serif:          #{'Helvetica Neue', Helvetica, Arial, sans-serif},
-   sans-serif:     #{'Helvetica Neue', Helvetica, Arial, sans-serif},
-   sans-condensed: #{'HelveticaNeue-CondensedBold', 'Helvetica Neue', Helvetica, Arial, sans-serif},
+   sans-serif:     #{'Hind','Helvetica Neue', Helvetica, Arial, sans-serif},
    base-size:      62.5%,
    letter-spacing: 0px,
    line-height:    1.3
 );
 
 $font-weights: (
-   //ultra-thin: 100,
-   //thin:       200,
-   light:      300,
-   regular:    400,
-   //strong:     500,
-   //stronger:   600,
-   bold:       700,
-   //bolder:     800,
-   //ultra-bold: 900
+   // thin:         100,
+   // extra-light:  200,
+   light:        300,
+   normal:       400,
+   medium:       500,
+   semi-bold:    600,
+   bold:         700
+   // extra-bold:   800,
+   // ultra-bold:   900
 );
 
 $breakpoints: (
@@ -47,7 +45,49 @@ $breakpoints: (
 );
 
 $colors: (
-   alto:           #d8d8d8,
+   niagara:                #09b788,
+   fun-blue:               #1b5ba7,
+   cloud-burst:            #233248,
+   ebony-clay:             #243041,
+   //ebony-clay2:          #273345,
+   boston-blue:            #3774bd,
+   chambray:               #3b5998,
+   shamrock:               #3ed08e,
+   tundora:                #434343,
+   //tundora2:             #4c4c4c,
+   emperor:                #555555,
+   picton-blue:            #55acee,
+   tawny-port:             #62224e,
+   dove-gray:              #717171,
+   studio:                 #7451b9,
+   slate-gray:             #76839a,
+   regent-gray:            #818998,
+   gray:                   #888888,
+   //gray2:                #8e8e8e,
+   //gray3:                #8f8f8f,
+   granite-green:          #918f7e,
+   olivine:                #94bd5e,
+   dusty-gray:             #9b9b9b,
+   wisteria:               #a558a8,
+   cadet-blue:             #acb3bf,
+   nobel:                  #b4b4b4,
+   silver:                 #b9b9b9,
+   loblolly:               #c2c9d2,
+   cabaret:                #d04a6b,
+   alto:                   #d8d8d8,
+   athens-gray:            #eff1f6,
+   //athens-gray2:         #f7f8fa,
+   carnation:              #f56360,
+   mercury:                #e7e7e7,
+   alabaster:              #f8f8f8,
+   //alabaster:            #f9f9f9,
+   persimmon:              #fe634f,
+   bittersweet:            #ff6f5c,
+   sunglow:                #ffc430,
+   pickled-bluewood:       #2e3a4c,
+
+   //OLD COLORS .....
+   //alto:           #d8d8d8,
    black:          #000,
    white:          #fff,
    rhino:          #293C5B,
@@ -55,8 +95,8 @@ $colors: (
    gallery:        #eaeaea,
    concrete:       #f2f2f2,
    charcoal:       #444,
-   dove-gray:      #717171,
-   dusty-gray:     #9b9b9b,
+   //dove-gray:      #717171,
+   //dusty-gray:     #9b9b9b,
    aqua-island:    #A6CADC,
    chalet-green:   #64733E,
    catskill-white: #DFEBF2,
@@ -69,8 +109,10 @@ $colors: (
   global-box-sizing: border-box
 ));
 
-$current-zindex:  100;
-$max-page-width:  1200px;
-$masthead-height: 75px;
-$page-boundary:   15px;
+$current-zindex:        100;
+$max-page-width:        1024px;
+$masthead-height:       70px;
+$page-boundary:         30px;
+$button-border-radius:  4px;
+$menu-border-radius:    8px;
 

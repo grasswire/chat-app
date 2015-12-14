@@ -26,19 +26,20 @@
  * everwhere.
  */
 // Functions & Mixins .........................................................
-@import "functions/getters-setters";
-@import "mixins/pseudo-elements";
-@import "mixins/form-elements";
-@import "mixins/flexbox";
-@import "mixins/font";
+@import "utilities/getters-setters";
+@import "utilities/pseudo-elements";
+@import "utilities/flexbox";
+@import "utilities/font";
+@import "utilities/text";
 
 /**
  * This is where you start editing.  We don't make any assumptions so these are
- * all just bare files.  With a little text to explain the thoughts behind it all/
+ * all just bare files.  With a little text to explain the thoughts behind it all
  */
 // Base .......................................................................
 @import "base/variables";
 @import "base/elements";
+@import "base/inputs";
 
 /**
  * Most of your code *should* nicely fit into modules, but I'd the truth is that
@@ -73,7 +74,7 @@
  * and move all the modules around and your site should work fine.  No cascade.
  */
 // Modules ....................................................................
-@import "modules/major-display";
+@import "modules/notification-center";
 @import "modules/create-form";
 @import "modules/navigation";
 @import "modules/like-list";
@@ -83,14 +84,9 @@
 @import "modules/profile";
 @import "modules/actions";
 @import "modules/sidebar";
-@import "modules/loader";
 @import "modules/blurb";
 @import "modules/modal";
+@import "modules/logo";
 @import "modules/card";
 @import "modules/room";
 
-/**
- * I use a BEM style of CSS development, so sometimes I have classes that don't
- * really fit or span multiple modules.  Those go here.
- */
-// Utility Classes ............................................................

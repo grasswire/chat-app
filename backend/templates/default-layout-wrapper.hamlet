@@ -5,6 +5,7 @@ $newline never
     <meta charset="UTF-8">
     <title>#{pageTitle pc}
     <meta name="viewport" content="width=device-width,initial-scale=1">
+    <link href="//fonts.googleapis.com/css?family=Hind:400,300,500,600,700" rel="stylesheet" type="text/css">
     ^{pageHead pc}
 
   ^{pageBody pc}

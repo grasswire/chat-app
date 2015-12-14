@@ -1,0 +1,15 @@
+.notification-center {
+   display: inline-block;
+   position: relative;
+
+   &__unread {
+      background: get-color(bittersweet);
+      border-radius: 50%;
+      top: -3px;
+      right: -5px;
+      position: absolute;
+      height: 18px;
+      width: 18px;
+   }
+}
+

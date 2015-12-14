@@ -9,16 +9,18 @@ App.Modules.CreateChatroom = function () {
             title: $('.js-create-title-input').val(),
             topic: $('.js-create-description-input').val(),
             color: "f8f8f8"
-            
          })
          .on({
-            complete: finished
+            complete: redirectToRoom
          });
 
          return false;
    };
 
-   var finished = function(response) {
+   var redirectToRoom = function(response) {
+      $('.js-create-title-input').val("");
+      $('.js-create-description-input').val("");
+
       location.href = '/room/'+response.slug;
    };
 

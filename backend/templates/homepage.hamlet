@@ -1,55 +1,58 @@
 <body class="#{signature}">
-  <section class="masthead">
-    <div class="content-flex-wrapper">
-      <a href="/" class="logo">TapLike
-      <nav class="nav__main">
-        <ul class="nav__list">
+  <header class="masthead">
+    <div class="masthead__navigation-container">
+      <a href="/" class="logo--light">Tap
+        <strong>Like
+      <nav>
+        <ul class="navigation-main__list">
           $maybe userId <- authId
-            <li class="nav__item">
-              <a href="/" class="js-trigger-modal nav__signin" data-modal-trigger="create">Create New
-            <li class="nav__item">
-                <a href="@{LogOutR}" class="nav__signin">Sign Out
+            <li class="navigation-main__item">
+              <a href="#" class="js-trigger-modal" data-modal-trigger="create">Create
+            <li class="navigation-main__item">
+                <a href="/logout">Log Out
           $nothing
-            <li class="nav__item">
-              <a href="@{TwitterAuthR}" class="nav__signin">Sign In
-  <main role="main">
-    <header class="major-display">
-      <div class="content-flex-wrapper">
-        <div class="major-display__textblock">
-          <h1 class="major-display__headline">TapLike is a place where...
-            <br>dog lovers can become cat lovers
-            $maybe userId <- authId
-              <a href="#" class="js-trigger-modal button--callout" data-modal-trigger="create">Create a Room
-            $nothing
-              <a href="@{TwitterAuthR}?modal=create" class="button--callout">Create a Room
+            <li class="navigation-main__item">
+              <a href="@{TwitterAuthR}?modal=create" class="js-trigger-modal" data-modal-trigger="create">Create
+            <li class="navigation-main__item">
+                <a href="@{TwitterAuthR}">Log In
+    <div class="masthead__content-container">
+      <div class="wrapper">
+        <h1>Chat about anything
+        <h2>Join a live community or start your own
+        <p>
+          $maybe userId <- authId
+            <a href="#" class="js-trigger-modal button" data-modal-trigger="create">Create a Room
+          $nothing
+            <a href="@{TwitterAuthR}?modal=create" class="button">Create a Room
 
-        <div class="major-display__visual">
-          <img src=@{StaticR images_screenshot_png}>
-
+  <main>
     <div class="content-container">
-      <h2 class="main__headline">Trending Chats
+      <h3 class="page__headline">Trending Chats
       <div class="card__container">
         $forall channel <- topChannels
           <a class="card" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
             <h3 class="card__title">#{TP.unChannelTitle $ TP.channelTitle channel}
             <p class="card__meta">
               <span class="fa fa-user">
-              <strong>#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
+              <span class="card__count">#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
             <p class="card__text">#{TP.unChannelTopic $ TP.channelTopic channel}
-
+    <div class="page__secondary">
+      <div class="content-container">
+        <h3 class="page__headline">All Chats
+        <div class="card__container">
+          $forall channel <- allChannels
+            <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
+              <h3 class="card__title--listing">#{TP.unChannelTitle $ TP.channelTitle channel}
+                <div class="card__meta--listing">
+                  <span class="fa fa-user">
+                  <span class="card__count--listing">#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
+              <p class="card__text--listing">#{TP.unChannelTopic $ TP.channelTopic channel}
+        <p class="center">
+          <a href="#" class="button">Load More
+  <footer class="standard-page__footer">
     <div class="content-container">
-      <h2 class="secondary__headline">All Chats
-      <div class="content-flex-container">
-        $forall channel <- allChannels
-          <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
-            <h3 class="card__title--listing">#{TP.unChannelTitle $ TP.channelTitle channel}
-              <div class="card__meta--listing">
-                <span class="fa fa-user">
-                <strong>#{TP.unNumberUsersPresent $ TP.channelNumUsersPresent channel}
-            <p class="card__text--listing">#{TP.unChannelTopic $ TP.channelTopic channel}
+      <a href="/" class="logo--small-dark">Tap
+        <strong>Like
 
-    <footer class="content-container">
-      <div class="loader">
-        <a href="" class="loader__button">Load More
 
   ^{modalCreate}

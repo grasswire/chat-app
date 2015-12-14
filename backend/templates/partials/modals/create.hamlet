@@ -3,13 +3,16 @@
     <header class="modal__header">
       <a href="#" class="js-trigger-modal-close">
         <span class="modal__close fa fa-times">
+      <h1 class="modal__title">Create a room
     <section class="modal__body">
-      <h1 class="modal__title">Create
       <form method="post" class="js-create create">
         <label class="js-create-title create__label">
           Title
-          <input type="text" name="" class="create__title js-create-title-input">
+          <input type="text" name="" class="create__input js-create-title-input" placeholder="Enter a title">
         <label class="js-create-description create__label">
           Description
-          <input type="text" name="" class="create__description js-create-description-input">
-        <button type="submit" class="create__button">GO
+          <textarea type="text" name="" class="create__input--description js-create-description-input">
+        <button type="submit" class="button">Create It
+        <p>
+          <a href="#" class="create__links js-trigger-modal-close">Nevermind
+
