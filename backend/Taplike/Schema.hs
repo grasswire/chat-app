@@ -17,7 +17,7 @@ import Data.UUID
 import System.Random
 
 newtype ChannelSlug = ChannelSlug {unSlug :: Text}
-    deriving (PathPiece, Show, Eq, Read)
+    deriving (PathPiece, Show, Eq, Read, Ord)
 
 instance ToJSON ChannelSlug where
   toJSON (ChannelSlug slug) = String slug

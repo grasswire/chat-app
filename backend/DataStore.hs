@@ -12,6 +12,7 @@ import           Data.Binary (encode)
 import qualified Data.Binary as Bin
 import Control.Arrow ((***))
 import Prelude (read)
+import Taplike.Schema (ChannelSlug)
 
 type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 
@@ -24,44 +25,36 @@ withRedisExcept = ExceptT . ReaderT
 channelPresenceSetKey :: ByteString
 channelPresenceSetKey = C8.pack "chan_presence_hash"
 
-mkChannelPresenceSetValue :: Key Channel -> ByteString
-mkChannelPresenceSetValue = encodeUtf8 . pack . show . fromSqlKey
+mkChannelPresenceSetValue :: ChannelSlug -> ByteString
+mkChannelPresenceSetValue = encodeUtf8 . pack . show 
 
-chanKey2bs :: Key Channel -> ByteString
+chanKey2bs :: ChannelSlug -> ByteString
 chanKey2bs = mkChannelPresenceSetValue
 
-numUsersPresent :: Key Channel -> RedisAction (Maybe TP.NumberUsersPresent)
+numUsersPresent :: ChannelSlug -> RedisAction (Maybe TP.NumberUsersPresent)
 numUsersPresent key = withRedisExcept $ \conn -> do
     score <- runRedis conn $ zscore channelPresenceSetKey (mkChannelPresenceSetValue key)
     return $ fmap toUsersPresent <$> score
 
-channelsByPresenceDesc :: Integer -> RedisAction [(Key Channel, TP.NumberUsersPresent)]
-channelsByPresenceDesc maxChans = do
-   res <- ExceptT $ ReaderT $ \conn -> runRedis conn $ zrangeWithscores channelPresenceSetKey 0 (maxChans - 1)
-   return ((keyToChanKey *** toUsersPresent) <$> res)
-
-keyToChanKey :: ByteString -> Key Channel
-keyToChanKey = toSqlKey . Bin.decode . fromStrict
-
 toUsersPresent :: Double -> TP.NumberUsersPresent
 toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
 
-setChannelPresence :: Integer -> Key Channel -> RedisAction Bool
+setChannelPresence :: Integer -> ChannelSlug -> RedisAction Bool
 setChannelPresence score channelId = withRedisExcept $ \conn -> do
   let action = hset channelPresenceSetKey (chanKey2bs channelId) (toStrict $ encode score)
   runRedis conn $ action
 
-incrChannelPresence :: Key Channel -> RedisAction Integer
+incrChannelPresence :: ChannelSlug -> RedisAction Integer
 incrChannelPresence channelId = withRedisExcept $ \conn -> do
   let action = hincrby channelPresenceSetKey (chanKey2bs channelId) 1
   runRedis conn $ action
 
-decrChannelPresence :: Key Channel -> RedisAction Integer
+decrChannelPresence :: ChannelSlug -> RedisAction Integer
 decrChannelPresence channelId = withRedisExcept $ \conn -> do
   let action = hincrby channelPresenceSetKey (chanKey2bs channelId) (-1)
   runRedis conn $ action
 
-getPresenceForChannels :: [Key Channel] -> RedisAction [TP.NumberUsersPresent]
+getPresenceForChannels :: [ChannelSlug] -> RedisAction [TP.NumberUsersPresent]
 getPresenceForChannels channelIds = withRedisExcept $ \conn -> do 
     let fields = fmap chanKey2bs channelIds
     let action = hmget channelPresenceSetKey fields 

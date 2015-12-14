@@ -4,11 +4,7 @@ module Handler.MessageLike where
   
 import           Import 
 import qualified Server as S
-import           Taplike.Shared (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import qualified Taplike.Shared as SH
-import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-import           Database.Redis (runRedis, zincrby)
-import qualified Database.Redis as Redis
 import qualified Types as TP
 import Model.Instances ()
 import Taplike.Schema
@@ -38,7 +34,7 @@ postMessageLikeR =  do
         broadcastLikeAdded (App { redisConn }) userId msgLike = do
           channel <- runDB (getBy $ UniqueChannelSlug (ChannelSlug $ TP.unChannelSlug $ TP.messageLikeChannel msgLike))
           case channel of 
-            Just chan -> liftIO . void . runRedisAction redisConn $ S.broadcastEvent (entityKey chan) (SH.RtmMessageLikeAdded (SH.MessageLikeAdded userId (TP.unMessageId $ TP.messageLikeMessageId msgLike)))
+            Just chan -> liftIO . void . runRedisAction redisConn $ S.broadcastEvent (channelCrSlug $ entityVal chan) (SH.RtmMessageLikeAdded (SH.MessageLikeAdded userId (TP.unMessageId $ TP.messageLikeMessageId msgLike)))
             Nothing   -> return ()
 
 

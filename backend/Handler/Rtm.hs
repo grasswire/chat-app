@@ -34,7 +34,7 @@ getRtmStartR = do
                   runDB (usersPresentQuery (entityKey channel) hourAgo)
                 _ ->  return []
       case maybeChan of
-        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (entityKey chan)))
+        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
         _ -> return ()
       let jsonResp = case user of
                       Just u -> RtmStartRp url (Just $ Self (entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)

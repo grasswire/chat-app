@@ -8,7 +8,6 @@ import Types
 import Control.Applicative (empty)
 import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (Value(..))
-import Data.UUID
 import Data.UUID.Aeson ()
 
 instance FromJSON NewChannel where

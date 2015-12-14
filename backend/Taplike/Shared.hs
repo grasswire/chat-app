@@ -120,14 +120,14 @@ data Message = Message
   , messageText         :: MessageText
   , messageTS           :: UTCTime
   , messageEventTS      :: Maybe UTCTime
-  , messageChannel      :: ChannelId
+  , messageChannel      :: Text
   , messageUUID         :: UUID
   }
 
 data IncomingMessage = IncomingMessage
  { incomingMessageUUID        :: UUID
  , incomingMessageTS          :: UTCTime
- , incomingMessageChannelId   :: ChannelId
+ , incomingMessageChannelId   :: Text
  , incomingMessageMessageText :: MessageText
  }
 

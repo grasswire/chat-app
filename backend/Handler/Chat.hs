@@ -31,13 +31,12 @@ getHealthCheckR = return "all good!!"
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
-chatApp :: WSExceptionHandler -> Key Channel -> Text -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp exceptionHandler channelId channelName userEntity =
+chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp exceptionHandler channelId channelSlug userEntity =
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
-    sendTextData ("Welcome to #" <> channelName)
     app <- getYesod
-    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelId
+    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelSlug
     toSend <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u  -> race_ (outbound toSend) (inbound app u chan)
@@ -50,8 +49,8 @@ chatApp exceptionHandler channelId channelName userEntity =
 
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ S.broadcastEvent channelId (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
-        void . runRedisAction redisConn $ incrChannelPresence channelId
+        void . runRedisAction redisConn $ S.broadcastEvent channelSlug (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
+        void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
 
@@ -65,7 +64,7 @@ chatApp exceptionHandler channelId channelName userEntity =
             wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
-            maybe (return ()) (\e -> void (liftIO $ runRedisAction redisConn $ S.broadcastEvent channelId e) >> persistEvent (entityKey user) e) processedMsg
+            maybe (return ()) (\e -> void (liftIO $ runRedisAction redisConn $ S.broadcastEvent channelSlug e) >> persistEvent (entityKey user) e) processedMsg
           pure ()
     
     persistEvent :: UserId -> RtmEvent -> Handler ()
@@ -78,10 +77,10 @@ chatApp exceptionHandler channelId channelName userEntity =
       sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
-wsExceptionHandler :: Redis.Connection -> ChannelId -> ConnectionException -> WebSocketsT Handler ()
-wsExceptionHandler conn chanId e = do
+wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
+wsExceptionHandler conn channelSlug e = do
   liftIO $ TIO.putStrLn ("Exception : " <> pack (show e))
-  _ <- liftIO . void . runRedisAction conn $ decrChannelPresence chanId
+  _ <- liftIO . void . runRedisAction conn $ decrChannelPresence channelSlug
   return ()
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
@@ -99,16 +98,17 @@ getChatR slug = do
     authId <- maybeAuthId
     renderFunc <- getUrlRenderParams
     let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
-    let signature = "chatroom" :: Text
-    let modalSignin = $(widgetFile "partials/modals/signin")
+        signature = "chatroom" :: Text
+        modalSignin = $(widgetFile "partials/modals/signin")
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
       Just c -> do
         let room = entityVal c
             masthead = $(widgetFile "partials/chat/masthead")
-            sidebar = $(widgetFile "partials/chat/sidebar")
+            sidebar  = $(widgetFile "partials/chat/sidebar")
             isLoggedIn = isJust authId
-        webSockets $ chatApp (wsExceptionHandler (redisConn app) (entityKey c)) (entityKey c) (channelTitle room) chatUser
+            chanSlug = channelCrSlug $ room
+        webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) (entityKey c) chanSlug chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
 
@@ -142,7 +142,7 @@ getHomeR = do
     let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
     (topChannels, allChannels) <- do 
         chanEntities <- runDB (popularChannels minActiveAgo)
-        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (entityKey <$> chanEntities)
+        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (channelCrSlug <$> entityVal <$> chanEntities)
         let zipped = case presences of 
                       Right ps -> chanEntities `zip` ps
                       Left _   -> chanEntities `zip` (replicate (length chanEntities) (TP.NumberUsersPresent 0))      
