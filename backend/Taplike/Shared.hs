@@ -23,7 +23,6 @@ import qualified Model as Model
 import Database.Persist.Types (Entity(..))
 
 
-
 newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
   toJSON (ChannelId key) = Number (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
@@ -131,12 +130,6 @@ data IncomingMessage = IncomingMessage
  , incomingMessageMessageText :: MessageText
  }
 
-data TapLikeTracked a = TapLikeTracked
-  { _trackedValue   :: a
-  , _trackedCreator :: ID User
-  , _trackedLastSet :: Time
-  }
-
 data Heartbeat = Heartbeat
   { heartBeatUser :: UserId
   , heartBeatChannel :: ChannelId
@@ -188,30 +181,11 @@ data UserTyping = UserTyping
   { _userTypingUser    :: ID User
   , _userTypingChannel :: ID Chat }
 
-class TapLikeTyped a where
-  isTypedID :: Proxy a -> ID b -> Bool
-instance TapLikeTyped Channel where
-  isTypedID _ = isPrefixOf "C" . unID
-instance TapLikeTyped Chat where
-   isTypedID _ =  isTypedID (Proxy :: Proxy Channel)
-
-instance TapLikeTyped User where
-  isTypedID _ = isPrefixOf "U" . unID
-
-asTypedID :: forall a b. TapLikeTyped b => ID a -> Maybe (ID b)
-asTypedID i =
-  if isTypedID (Proxy :: Proxy b) i
-    then Just (ID . unID $ i)
-    else Nothing
-
-asChannelID :: ID Chat -> Maybe (ID Channel)
-asChannelID = asTypedID
 
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
 deriving instance Eq Self
 deriving instance Eq Message
-deriving instance Eq a => Eq (TapLikeTracked a)
 deriving instance Eq RtmEvent
 deriving instance Eq UserTyping
 deriving instance Eq IncomingMessage
@@ -234,7 +208,6 @@ deriveTextShow ''RtmStartRequest
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
 deriveTextShow ''Message
-deriveTextShow ''TapLikeTracked
 deriveTextShow ''RtmEvent
 deriveTextShow ''UserTyping
 deriveTextShow ''IncomingMessage
@@ -279,12 +252,6 @@ instance ToJSON Self where
     , "twitter_screen_name" .= name
     , "profile_image_url"   .= profileImageUrl
     ]
-
-instance FromJSON a => FromJSON (TapLikeTracked a) where
-  parseJSON = withObject "tracked value object" $ \ o -> TapLikeTracked
-    <$> o .: "value"
-    <*> o .: "creator"
-    <*> o .: "last_set"
 
 instance FromJSON Message where
   parseJSON = withObject "message object" $ \ o -> Message
