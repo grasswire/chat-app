@@ -28,6 +28,14 @@ me=# grant all privileges on database taplike_test to taplike;
 GRANT
 ```
 
+Connect to the taplike database with 
+
+`\c taplike;`
+
+Once connected, enable the postgres uuid extension with 
+
+`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`
+
 ### Installing and running Redis
 
 Installation:
