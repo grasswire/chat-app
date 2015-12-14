@@ -69,8 +69,7 @@ data Channel = Channel
   , channelSlug            :: ChannelSlug
   , channelTitle           :: ChannelTitle
   , channelNumUsersPresent :: NumberUsersPresent
-  , channelColor           :: ChannelColor
-  
+  , channelColor           :: ChannelColor  
   }
 
 data NewMessageLike = NewMessageLike 

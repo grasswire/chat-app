@@ -22,7 +22,6 @@ import           Data.Maybe (fromJust)
 import qualified Model as Model
 import Database.Persist.Types (Entity(..))
 
-
 newtype ChannelId = ChannelId (Key Channel)
 instance ToJSON ChannelId where
   toJSON (ChannelId key) = Number (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
@@ -39,7 +38,7 @@ instance FromJSON MessageText where
   parseJSON invalid    = typeMismatch "MessageText" invalid
 
 data ChannelCreatedRp = ChannelCreatedRp
-  { channelCreatedRpChannel :: Channel
+  { channelCreatedRpChannel  :: Channel
   , channelCreatedRpId       :: Int64
   , channelSlug              :: ChannelSlug
   }
@@ -53,14 +52,6 @@ instance FromJSON TS where
 instance ToJSON TS where
   toJSON (TS t) = String t
 deriveTextShow ''TS
-
-newtype Time = Time { unTime :: Word32 } deriving (Eq, Ord)
-instance FromJSON Time where
-  parseJSON = withScientific "time" $ \ s ->
-    case toBoundedInteger s of
-      Just w32 -> pure (Time w32)
-      Nothing  -> fail . unpack $ "out of bound unix time " <> showt (FromStringShow s)
-deriveTextShow ''Time
 
 newtype ID a = ID { unID :: Text } deriving (Eq, Ord)
 instance FromJSON (ID a) where
@@ -86,33 +77,26 @@ userFromEntity userEntity = User (Model.userProfileImageUrl userVal) (Model.user
         key     = entityKey userEntity
 
 data RtmStartRp = RtmStartRp
-  { _rtmStartUrl      :: Text
-  , _rtmStartSelf     :: Maybe Self
-  , _rtmStartUsers    :: [User]
+  { rtmStartUrl      :: Text
+  , rtmStartSelf     :: Maybe Self
+  , rtmStartUsers    :: [User]
   }
 
 data Self = Self
-  { _selfID               :: UserId
-  , _selfName             :: Text
-  , _selfProfileImageUrl  :: Text
+  { selfID               :: UserId
+  , selfName             :: Text
+  , selfProfileImageUrl  :: Text
   }
 
 data Presence = PresenceActive | PresenceAway
 
 data Profile = Profile
-  { _profileFirstName :: Maybe Text
-  , _profileLastName  :: Maybe Text
-  , _profileRealName  :: Maybe Text
-  , _profileEmail     :: Maybe Text
-  , _profileSkype     :: Maybe Text
-  , _profilePhone     :: Maybe Text }
-
-data Bot = Bot
-  { _botID    :: ID Bot
-  , _botName  :: Text
-  , _botIcons :: HM.HashMap Text Text }
-
-data Chat
+  { profileFirstName :: Maybe Text
+  , profileLastName  :: Maybe Text
+  , profileRealName  :: Maybe Text
+  , profileEmail     :: Maybe Text
+  , profileSkype     :: Maybe Text
+  , profilePhone     :: Maybe Text }
 
 data Message = Message
   { messageUser         :: UserId
@@ -140,7 +124,6 @@ data RtmEvent
   | RtmReplyOk ReplyOk
   | RtmReplyNotOk ReplyNotOk
   | RtmMessage Message
-  | RtmUserTyping UserTyping
   | RtmSendMessage IncomingMessage
   | RtmHeartbeat Heartbeat
   | RtmPing Ping
@@ -177,17 +160,11 @@ instance WebSocketsData RtmEvent where
   fromLazyByteString = fromJust . decode
   toLazyByteString   = encode
 
-data UserTyping = UserTyping
-  { _userTypingUser    :: ID User
-  , _userTypingChannel :: ID Chat }
-
-
 deriving instance Eq RtmStartRequest
 deriving instance Eq RtmStartRp
 deriving instance Eq Self
 deriving instance Eq Message
 deriving instance Eq RtmEvent
-deriving instance Eq UserTyping
 deriving instance Eq IncomingMessage
 deriving instance Eq MessageText
 deriving instance Eq ChannelId
@@ -201,15 +178,11 @@ deriving instance Eq Presence
 deriving instance Eq PresenceChange
 deriving instance Eq MessageLikeAdded
 
-instance TextShow Chat where
-  showb _ = "Chat"
-
 deriveTextShow ''RtmStartRequest
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
 deriveTextShow ''Message
 deriveTextShow ''RtmEvent
-deriveTextShow ''UserTyping
 deriveTextShow ''IncomingMessage
 deriveTextShow ''MessageText
 deriveTextShow ''ChannelId
@@ -289,7 +262,6 @@ instance FromJSON RtmEvent where
               "ping"                    -> RtmPing <$> recur
               "pong"                    -> RtmPong <$> recur
               "message"                 -> RtmMessage <$> recur
-              "user_typing"             -> RtmUserTyping <$> recur
               "incoming_message"        -> RtmSendMessage <$> recur
               "heart_beat"              -> RtmHeartbeat <$> recur
               "ok"                      -> RtmReplyOk <$> recur
@@ -310,11 +282,6 @@ instance ToJSON RtmEvent where
                   RtmReplyNotOk notok           -> toJSON notok
                   RtmMessageLikeAdded likeAdded -> toJSON likeAdded
                   RtmPresenceChange change      -> toJSON change
-
-instance FromJSON UserTyping where
-  parseJSON = withObject "user typing event" $ \ o -> UserTyping
-    <$> o .: "user"
-    <*> o .: "channel"
 
 instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
