@@ -27,10 +27,10 @@ App.Modules.ChatMessages = function () {
    };
 
    var displayMessage = function(response) {
-      $('.js-chat-output').append(Handlebars.templates.blurb(response.message));
+      //$('.js-chat-output').append(Handlebars.templates.blurb(response.message));
       //.animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
       //$('.js-chat-output')
-      //return false;
+      return false;
    };
 
    var message = function(response) {
@@ -57,7 +57,7 @@ App.Modules.ChatMessages = function () {
          text: data.text,
          user: App.data.users[data.user]
       };
-      $('.js-chat-output').append(Handlebars.templates.blurb(transformer));
+      $('.js-chat-output').append(Handlebars.templates.blurb(transformer)).animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
    };
 
 
