@@ -25,10 +25,11 @@ library
                      Handler.Chat
                      Handler.Rtm
                      Handler.Auth
+                     Handler.MessageLike
                      Server
                      Taplike.Shared
                      Taplike.TextShowOrphans
-                     Taplike.ChannelSlug
+                     Taplike.Schema
                      DataStore
 
     if flag(dev) || flag(library-only)
@@ -132,6 +133,8 @@ library
                  , binary
                  , lifted-base
                  , wai-cors
+                 , random 
+                 , errors
 
 
 executable         chat-app

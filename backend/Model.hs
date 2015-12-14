@@ -2,15 +2,13 @@ module Model where
 
 import ClassyPrelude.Yesod
 import Database.Persist.Quasi
-import Taplike.ChannelSlug (ChannelSlug, unSlug)
+import Taplike.Schema (MessageUUID, ChannelSlug, unSlug)
 import TextShow (TextShow)
 import TextShow.TH (deriveTextShow)
 import TextShow.Data.Time ()
 import Taplike.TextShowOrphans ()
 import qualified Types as TP
 import Database.Persist.Sql  (fromSqlKey)
--- import Data.Monoid ((<>))
-
 
 -- You can define all of your database entities in the entities file.
 -- You can find more information on persistent and how to declare entities
@@ -33,4 +31,4 @@ chanFromEntity entity numPresent = TP.Channel { TP.channelCreator = TP.UserId (f
                                               , TP.channelTitle = TP.ChannelTitle $ channelTitle $ entityVal entity
                                               , TP.channelNumUsersPresent = numPresent
                                               , TP.channelColor = TP.ChannelColor $ ("#" <> (channelColor $ entityVal entity))
-                                              }
+                                              }                                           

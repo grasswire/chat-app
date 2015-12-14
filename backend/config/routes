@@ -19,3 +19,5 @@
 /logout LogOutR GET
 
 /api/rtm.start RtmStartR GET
+
+/api/likes.add MessageLikeR POST 

@@ -5,7 +5,7 @@ module Handler.Rtm where
 import Import hiding ((==.), (>=.))
 
 import Taplike.Shared (RtmStartRp(..), Self(..), userFromEntity)
-import Taplike.ChannelSlug
+import Taplike.Schema
 import qualified Database.Esqueleto as E
 import Data.Time.Clock
 import DataStore

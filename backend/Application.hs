@@ -36,6 +36,7 @@ import Handler.Common
 import Handler.Chat
 import Handler.Rtm
 import Handler.Auth
+import Handler.MessageLike
 import qualified Data.Map as Map
 import Server
 import qualified Database.Redis as Redis
@@ -86,6 +87,9 @@ makeFoundation appSettings = do
         (pgConnStr  $ appDatabaseConf appSettings)
         (pgPoolSize $ appDatabaseConf appSettings)
 
+    -- flip runLoggingT logFunc $ flip runSqlPool pool $ do 
+    --   let sql = "CREATE EXTENSION IF NOT EXISTS \"uuid-ossp\";"
+    --   rawSql sql [] :: ReaderT SqlBackend (LoggingT IO) [Single Int]
     -- Perform database migration using our application's logging settings.
     runLoggingT (runSqlPool (runMigration migrateAll) pool) logFunc
 
