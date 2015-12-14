@@ -2,12 +2,10 @@ module Taplike.Shared where
 
 import           ClassyPrelude
 import           Control.Lens (Getter, view, to)
-import           Data.Aeson ((.:), (.:?), (.=), (.!=), Value(String), FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText, encode, decode)
+import           Data.Aeson ((.:), (.:?), (.=), Value(String), FromJSON(parseJSON), ToJSON(toJSON), object, withText, withObject, withScientific, withText, encode, decode)
 import           Data.Aeson.Types (Parser, Value(..), typeMismatch)
-import qualified Data.HashMap.Strict as HM
-import           Data.Proxy (Proxy(Proxy))
 import           Data.Scientific (toBoundedInteger, Scientific)
-import           TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
+import           TextShow (FromStringShow(FromStringShow), showt)
 import           TextShow.TH (deriveTextShow)
 import           Network.WebSockets (WebSocketsData(fromLazyByteString, toLazyByteString))
 import           Taplike.TextShowOrphans ()
@@ -23,16 +21,21 @@ import qualified Model as Model
 import Database.Persist.Types (Entity(..))
 
 newtype ChannelId = ChannelId (Key Channel)
+
 instance ToJSON ChannelId where
   toJSON (ChannelId key) = Number (fromInteger (fromIntegral $ fromSqlKey key :: Integer) :: Scientific)
+
 instance FromJSON ChannelId where
   parseJSON = withScientific "channel_id" $ \ s ->
     case (toBoundedInteger s :: Maybe Int64) of
       Just i -> pure $ ChannelId (toSqlKey i)
       Nothing  -> fail . unpack $ "out of bound channel id " <> showt (FromStringShow s)
+
 newtype MessageText = MessageText { unMessageText :: Text}
+
 instance ToJSON MessageText where
   toJSON (MessageText text) = String text
+
 instance FromJSON MessageText where
   parseJSON (String s) = pure $ MessageText s
   parseJSON invalid    = typeMismatch "MessageText" invalid

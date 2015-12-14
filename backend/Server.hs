@@ -2,37 +2,24 @@
 
 module Server where
 
-import           Control.Applicative
-import           Control.Concurrent.STM
-import           Control.Monad
-import           Data.Map                 (Map)
-import qualified Data.Map                 as M
-import qualified Data.Set                 as S
-import           System.IO
-import           Prelude                  ((.), ($), (++), show, putStrLn, Integer, read)
-import           Data.Int                 (Int64)
-import           Data.String
-import qualified Types                    as TP
-import           Data.Maybe
-import qualified Data.ByteString          as BS
-import qualified Data.Text.Lazy           as T
-import qualified Data.ByteString.Lazy     as BL
-import           Data.Text.Lazy           (Text)
-import           Taplike.Shared           (RtmEvent(..))
-import           Model                    (ChannelId(..), Message(..))
-import           Database.Redis hiding    (Message)
-import qualified Database.Redis as Redis
-import qualified Data.ByteString.Char8 as C8
+import           ClassyPrelude              hiding ((<>))
+import qualified Data.Map                   as M
+import qualified Data.Set                   as S
+import           Prelude                    (read)
+import qualified Data.ByteString            as BS
+import qualified Data.ByteString.Lazy       as BL
+import           Taplike.Shared             (RtmEvent(..))
+import           Model                      (Message(..))
+import           Database.Redis             hiding (Message)
+import qualified Database.Redis             as Redis
+import qualified Data.ByteString.Char8      as C8
 import qualified Data.ByteString.Lazy.Char8 as LC8
-import           Data.Monoid              ((<>), mempty)
+import           Data.Monoid                ((<>))
 import           DataStore
 import           Control.Monad.Trans.Except
-import           Control.Monad.Trans.Reader
-import qualified Data.Aeson as Aeson
-import           Debug.Trace
-import           Control.Concurrent       (forkIO)
-import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-import Taplike.Schema (ChannelSlug)
+import qualified Data.Aeson                 as Aeson
+import           Control.Concurrent         (forkIO)
+import           Taplike.Schema             (ChannelSlug)
 
 type ClientId = Int64
 
@@ -98,14 +85,14 @@ lookupOrCreateChannel conn server@Server{..} name = do
       let pubSubChan = chanId2Bs name
       case channel of
         Nothing -> do
-          (subs, newChan) <- atomically $ do
+          (subs, newServerChan) <- atomically $ do
               chan <- newChannel name
               modifyTVar serverChannels . M.insert name $ chan
               modifyTVar serverSubscriptions (subscribe [pubSubChan] <>)
               currentSubscriptions <- readTVar serverSubscriptions
               return (currentSubscriptions, chan)
-          forkIO $ runRedis conn (pubSub subs (messageCallback server))
-          return newChan
+          void $ forkIO $ runRedis conn (pubSub subs (messageCallback server))
+          return newServerChan
         Just chan -> return chan
 
 messageCallback :: Server -> Redis.Message -> IO PubSub

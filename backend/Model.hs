@@ -30,5 +30,5 @@ chanFromEntity entity numPresent = TP.Channel { TP.channelCreator = TP.UserId (f
                                               , TP.channelSlug = TP.ChannelSlug $ unSlug $ channelCrSlug $ entityVal entity
                                               , TP.channelTitle = TP.ChannelTitle $ channelTitle $ entityVal entity
                                               , TP.channelNumUsersPresent = numPresent
-                                              , TP.channelColor = TP.ChannelColor $ ("#" <> (channelColor $ entityVal entity))
+                                              , TP.channelColor = TP.ChannelColor ("#" <> channelColor (entityVal entity))
                                               }                                           

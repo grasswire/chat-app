@@ -11,7 +11,7 @@ import qualified Data.Text as T
 import qualified Data.Text.IO as TIO
 import           Taplike.Shared (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import qualified Taplike.Shared as SH
-import           Database.Persist.Sql (fromSqlKey)
+import           Database.Persist.Sql (fromSqlKey, rawSql)
 import           Taplike.Schema
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
@@ -22,7 +22,6 @@ import DataStore
 import Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
-import Database.Persist.Sql (rawSql)
 import Data.Time.Clock
 
 
@@ -107,7 +106,7 @@ getChatR slug = do
             masthead = $(widgetFile "partials/chat/masthead")
             sidebar  = $(widgetFile "partials/chat/sidebar")
             isLoggedIn = isJust authId
-            chanSlug = channelCrSlug $ room
+            chanSlug = channelCrSlug room
         webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) (entityKey c) chanSlug chatUser
         defaultLayout $(widgetFile "chat-room")
       Nothing -> getHomeR
@@ -142,11 +141,11 @@ getHomeR = do
     let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
     (topChannels, allChannels) <- do 
         chanEntities <- runDB (popularChannels minActiveAgo)
-        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (channelCrSlug <$> entityVal <$> chanEntities)
+        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
         let zipped = case presences of 
                       Right ps -> chanEntities `zip` ps
-                      Left _   -> chanEntities `zip` (replicate (length chanEntities) (TP.NumberUsersPresent 0))      
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (\(c, numPresent) -> chanFromEntity c numPresent) <$> zipped
+                      Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (uncurry chanFromEntity) <$> zipped
     defaultLayout $ do
       setTitle "Taplike / Home"
       $(widgetFile "homepage")

@@ -3,14 +3,9 @@ module DataStore where
 import           ClassyPrelude
 import           Database.Redis
 import qualified Types as TP
-import           Database.Persist.Sql (fromSqlKey, toSqlKey)
-import           Model
-import           Database.Persist (Key)
 import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
 import           Data.Binary (encode)
-import qualified Data.Binary as Bin
-import Control.Arrow ((***))
 import Prelude (read)
 import Taplike.Schema (ChannelSlug)
 
@@ -42,23 +37,23 @@ toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
 setChannelPresence :: Integer -> ChannelSlug -> RedisAction Bool
 setChannelPresence score channelId = withRedisExcept $ \conn -> do
   let action = hset channelPresenceSetKey (chanKey2bs channelId) (toStrict $ encode score)
-  runRedis conn $ action
+  runRedis conn action
 
 incrChannelPresence :: ChannelSlug -> RedisAction Integer
 incrChannelPresence channelId = withRedisExcept $ \conn -> do
   let action = hincrby channelPresenceSetKey (chanKey2bs channelId) 1
-  runRedis conn $ action
+  runRedis conn action
 
 decrChannelPresence :: ChannelSlug -> RedisAction Integer
 decrChannelPresence channelId = withRedisExcept $ \conn -> do
   let action = hincrby channelPresenceSetKey (chanKey2bs channelId) (-1)
-  runRedis conn $ action
+  runRedis conn action
 
 getPresenceForChannels :: [ChannelSlug] -> RedisAction [TP.NumberUsersPresent]
 getPresenceForChannels channelIds = withRedisExcept $ \conn -> do 
     let fields = fmap chanKey2bs channelIds
     let action = hmget channelPresenceSetKey fields 
-    result <- runRedis conn $ action 
+    result <- runRedis conn action 
     case result of 
       Right xs -> return $ Right $ fmap (maybe (TP.NumberUsersPresent 0) (TP.NumberUsersPresent . read . C8.unpack)) xs
       _        -> return $ Right (replicate (length channelIds) (TP.NumberUsersPresent 0)) 
