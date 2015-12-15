@@ -29,12 +29,14 @@ getHealthCheckR = return "all good!!"
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
-chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug -> Maybe (Entity User) -> WebSocketsT Handler ()
+chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug 
+            -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp exceptionHandler channelId channelSlug userEntity = 
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
     app <- getYesod
-    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelSlug
+    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app)
+                channelSlug
     toSend <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u  -> race_ (outbound toSend) (inbound app u chan)
@@ -43,11 +45,17 @@ chatApp exceptionHandler channelId channelSlug userEntity =
     outbound chan = forever $ atomically (readTChan chan) >>= sendTextData
     inbound (App { redisConn }) user chan = do
       let wasSeen = do now <- liftIO getCurrentTime
-                       void $ runDB (upsert (Heartbeat (entityKey user) now channelId) [HeartbeatLastSeen =. now])
+                       void $ runDB 
+                        (upsert 
+                            (Heartbeat (entityKey user) now channelId) 
+                            [HeartbeatLastSeen =. now])
 
       void $ liftIO $ do
-        atomically $ S.chanAddClient S.JoinReasonConnected chan (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ S.broadcastEvent channelSlug (SH.RtmPresenceChange (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
+        atomically $ S.chanAddClient S.JoinReasonConnected chan
+                    (userTwitterUserId $ entityVal user)
+        void . runRedisAction redisConn $ 
+                S.broadcastEvent channelSlug (SH.RtmPresenceChange 
+                (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
@@ -62,17 +70,30 @@ chatApp exceptionHandler channelId channelSlug userEntity =
             wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
-            maybe (return ()) (\e -> void (liftIO $ runRedisAction redisConn $ S.broadcastEvent channelSlug e) >> persistEvent (entityKey user) e) processedMsg
+            maybe (return ()) (\e -> void 
+                  (liftIO $ runRedisAction redisConn $ 
+                          S.broadcastEvent channelSlug e) >> 
+                          persistEvent (entityKey user) e) processedMsg
           pure ()
 
     persistEvent :: UserId -> RtmEvent -> Handler ()
     persistEvent userId event = case event of
-                                  RtmMessage msg -> void $ runDB $ insert (Message userId (SH.unMessageText $ SH.messageText msg) (SH.messageTS msg) channelId (MessageUUID $ SH.messageUUID msg))
+                                  RtmMessage msg -> 
+                                          void $ runDB $ insert 
+                                            (Message userId 
+                                              (SH.unMessageText $ SH.messageText msg) 
+                                              (SH.messageTS msg) channelId 
+                                              (MessageUUID $ SH.messageUUID msg))
                                   _              -> return ()
 
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
-      sendTextData (RtmReplyOk (ReplyOk (SH.incomingMessageUUID incoming) (Just now) (Just $ SH.unMessageText $ incomingMessageMessageText incoming)))
+      sendTextData (RtmReplyOk 
+                     (ReplyOk 
+                       (SH.incomingMessageUUID incoming) 
+                       (Just now) 
+                       (Just $ SH.unMessageText $ 
+                               incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
@@ -82,7 +103,14 @@ wsExceptionHandler conn channelSlug e = do
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
-                              (RtmSendMessage incoming) -> Just $ RtmMessage (SH.Message userId ( incomingMessageMessageText incoming) (SH.incomingMessageTS incoming) (Just eventTS) (SH.incomingMessageChannelId incoming) (SH.incomingMessageUUID incoming))
+                              (RtmSendMessage incoming) -> 
+                                      Just $ RtmMessage 
+                                        (SH.Message userId 
+                                          (incomingMessageMessageText incoming) 
+                                          (SH.incomingMessageTS incoming) 
+                                          (Just eventTS) 
+                                          (SH.incomingMessageChannelId incoming) 
+                                          (SH.incomingMessageUUID incoming))
                               _                         -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text
@@ -97,13 +125,17 @@ getChatR slug = do
     let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
         signature = "chatroom" :: Text
         modalSignin = $(widgetFile "partials/modals/signin")
-    chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
+    chatUser <- maybe (return Nothing) 
+                  (\userId -> fmap (Entity userId) <$> 
+                          runDB (get userId)) authId
     case channel of
       Just c -> do
         let room = entityVal c
             isLoggedIn = isJust authId
             chanSlug = channelCrSlug room
-        webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) (entityKey c) chanSlug chatUser
+        webSockets $ chatApp 
+          (wsExceptionHandler (redisConn app) chanSlug) 
+            (entityKey c) chanSlug chatUser
         defaultLayout $ do 
           setTitle $ toHtml $ makeTitle slug <> " | TapLike"
           $(widgetFile "chat-room")
@@ -117,8 +149,14 @@ postNewChatR = do
       Just chanCreator -> do
         currentTime <- liftIO getCurrentTime
         let slug = slugify $ TP.unChannelTitle $ TP.newChannelTitle channel
-            newChannel  = Channel (TP.unChannelTitle $ TP.newChannelTitle channel) (TP.unChannelTopic $ TP.newChannelTopic channel) slug currentTime chanCreator (TP.unChannelColor $ TP.newChannelColor channel)
-        runDB (insert newChannel) >>= \key -> sendResponseStatus status201 (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
+            newChannel = 
+                    Channel (TP.unChannelTitle $ TP.newChannelTitle channel) 
+                        (TP.unChannelTopic $ TP.newChannelTopic channel) 
+                            slug currentTime chanCreator 
+                            (TP.unChannelColor $ TP.newChannelColor channel)
+        runDB (insert newChannel) >>= 
+                \key -> sendResponseStatus status201 
+                    (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChannelSlug
@@ -142,7 +180,8 @@ getHomeR = do
     let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
     (topChannels, allChannels) <- do
         chanEntities <- runDB (popularChannels minActiveAgo)
-        presences <- liftIO $ runRedisAction (redisConn app) $ getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
+        presences <- liftIO $ runRedisAction (redisConn app) $ 
+                        getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
         let zipped = case presences of
                       Right ps -> chanEntities `zip` ps
                       Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
