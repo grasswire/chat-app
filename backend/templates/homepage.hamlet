@@ -30,7 +30,7 @@
       <h3 class="page__headline">Trending Chats
       <div class="card__container">
         $forall channel <- topChannels
-          <a class="card" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
+          <a class="card" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">
             <h3 class="card__title">#{TP.unChannelTitle $ TP.channelTitle channel}
             <p class="card__meta">
               <span class="fa fa-user">
@@ -41,7 +41,7 @@
         <h3 class="page__headline">All Chats
         <div class="card__container">
           $forall channel <- allChannels
-            <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelSlug channel))}">
+            <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">
               <h3 class="card__title--listing">#{TP.unChannelTitle $ TP.channelTitle channel}
                 <div class="card__meta--listing">
                   <span class="fa fa-user">

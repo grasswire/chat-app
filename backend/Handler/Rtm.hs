@@ -4,14 +4,16 @@ module Handler.Rtm where
 
 import Import hiding ((==.), (>=.))
 
-import Taplike.Shared (RtmStartRp(..), Self(..), userFromEntity)
-import Taplike.Schema
-import qualified Database.Esqueleto as E
-import Data.Time.Clock
-import DataStore
-import Control.Concurrent (forkIO)
-import Database.Esqueleto.Internal.Language ((^.), (==.), (>=.))
 
+import           Data.Time.Clock
+import           DataStore
+import           Taplike.Schema
+import qualified Database.Esqueleto   as E
+import qualified Types                as TP
+import           Control.Concurrent   (forkIO)
+import           Taplike.Shared       (userFromEntity)
+import           Database.Persist.Sql (fromSqlKey)
+import           Types                (RtmStartRp(..), Self(..))
 
 getRtmStartR :: Handler Value
 getRtmStartR = do
@@ -37,7 +39,7 @@ getRtmStartR = do
         Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
         _ -> return ()
       let jsonResp = case user of
-                      Just u -> RtmStartRp url (Just $ Self (entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)
+                      Just u -> RtmStartRp url (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)
                       _      -> RtmStartRp url Nothing (fmap userFromEntity users)
       returnJson jsonResp
     Nothing -> sendResponseStatus badRequest400 ("BADREQUEST: MISSING channel_slug param" :: Text)

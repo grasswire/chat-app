@@ -9,10 +9,8 @@ import Data.Aeson(Value(..), ToJSON(toJSON), FromJSON(parseJSON))
 import Data.Aeson.Types (typeMismatch)
 import Database.Persist.Sql
 import TextShow.TH (deriveTextShow)
-import TextShow (showt)
 import Control.Error
 import Control.Lens
-import Data.ByteString (ByteString)
 import Data.UUID
 import System.Random
 
@@ -58,6 +56,7 @@ fromPersistValueUUID i (PersistDbSpecific bs) =
   note "Could not parse UUID" $ bs ^? _ASCIIBytes . from i
 fromPersistValueUUID _ x = Left $ "Invalid value for UUID: " <> showT x
 
+showT :: Show a => a -> Text
 showT = pack . show
 
 deriveTextShow ''ChannelSlug
