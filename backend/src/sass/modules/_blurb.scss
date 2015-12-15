@@ -6,16 +6,17 @@
    padding-bottom: 10px;
 
    &__image {
-      padding: 0 15px 0 0;
-      width: 60px;
+      padding: 0 13px 0 0;
+
       img {
          border-radius: 50%;
-         height: 35px;
-         width: 35px;
+         height: 42px;
+         width: 42px;
       }
    }
 
    &__content {
       flex-grow: 2
    }
+
 }

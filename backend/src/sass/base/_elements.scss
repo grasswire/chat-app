@@ -24,6 +24,10 @@ html {
    }
 }
 
+:focus {
+   outline: none;
+}
+
 body {
    background: get-color(white);
    color: get-color(charcoal);

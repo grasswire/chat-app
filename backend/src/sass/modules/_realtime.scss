@@ -1,0 +1,36 @@
+.realtime {
+   background: get-color(white);
+   bottom: 0;
+   position: absolute;
+   top: $masthead-height;
+   width: 100%;
+
+   &__input {
+      @include font-size(15px);
+      background: get-color(alabaster);
+      border: 2px solid get-color(loblolly);
+      border-radius: $button-border-radius;
+      color: get-color(dove-gray);
+      font-weight: get-font-weight(normal);
+      padding: 10px 20px;
+      width: 100%;
+   }
+
+   &__output {
+      bottom: 105px;
+      overflow:hidden;
+      overflow-y: scroll;
+      padding: 20px 40px;
+      position: absolute;
+      top: 0;
+      width: 100%;
+   }
+
+   &__form {
+      bottom: 10px;
+      padding: 20px 40px;
+      position: absolute;
+      width: 100%;
+   }
+}
+
