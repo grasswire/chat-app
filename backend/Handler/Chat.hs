@@ -128,6 +128,7 @@ getChatR slug = do
         signature = "chatroom" :: Text
         modalSignin = $(widgetFile "partials/modals/signin")
         redirectUrl = renderFunc $ (ChatR slug)
+        loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
     chatUser <- maybe (return Nothing) 
                   (\userId -> fmap (Entity userId) <$> 
                           runDB (get userId)) authId
