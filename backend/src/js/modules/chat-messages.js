@@ -41,19 +41,27 @@ App.Modules.ChatMessages = function () {
 
    };
 
-   var welcome = function(data) {
-      $('.js-chat-output').append(Handlebars.templates.welcome(data.text));
+   var welcomeMessage = function(data) {
+      display(Handlebars.templates.welcome(data.text));
    };
 
-   var blurb = function(data) {
+   var standardMessage = function(data) {
       var transformer = {
          text: data.text,
          user: App.data.users[data.user]
       };
-      $('.js-chat-output').append(Handlebars.templates.blurb(transformer)).animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 0);
-      $('.js-chat-output').linkify();
+
+      display(Handlebars.templates.blurb(transformer));
    };
 
+   var display = function(compiledTemplate) {
+      var output = $('.js-chat-output');
+
+      output
+         .append(compiledTemplate)
+         .linkify()
+         .animate({scrollTop: output.prop("scrollHeight")}, 0);
+   };
 
    return {
       init: function() { return this; },
@@ -61,8 +69,8 @@ App.Modules.ChatMessages = function () {
          Events.subscribe("tl/chat/socket/ready", chatReady);
 
          Events.subscribe("tl/chat/messages/received", message);
-         Events.subscribe("tl/chat/messages/welcome", welcome);
-         Events.subscribe("tl/chat/messages/message", blurb);
+         Events.subscribe("tl/chat/messages/welcome", welcomeMessage);
+         Events.subscribe("tl/chat/messages/message", standardMessage);
 
          Events.bind("submit", ".js-chat-form").to(sendMessage, this);
          return this;
