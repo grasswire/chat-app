@@ -8,7 +8,6 @@ import qualified Server as S
 import           Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
-import qualified Data.Text.IO as TIO
 import           Taplike.Shared (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import qualified Taplike.Shared as SH
 import           Database.Persist.Sql (fromSqlKey, rawSql)
@@ -31,7 +30,7 @@ getHealthCheckR = return "all good!!"
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
 chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp exceptionHandler channelId channelSlug userEntity =
+chatApp exceptionHandler channelId channelSlug userEntity = 
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
     app <- getYesod
@@ -78,9 +77,8 @@ chatApp exceptionHandler channelId channelSlug userEntity =
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
 wsExceptionHandler conn channelSlug e = do
-  liftIO $ TIO.putStrLn ("Exception : " <> pack (show e))
   _ <- liftIO . void . runRedisAction conn $ decrChannelPresence channelSlug
-  return ()
+  throwM e
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
