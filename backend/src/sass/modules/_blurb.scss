@@ -19,7 +19,41 @@
       flex-grow: 2
    }
 
-   a {
-      text-decoration: underline;
+   &__info {
+      @include flex-container(center, center, flex-start);
    }
+
+   &__username {
+      @include font-size(16px);
+      color: get-color(cloud-burst);
+      display: inline-block;
+      font-weight: get-font-weight(medium);
+      padding-right: 10px;
+   }
+
+   &__timestamp {
+      @include font-size(12px);
+      color: get-color(gray);
+      display: inline-block;
+      text-transform: uppercase;
+      padding-right: 10px;
+   }
+
+   &__like-button {
+      @include font-size(16px);
+      color: get-color(persimmon);
+      display: inline-block;
+      padding-right: 10px;
+   }
+
+   &__text {
+      @include font-size(15px);
+      line-height: get-line-height(15px, 20px);
+
+      a {
+         color: get-color(boston-blue);
+         font-weight: get-font-weight(semi-bold);
+      }
+   }
+
 }

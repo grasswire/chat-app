@@ -46,7 +46,9 @@ App.Modules.ChatMessages = function () {
    };
 
    var standardMessage = function(data) {
+
       var transformer = {
+         timestamp: moment(data.ts).format('hh:mm:ss A'),
          text: data.text,
          user: App.data.users[data.user]
       };
