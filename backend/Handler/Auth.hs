@@ -33,13 +33,18 @@ takeCredential k ioref =
 createRoomModalParams :: [(Text, Text)]
 createRoomModalParams = [("modal", "create")]
 
+createRedirectParms :: Text -> [(Text, Text)]
+createRedirectParms url = [("redirect_url", url)]
+
 getTwitterAuthR :: Handler Text
 getTwitterAuthR = do
   app <- getYesod
   let conf = twitterConf . appSettings $ app
   modalParam <- lookupGetParam "modal"
+  redirectParam <- lookupGetParam "redirect_url"
   renderFunc <- getUrlRenderParams
-  let callback = renderFunc TwitterCallbackR (if isJust modalParam then createRoomModalParams else [])
+  let callbackParams = (if isJust modalParam then createRoomModalParams else [])
+  let callback = renderFunc TwitterCallbackR (maybe callbackParams ((callbackParams ++) . createRedirectParms)  redirectParam)
   let token = getRequestToken callback conf
   manager <- appHttpManager <$> getYesod
   cred <- liftIO $ OA.getTemporaryCredential token manager
@@ -56,6 +61,7 @@ getTwitterCallbackR = do
    temporaryToken <- lookupGetParam "oauth_token"
    oauthVerifier  <- lookupGetParam "oauth_verifier"
    modalParam     <- lookupGetParam "modal"
+   redirectParam  <- lookupGetParam "redirect_url"
    let tokenStore = twitterTokenStore app
    let conf = twitterConf . appSettings $ app
    let params = if isJust modalParam then createRoomModalParams else []
@@ -78,10 +84,10 @@ getTwitterCallbackR = do
             Nothing -> do
               userId <- runDB $ insert $ User twitterUserId (TT.userScreenName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
               setSession sessionUserIdKey (pack . show $ userId)
-              redirect homeR
+              maybe (redirect homeR) (redirect) redirectParam
             Just u -> do
               setSession sessionUserIdKey (pack . show $ fromSqlKey (entityKey u))
-              redirect homeR
+              maybe (redirect homeR) (redirect) redirectParam
     _ -> redirect homeR
 
 verifyTwitterCreds :: Manager -> TWInfo -> IO TT.User
