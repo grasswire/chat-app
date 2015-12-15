@@ -50,7 +50,7 @@ App.Modules.ChatMessages = function () {
          text: data.text,
          user: App.data.users[data.user]
       };
-      $('.js-chat-output').append(Handlebars.templates.blurb(transformer)).animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
+      $('.js-chat-output').append(Handlebars.templates.blurb(transformer)).animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 0);
    };
 
 
