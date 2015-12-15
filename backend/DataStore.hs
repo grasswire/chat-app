@@ -55,7 +55,7 @@ getPresenceForChannels channelIds = withRedisExcept $ \conn -> do
         defaultPresence = TP.NumberUsersPresent 0
     result <- runRedis conn action 
     case result of 
-      Right xs -> return $ Right $ fmap (maybe defaultPresence (\x -> fromMaybe defaultPresence (TP.NumberUsersPresent <$> (readMay $ C8.unpack x)))) xs
+      Right xs -> return $ Right $ fmap (maybe defaultPresence (\x -> fromMaybe defaultPresence (TP.NumberUsersPresent <$> readMay (C8.unpack x)))) xs
       _        -> return $ Right (replicate (length channelIds) defaultPresence) 
   
 

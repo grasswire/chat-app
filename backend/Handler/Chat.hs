@@ -106,7 +106,9 @@ getChatR slug = do
             isLoggedIn = isJust authId
             chanSlug = channelCrSlug room
         webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) (entityKey c) chanSlug chatUser
-        defaultLayout $(widgetFile "chat-room")
+        defaultLayout $ do 
+          setTitle $ toHtml $ makeTitle slug <> " | TapLike"
+          $(widgetFile "chat-room")
       Nothing -> getHomeR
 
 postNewChatR :: Handler ()
@@ -128,6 +130,9 @@ makeSlug :: Text -> Text
 makeSlug =  replaceAll "[ _]" "-"
           . replaceAll "[^a-z0-9_ ]+" ""
           . T.map toLower
+          
+makeTitle :: ChannelSlug -> Text 
+makeTitle = replaceAll "[-]" " " . T.map toLower . unSlug
 
 getHomeR :: Handler Html
 getHomeR = do
