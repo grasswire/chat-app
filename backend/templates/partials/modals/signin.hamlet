@@ -7,5 +7,5 @@
     <section class="modal__body center">
       <p>You'll need a Twitter account to sign into TapLike
       <br>
-      <a href="@{TwitterAuthR}" class="button--twitter">
+      <a href="#{loginWithChatRedirect}" class="button--twitter">
         <span class="fa fa-twitter"> Sign In With Twitter
