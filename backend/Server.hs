@@ -7,7 +7,8 @@ import qualified Data.Map                   as M
 import qualified Data.Set                   as S
 import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Lazy       as BL
-import           Taplike.Shared             (RtmEvent(..))
+import           Types                      (RtmEvent(..))
+import           Model.Instances            ()
 import           Model                      (Message(..))
 import           Database.Redis             hiding (Message)
 import qualified Database.Redis             as Redis

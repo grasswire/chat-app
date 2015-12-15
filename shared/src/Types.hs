@@ -23,6 +23,99 @@ newtype UserId =
   UserId { unUserId :: Int64 }
   deriving (Eq, Show, Typeable)
   
+-- data User = User
+--  { userProfileImageUrl :: Text
+--  , userTwitterScreenName :: Text
+--  , userUserId :: UserId
+--  }
+
+newtype MessageText = MessageText { unMessageText :: Text}
+
+data ChannelCreatedRp = ChannelCreatedRp
+  { channelCreatedRpChannel     :: Channel
+  , channelCreatedRpId          :: Int64
+  , channelCreatedRpChannelSlug :: ChannelSlug
+  }
+
+newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
+
+newtype ID a = ID { unID :: Text } deriving (Eq, Ord)
+
+
+
+data RtmStartRp = RtmStartRp
+  { rtmStartUrl      :: Text
+  , rtmStartSelf     :: Maybe Self
+  , rtmStartUsers    :: [User]
+  }
+
+data Self = Self
+  { selfID               :: UserId
+  , selfName             :: Text
+  , selfProfileImageUrl  :: Text
+  }
+
+data Presence = PresenceActive | PresenceAway
+
+data Message = Message
+  { messageUser         :: UserId
+  , messageText         :: MessageText
+  , messageTS           :: UTCTime
+  , messageEventTS      :: Maybe UTCTime
+  , messageChannel      :: Text
+  , messageUUID         :: UUID
+  }
+
+data IncomingMessage = IncomingMessage
+ { incomingMessageUUID        :: UUID
+ , incomingMessageTS          :: UTCTime
+ , incomingMessageChannelId   :: Text
+ , incomingMessageMessageText :: MessageText
+ }
+
+data Heartbeat = Heartbeat
+  { heartBeatUser    :: UserId
+  , heartBeatChannel :: ChannelSlug
+  }
+
+data RtmEvent
+  = RtmHello
+  | RtmReplyOk ReplyOk
+  | RtmReplyNotOk ReplyNotOk
+  | RtmMessage Message
+  | RtmSendMessage IncomingMessage
+  | RtmHeartbeat Heartbeat
+  | RtmPing Ping
+  | RtmPong Pong
+  | RtmPresenceChange PresenceChange
+  | RtmMessageLikeAdded MessageLikeAdded 
+  
+data MessageLikeAdded = MessageLikeAdded 
+  { messageLikeAddedUser      :: UserId
+  , messageLikeAddedMessageId :: UUID  
+  }
+
+data ReplyOk = ReplyOk
+  { replyOkReplyTo :: UUID
+  , replyOkTS      :: Maybe UTCTime
+  , replyOkText    :: Maybe Text
+  }
+
+data ReplyNotOk = ReplyNotOk
+  { replyNotOkReplyTo :: UUID
+  , replyNotOkCode    :: Int32
+  , replyNotOkText    :: Text
+  }
+
+data Ping = Ping { pingId :: Int32 }
+data Pong = Pong { pongReplyTo :: Int32 }
+
+data PresenceChange = PresenceChange
+  { presenceChangeUser     :: User
+  , presenceChangePresence :: Presence
+  }
+
+
 newtype MessageId = 
   MessageId { unMessageId :: UUID } 
   deriving (Eq, Show, Typeable) 
@@ -44,7 +137,7 @@ newtype TwitterUserId =
   deriving (Eq, Show, Typeable)
 
 newtype TwitterScreenName =
-  TwitterScreenName { unTwitterScreenName :: Int64 }
+  TwitterScreenName { unTwitterScreenName :: Text }
   deriving (Eq, Show, Typeable)
 
 newtype ProfileImageUrl =
@@ -66,7 +159,7 @@ data Channel = Channel
   { channelCreator         :: UserId
   , channelCreated         :: UTCTime
   , channelTopic           :: ChannelTopic
-  , channelSlug            :: ChannelSlug
+  , channelChannelSlug     :: ChannelSlug
   , channelTitle           :: ChannelTitle
   , channelNumUsersPresent :: NumberUsersPresent
   , channelColor           :: ChannelColor  

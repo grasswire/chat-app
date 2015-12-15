@@ -8,8 +8,8 @@ import qualified Server as S
 import           Network.Wai (remoteHost)
 import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
-import           Taplike.Shared (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
-import qualified Taplike.Shared as SH
+import           Types (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
+import           Taplike.Shared (userFromEntity)
 import           Database.Persist.Sql (fromSqlKey, rawSql)
 import           Taplike.Schema
 import           Data.Char (toLower)
@@ -53,16 +53,17 @@ chatApp exceptionHandler channelId channelSlug userEntity =
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan
                     (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ 
-                S.broadcastEvent channelSlug (SH.RtmPresenceChange 
-                (SH.PresenceChange (SH.userFromEntity user) SH.PresenceActive))
+        res <- runRedisAction redisConn $ 
+                 S.broadcastEvent channelSlug 
+                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
+        print res         
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
 
       sourceWS $$ mapM_C $ \ case
         RtmHeartbeat _ -> lift wasSeen
-        RtmPing ping -> sendTextData $ RtmPong (SH.Pong $ SH.pingId ping)
+        RtmPing ping -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
         inEvent -> do
           ackMessage inEvent
           runInnerHandler <- lift handlerToIO
@@ -81,18 +82,18 @@ chatApp exceptionHandler channelId channelSlug userEntity =
                                   RtmMessage msg -> 
                                           void $ runDB $ insert 
                                             (Message userId 
-                                              (SH.unMessageText $ SH.messageText msg) 
-                                              (SH.messageTS msg) channelId 
-                                              (MessageUUID $ SH.messageUUID msg))
+                                              (TP.unMessageText $ TP.messageText msg) 
+                                              (TP.messageTS msg) channelId 
+                                              (MessageUUID $ TP.messageUUID msg))
                                   _              -> return ()
 
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
       sendTextData (RtmReplyOk 
                      (ReplyOk 
-                       (SH.incomingMessageUUID incoming) 
+                       (TP.incomingMessageUUID incoming) 
                        (Just now) 
-                       (Just $ SH.unMessageText $ 
+                       (Just $ TP.unMessageText $ 
                                incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
@@ -105,12 +106,12 @@ processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
                               (RtmSendMessage incoming) -> 
                                       Just $ RtmMessage 
-                                        (SH.Message userId 
+                                        (TP.Message (TP.UserId $ fromSqlKey userId )
                                           (incomingMessageMessageText incoming) 
-                                          (SH.incomingMessageTS incoming) 
+                                          (TP.incomingMessageTS incoming) 
                                           (Just eventTS) 
-                                          (SH.incomingMessageChannelId incoming) 
-                                          (SH.incomingMessageUUID incoming))
+                                          (TP.incomingMessageChannelId incoming) 
+                                          (TP.incomingMessageUUID incoming))
                               _                         -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text
@@ -148,15 +149,20 @@ postNewChatR = do
     case authId of
       Just chanCreator -> do
         currentTime <- liftIO getCurrentTime
-        let slug = slugify $ TP.unChannelTitle $ TP.newChannelTitle channel
-            newChannel = 
-                    Channel (TP.unChannelTitle $ TP.newChannelTitle channel) 
-                        (TP.unChannelTopic $ TP.newChannelTopic channel) 
-                            slug currentTime chanCreator 
-                            (TP.unChannelColor $ TP.newChannelColor channel)
+        let slug  = slugify $ TP.unChannelTitle $ TP.newChannelTitle channel
+            topic = TP.unChannelTopic $ TP.newChannelTopic channel
+            title = TP.unChannelTitle $ TP.newChannelTitle channel
+            color = TP.unChannelColor $ TP.newChannelColor channel
+            newChannel = Channel title topic slug currentTime chanCreator color
         runDB (insert newChannel) >>= 
                 \key -> sendResponseStatus status201 
-                    (toJSON (ChannelCreatedRp newChannel (fromSqlKey key) slug))
+                    (toJSON (ChannelCreatedRp 
+                              (TP.Channel 
+                                (TP.UserId $ fromSqlKey chanCreator) currentTime
+                                (TP.ChannelTopic topic) (TP.ChannelSlug $ unSlug slug) 
+                                (TP.ChannelTitle title) (TP.NumberUsersPresent 0) 
+                                (TP.ChannelColor color)) 
+                              (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChannelSlug
@@ -185,7 +191,7 @@ getHomeR = do
         let zipped = case presences of
                       Right ps -> chanEntities `zip` ps
                       Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ (uncurry chanFromEntity) <$> zipped
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ uncurry chanFromEntity <$> zipped
 
     defaultLayout $ do
       setTitle "Taplike / Home"
