@@ -122,10 +122,12 @@ getChatR slug = do
     app <- getYesod
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
-    renderFunc <- getUrlRenderParams
-    let rtmStartUrl = renderFunc RtmStartR [("channel_slug", unSlug slug)]
+    renderFuncP <- getUrlRenderParams
+    renderFunc <- getUrlRender
+    let rtmStartUrl = renderFuncP RtmStartR [("channel_slug", unSlug slug)]
         signature = "chatroom" :: Text
         modalSignin = $(widgetFile "partials/modals/signin")
+        redirectUrl = renderFunc $ (ChatR slug)
     chatUser <- maybe (return Nothing) 
                   (\userId -> fmap (Entity userId) <$> 
                           runDB (get userId)) authId
