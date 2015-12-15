@@ -35,4 +35,4 @@ redis:
   redisHost: "_env:REDIS_HOST:localhost"
 
 copyright: Insert copyright statement here
-#analytics: UA-YOURCODE
+analytics: UA-71422008-1
