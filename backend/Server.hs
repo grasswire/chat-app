@@ -12,14 +12,12 @@ import           Model.Instances            ()
 import           Model                      (Message(..))
 import           Database.Redis             hiding (Message)
 import qualified Database.Redis             as Redis
-import qualified Data.ByteString.Char8      as C8
 import qualified Data.ByteString.Lazy.Char8 as LC8
-import           Data.Monoid                ((<>))
 import           DataStore
 import           Control.Monad.Trans.Except
 import qualified Data.Aeson                 as Aeson
 import           Control.Concurrent         (forkIO)
-import           Taplike.Schema             (ChannelSlug)
+import           Taplike.Schema             (ChannelSlug, unSlug, ChannelSlug(..))
 
 type ClientId = Int64
 
@@ -85,20 +83,18 @@ lookupOrCreateChannel conn server@Server{..} name = do
       let pubSubChan = chanId2Bs name
       case channel of
         Nothing -> do
-          (subs, newServerChan) <- atomically $ do
+          newServerChan <- atomically $ do
               chan <- newChannel name
               modifyTVar serverChannels . M.insert name $ chan
-              modifyTVar serverSubscriptions (subscribe [pubSubChan] <>)
-              currentSubscriptions <- readTVar serverSubscriptions
-              return (currentSubscriptions, chan)
-          void $ forkIO $ runRedis conn (pubSub subs (messageCallback server))
+              return chan
+          void $ forkIO $ runRedis conn (pubSub (subscribe [pubSubChan]) (messageCallback server))
           return newServerChan
         Just chan -> return chan
 
 messageCallback :: Server -> Redis.Message -> IO PubSub
-messageCallback server@Server{..} msg = do
+messageCallback server@Server{..} msg = 
   atomically $ do
-    channel <- maybe (pure Nothing) (lookupChannel server) (readMay $ C8.unpack $ msgChannel msg)
+    channel <- lookupChannel server (ChannelSlug $ decodeUtf8 $ msgChannel msg)
     case channel of
       Just chan -> do
         let broadcastMsg = Aeson.decode (LC8.fromStrict $ msgMessage msg) :: Maybe RtmEvent
@@ -106,7 +102,7 @@ messageCallback server@Server{..} msg = do
           Just bMsg -> writeTChan (channelBroadcastChan chan) bMsg
           Nothing   -> return ()
       Nothing -> return ()
-  return mempty
+    return mempty
 
 broadcastEvent :: ChannelSlug -> RtmEvent -> RedisAction Integer
 broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
@@ -115,7 +111,7 @@ lookupClient :: Server -> ClientId -> STM (Maybe Client)
 lookupClient Server{..} name = M.lookup name <$> readTVar serverClients
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
-chanId2Bs = C8.pack . show 
+chanId2Bs = encodeUtf8 . unSlug
 
 lookupChannel :: Server -> ChannelSlug -> STM (Maybe Channel)
 lookupChannel Server{..} name = M.lookup name <$> readTVar serverChannels
