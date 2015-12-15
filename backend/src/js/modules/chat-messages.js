@@ -26,13 +26,6 @@ App.Modules.ChatMessages = function () {
       return false;
    };
 
-   var displayMessage = function(response) {
-      $('.js-chat-output').append(Handlebars.templates.blurb(response.message));
-      //.animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
-      //$('.js-chat-output')
-      //return false;
-   };
-
    var message = function(response) {
       try {
          var msg = JSON.parse(response.message.data);
@@ -57,7 +50,7 @@ App.Modules.ChatMessages = function () {
          text: data.text,
          user: App.data.users[data.user]
       };
-      $('.js-chat-output').append(Handlebars.templates.blurb(transformer));
+      $('.js-chat-output').append(Handlebars.templates.blurb(transformer)).animate({scrollTop: $('.js-chat-output').prop("scrollHeight")}, 500);
    };
 
 
