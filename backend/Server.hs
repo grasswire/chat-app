@@ -18,6 +18,8 @@ import           Control.Monad.Trans.Except
 import qualified Data.Aeson                 as Aeson
 import           Control.Concurrent         (forkIO)
 import           Taplike.Schema             (ChannelSlug, unSlug, ChannelSlug(..))
+import Debug.Trace
+import qualified Data.Text.IO as TIO
 
 type ClientId = Int64
 
@@ -92,15 +94,16 @@ lookupOrCreateChannel conn server@Server{..} name = do
         Just chan -> return chan
 
 messageCallback :: Server -> Redis.Message -> IO PubSub
-messageCallback server@Server{..} msg = 
+messageCallback server@Server{..} msg = do 
+  TIO.putStrLn $ decodeUtf8 (msgMessage msg)
   atomically $ do
     channel <- lookupChannel server (ChannelSlug $ decodeUtf8 $ msgChannel msg)
     case channel of
       Just chan -> do
-        let broadcastMsg = Aeson.decode (LC8.fromStrict $ msgMessage msg) :: Maybe RtmEvent
+        let broadcastMsg = Aeson.eitherDecode (LC8.fromStrict $ msgMessage msg) :: Either String RtmEvent
         case broadcastMsg of
-          Just bMsg -> writeTChan (channelBroadcastChan chan) bMsg
-          Nothing   -> return ()
+          Right bMsg -> writeTChan (channelBroadcastChan chan) bMsg
+          Left err   -> return ()
       Nothing -> return ()
     return mempty
 

@@ -304,10 +304,10 @@ instance ToJSON User where
 
 instance FromJSON User where
   parseJSON = withObject "User" $ \o -> User
-    <$> o .: "profile_image_url"
+    <$> o .: "user_id"
+    <*> o .: "twitter_user_id" 
     <*> o .: "twitter_screen_name"
-    <*> o .: "user_id"
-    <*> o .: "twitter_user_id"
+    <*> o .: "profile_image_url" 
 
 instance ToJSON PresenceChange where
   toJSON (PresenceChange user presence) = object

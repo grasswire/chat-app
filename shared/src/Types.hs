@@ -23,12 +23,6 @@ newtype UserId =
   UserId { unUserId :: Int64 }
   deriving (Eq, Show, Typeable)
   
--- data User = User
---  { userProfileImageUrl :: Text
---  , userTwitterScreenName :: Text
---  , userUserId :: UserId
---  }
-
 newtype MessageText = MessageText { unMessageText :: Text}
 
 data ChannelCreatedRp = ChannelCreatedRp
