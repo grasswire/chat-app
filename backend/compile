@@ -3,6 +3,10 @@
 npm install
 npm prune
 
+bower install
+bower update
+bower prune
+
 gulp boot
 gulp compile --production
 
