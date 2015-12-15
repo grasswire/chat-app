@@ -1,20 +1,27 @@
 .button {
-    @include font-size(15px);
-    background: get-color(boston-blue);
-    border: 0;
-    border-radius: $button-border-radius;
-    color: get-color(white);
-    display: inline-block;
-    font-weight: get-font-weight(bold);
-    padding: 15px 40px;
-    margin: 15px 0;
-    text-align: center;
-    text-decoration: none;
-    transition: background 0.3s ease-out;
-    width: 246px;
+   @include font-size(15px);
+   background: get-color(boston-blue);
+   border: 0;
+   border-radius: $button-border-radius;
+   color: get-color(white);
+   display: inline-block;
+   font-weight: get-font-weight(bold);
+   padding: 15px 40px;
+   margin: 15px 0;
+   text-align: center;
+   text-decoration: none;
+   transition: background 0.3s ease-out;
+   width: 246px;
 
-    &:hover {
-        background: darken(get-color(boston-blue), 5%);
-        transition: background 0.3s ease-in;
-    }
+   &:hover {
+      background: darken(get-color(boston-blue), 5%);
+      transition: background 0.3s ease-in;
+   }
+
+   &--twitter {
+      @extend .button;
+      background: get-color(picton-blue);
+
+   }
+
 }

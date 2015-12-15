@@ -60,8 +60,15 @@ App.Modules.ChatMessages = function () {
       var output = $('.js-chat-output');
 
       output
-         .append(compiledTemplate)
-         .linkify()
+         .append(App.Helpers.linkifyHashtags(
+                 App.Helpers.linkifyUsers(compiledTemplate)))
+         .linkify({
+            defaultProtocol: "//",
+            linkClass: "blurb__link",
+            linkAttributes: {
+               rel: "nofollow"
+            }
+         })
          .animate({scrollTop: output.prop("scrollHeight")}, 0);
    };
 
