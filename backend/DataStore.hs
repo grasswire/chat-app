@@ -6,7 +6,6 @@ import qualified Types as TP
 import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
 import           Data.Binary (encode)
-import Prelude (read)
 import Taplike.Schema (ChannelSlug)
 
 type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
@@ -52,10 +51,11 @@ decrChannelPresence channelId = withRedisExcept $ \conn -> do
 getPresenceForChannels :: [ChannelSlug] -> RedisAction [TP.NumberUsersPresent]
 getPresenceForChannels channelIds = withRedisExcept $ \conn -> do 
     let fields = fmap chanKey2bs channelIds
-    let action = hmget channelPresenceSetKey fields 
+        action = hmget channelPresenceSetKey fields 
+        defaultPresence = TP.NumberUsersPresent 0
     result <- runRedis conn action 
     case result of 
-      Right xs -> return $ Right $ fmap (maybe (TP.NumberUsersPresent 0) (TP.NumberUsersPresent . read . C8.unpack)) xs
-      _        -> return $ Right (replicate (length channelIds) (TP.NumberUsersPresent 0)) 
+      Right xs -> return $ Right $ fmap (maybe defaultPresence (\x -> fromMaybe defaultPresence (TP.NumberUsersPresent <$> (readMay $ C8.unpack x)))) xs
+      _        -> return $ Right (replicate (length channelIds) defaultPresence) 
   
 

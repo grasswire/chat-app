@@ -5,7 +5,6 @@ module Server where
 import           ClassyPrelude              hiding ((<>))
 import qualified Data.Map                   as M
 import qualified Data.Set                   as S
-import           Prelude                    (read)
 import qualified Data.ByteString            as BS
 import qualified Data.ByteString.Lazy       as BL
 import           Taplike.Shared             (RtmEvent(..))
@@ -98,7 +97,7 @@ lookupOrCreateChannel conn server@Server{..} name = do
 messageCallback :: Server -> Redis.Message -> IO PubSub
 messageCallback server@Server{..} msg = do
   atomically $ do
-    channel <- lookupChannel server (read $ C8.unpack $ msgChannel msg)
+    channel <- maybe (pure Nothing) (lookupChannel server) (readMay $ C8.unpack $ msgChannel msg)
     case channel of
       Just chan -> do
         let broadcastMsg = Aeson.decode (LC8.fromStrict $ msgMessage msg) :: Maybe RtmEvent
