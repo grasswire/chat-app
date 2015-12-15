@@ -27,6 +27,12 @@
    &__title {
       @include font-size(32px);
       color: get-color(ebony-clay);
+      margin: 100px 0 0 0;
       text-align: center;
+   }
+
+   p {
+      @include font-size(15px);
+      color: get-color(emperor);
    }
 }

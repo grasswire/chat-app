@@ -18,7 +18,7 @@
     "susy": "~2.2.6",
     "underscore": "~1.8.3",
     "underscore.string": "~3.2.2",
-    "linkifyjs": "~2.0.0"
+    "jQuery-linkify": "linkifyjs#~1.1.7"
   },
   "license": "MIT",
   "private": true,

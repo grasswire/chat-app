@@ -41,7 +41,8 @@
 
    &__like-button {
       @include font-size(16px);
-      color: get-color(persimmon);
+      //color: get-color(persimmon);
+      color: get-color(gray);
       display: inline-block;
       padding-right: 10px;
    }

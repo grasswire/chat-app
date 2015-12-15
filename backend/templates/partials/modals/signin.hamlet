@@ -3,6 +3,9 @@
     <header class="modal__header">
       <a href="#" class="js-trigger-modal-close">
         <span class="modal__close fa fa-times">
-    <section class="modal__body">
-      <h1 class="modal__title">Sign In
-      <a href="@{TwitterAuthR}" class="create__button">Sign in with Twitter
+      <h1 class="modal__title">Sign Up
+    <section class="modal__body center">
+      <p>You'll need a Twitter account to sign into TapLike
+      <br>
+      <a href="@{TwitterAuthR}" class="button--twitter">
+        <span class="fa fa-twitter"> Sign In With Twitter
