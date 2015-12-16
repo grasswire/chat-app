@@ -31,7 +31,8 @@ getHomeR = do
       $(widgetFile "homepage")
 
 popularChannelsStatement :: Text
-popularChannelsStatement = "select ?? from channel where id in (select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
+popularChannelsStatement = "select ?? from channel where id in " <> 
+                           "(select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
 
 popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
 popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]

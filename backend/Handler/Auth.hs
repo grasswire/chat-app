@@ -77,7 +77,8 @@ getTwitterCallbackR = do
               Nothing -> return Nothing
    case (mcred, oauthVerifier) of
     (Just cred, Just authVer) -> do
-          accessTokens <- liftIO $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
+          accessTokens <- liftIO $ OA.getAccessToken tokens 
+                                   (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
           let token = getRequestToken callback conf
           manager <- appHttpManager <$> getYesod
           user <- liftIO $ verifyTwitterCreds manager (mkTwitterInfo token accessTokens)
@@ -85,7 +86,8 @@ getTwitterCallbackR = do
           maybePersistedUser <- runDB $ getBy (UniqueUser twitterUserId)
           case maybePersistedUser of
             Nothing -> do
-              userId <- runDB $ insert $ User twitterUserId (TT.userScreenName user) (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
+              userId <- runDB $ insert $ User twitterUserId (TT.userScreenName user) 
+                                         (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
               setSession sessionUserIdKey (pack . show $ userId)
               maybe (redirect homeR) (redirect) redirectParam
             Just u -> do
