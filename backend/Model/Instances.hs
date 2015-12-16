@@ -136,6 +136,8 @@ deriveTextShow ''ChannelSlug
 deriveTextShow ''TwitterUserId
 deriveTextShow ''TwitterScreenName
 deriveTextShow ''ProfileImageUrl
+deriveTextShow ''MessageLike
+deriveTextShow ''MessageId
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
@@ -171,11 +173,12 @@ instance FromJSON Message where
     <*> o .:? "event_ts"
     <*> o .: "channel"
     <*> o .: "uuid"
+    <*> o .: "likes"
 
 instance ToJSON Message where
-  toJSON (Message user text ts eventTs channel uuid) =
+  toJSON (Message user text ts eventTs channel uuid msgLikes) =
     object ["type" .=  ("message" :: Text), "user" .= user, "text" .= text, "ts" .= ts
-           , "event_ts" .= eventTs, "channel" .= channel, "uuid" .= uuid
+           , "event_ts" .= eventTs, "channel" .= channel, "uuid" .= uuid, "likes" .= msgLikes
            ]
 
 instance FromJSON Presence where
@@ -326,6 +329,28 @@ instance ToJSON MessageLikeAdded where
     [ "type"       .= ("message_like_added" :: Text)
     , "user_id"    .= user
     , "message_id" .= message
+    ]
+
+-- data MessageLike = MessageLike 
+--  { messageLikeMessageId   :: MessageId
+--  , messageLikeUserId      :: UserId
+--  , messageLikeChannelSlug :: ChannelSlug
+--  , messageLikeTimestamp   :: UTCTime
+--  } deriving (Eq, Show)
+
+instance FromJSON MessageLike where
+  parseJSON = withObject "Message Like" $ \o -> MessageLike
+    <$> o .: "message_id"
+    <*> o .: "user_id"
+    <*> o .: "channel_slug"
+    <*> o .: "timestamp"
+
+instance ToJSON MessageLike where
+  toJSON (MessageLike msgId userId channelSlug timestamp) = object
+    [ "message_id"   .= msgId
+    , "user_id"      .= userId
+    , "channel_slug" .= channelSlug
+    , "timestamp"    .= timestamp
     ]
 
 instance ToJSON Presence where

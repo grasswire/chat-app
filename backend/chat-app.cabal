@@ -27,6 +27,7 @@ library
                      Handler.Auth
                      Handler.MessageLike
                      Handler.Home
+                     Handler.Channel
                      Server
                      Taplike.Shared
                      Taplike.TextShowOrphans

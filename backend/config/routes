@@ -21,3 +21,5 @@
 /api/rtm.start RtmStartR GET
 
 /api/likes.add MessageLikeR POST 
+
+/channels.likes ChannelLikesR GET 

@@ -38,6 +38,7 @@ import Handler.Rtm
 import Handler.Auth
 import Handler.MessageLike
 import Handler.Home
+import Handler.Channel
 import qualified Data.Map as Map
 import Server
 import qualified Database.Redis as Redis

@@ -31,13 +31,13 @@ postMessageLikeR =  do
         
         broadcastLikeAdded :: App -> UserId -> TP.NewMessageLike -> Handler ()
         broadcastLikeAdded (App { redisConn }) userId msgLike = do
-          channel <- runDB (getBy $ UniqueChannelSlug (ChannelSlug $ TP.unChannelSlug $ TP.messageLikeChannel msgLike))
+          channel <- runDB (getBy $ UniqueChannelSlug (ChannelSlug $ TP.unChannelSlug $ TP.newMessageLikeChannel msgLike))
           case channel of 
             Just chan -> liftIO . void . runRedisAction redisConn $ 
               S.broadcastEvent (channelCrSlug $ entityVal chan) 
                              (TP.RtmMessageLikeAdded 
                                (TP.MessageLikeAdded (TP.UserId $ fromSqlKey userId) 
-                               (TP.unMessageId $ TP.messageLikeMessageId msgLike)))
+                               (TP.unMessageId $ TP.newMessageLikeMessageId msgLike)))
             Nothing   -> return ()
 
 

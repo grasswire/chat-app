@@ -23,7 +23,7 @@ newtype UserId =
   UserId { unUserId :: Int64 }
   deriving (Eq, Show, Typeable)
   
-newtype MessageText = MessageText { unMessageText :: Text}
+newtype MessageText = MessageText { unMessageText :: Text} deriving (Show)
 
 data ChannelCreatedRp = ChannelCreatedRp
   { channelCreatedRpChannel     :: Channel
@@ -56,7 +56,8 @@ data Message = Message
   , messageEventTS      :: Maybe UTCTime
   , messageChannel      :: Text
   , messageUUID         :: UUID
-  }
+  , messageMessageLikes :: [MessageLike]
+  } deriving (Show)
 
 data IncomingMessage = IncomingMessage
  { incomingMessageUUID        :: UUID
@@ -158,8 +159,15 @@ data Channel = Channel
   }
 
 data NewMessageLike = NewMessageLike 
-  { messageLikeMessageId :: MessageId
-  , messageLikeChannel   :: ChannelSlug
+  { newMessageLikeMessageId :: MessageId
+  , newMessageLikeChannel   :: ChannelSlug
   } deriving (Eq, Show)
+  
+data MessageLike = MessageLike 
+ { messageLikeMessageId   :: MessageId
+ , messageLikeUserId      :: UserId
+ , messageLikeChannelSlug :: ChannelSlug
+ , messageLikeTimestamp   :: UTCTime
+ } deriving (Eq, Show)
 
 data OkResponse = OkResponse deriving (Eq, Show)

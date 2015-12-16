@@ -107,7 +107,7 @@ processMessage userId event eventTS = case event of
                                           (TP.incomingMessageTS incoming) 
                                           (Just eventTS) 
                                           (TP.incomingMessageChannelId incoming) 
-                                          (TP.incomingMessageUUID incoming))
+                                          (TP.incomingMessageUUID incoming) [])
                               _                         -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text
