@@ -10,7 +10,7 @@ import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import           Types (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import           Taplike.Shared (userFromEntity)
-import           Database.Persist.Sql (fromSqlKey, rawSql)
+import           Database.Persist.Sql (fromSqlKey)
 import           Taplike.Schema
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
@@ -21,7 +21,7 @@ import DataStore
 import Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
-import Data.Time.Clock
+import Handler.Home (getHomeR)
 
 
 getHealthCheckR :: Handler Text
@@ -179,32 +179,32 @@ makeSlug =  replaceAll "[ _]" "-"
 makeTitle :: ChannelSlug -> Text 
 makeTitle = replaceAll "[-]" " " . T.map toLower . unSlug
 
-getHomeR :: Handler Html
-getHomeR = do
-    authId <- maybeAuthId
-    app <- getYesod
-    let signature = "home" :: String
-    let modalCreate = $(widgetFile "partials/modals/create")
-    timeNow <- liftIO getCurrentTime
-    let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
-    (topChannels, allChannels) <- do
-        chanEntities <- runDB (popularChannels minActiveAgo)
-        presences <- liftIO $ runRedisAction (redisConn app) $ 
-                        getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
-        let zipped = case presences of
-                      Right ps -> chanEntities `zip` ps
-                      Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ uncurry chanFromEntity <$> zipped
-
-    defaultLayout $ do
-      setTitle "Taplike / Home"
-      $(widgetFile "homepage")
-
-popularChannelsStatement :: Text
-popularChannelsStatement = "select ?? from channel where id in (select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
-
-popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
-popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]
+-- getHomeR :: Handler Html
+-- getHomeR = do
+--     authId <- maybeAuthId
+--     app <- getYesod
+--     let signature = "home" :: String
+--     let modalCreate = $(widgetFile "partials/modals/create")
+--     timeNow <- liftIO getCurrentTime
+--     let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
+--     (topChannels, allChannels) <- do
+--         chanEntities <- runDB (popularChannels minActiveAgo)
+--         presences <- liftIO $ runRedisAction (redisConn app) $ 
+--                         getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
+--         let zipped = case presences of
+--                       Right ps -> chanEntities `zip` ps
+--                       Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
+--         return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ uncurry chanFromEntity <$> zipped
+-- 
+--     defaultLayout $ do
+--       setTitle "Taplike / Home"
+--       $(widgetFile "homepage")
+-- 
+-- popularChannelsStatement :: Text
+-- popularChannelsStatement = "select ?? from channel where id in (select channel from message where timestamp >= ? group by channel order by count(*) desc limit 27);"
+-- 
+-- popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
+-- popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]
 
 getLogOutR :: Handler Html
 getLogOutR = clearSession >> getHomeR

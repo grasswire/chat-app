@@ -26,6 +26,7 @@ library
                      Handler.Rtm
                      Handler.Auth
                      Handler.MessageLike
+                     Handler.Home
                      Server
                      Taplike.Shared
                      Taplike.TextShowOrphans
