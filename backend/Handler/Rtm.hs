@@ -69,6 +69,7 @@ channelMembersQuery chanKey = E.select $
                               E.from $ \user -> do
                               E.where_ $ E.exists $
                                          E.from $ \membership ->
-                                         E.where_ (membership ^. MembershipChannel ==. val chanKey &&. membership ^. MembershipUser ==. user ^. UserId)
+                                         E.where_ (membership ^. MembershipChannel ==. val chanKey &&. 
+                                         membership ^. MembershipUser ==. user ^. UserId)
                               return user
 
