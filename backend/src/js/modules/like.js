@@ -4,7 +4,12 @@ App.Modules.Like = function () {
    var o = {};
 
    var toggleLike = function(data) {
-
+      data.eventElement
+          .toggleClass("blurb__like-button")
+          .toggleClass("blurb__like-button--liked")
+          .find("span")
+          .toggleClass("fa-heart-o")
+          .toggleClass("fa-heart");
    };
 
    return {
