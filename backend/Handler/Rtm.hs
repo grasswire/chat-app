@@ -37,14 +37,15 @@ getRtmStartR = do
                   let timeAgo = addUTCTime (negate 120 :: NominalDiffTime) now
                   runDB (usersPresentQuery (entityKey channel) timeAgo)
                 _ ->  return []
+      members <- case maybeChan of 
+        Just channel -> runDB (channelMembersQuery $ entityKey channel)          
+        _            -> return []
       case maybeChan of
-        Just chan -> do 
-          liftIO $ print (length users)
-          liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
-        _ -> return ()
+        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
+        _         -> return ()
       let jsonResp = case user of
-                      Just u -> RtmStartRp url (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)
-                      _      -> RtmStartRp url Nothing (fmap userFromEntity users)
+                      Just u -> RtmStartRp url (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users) (fmap userFromEntity members)
+                      _      -> RtmStartRp url Nothing (fmap userFromEntity users) (fmap userFromEntity members)
       returnJson jsonResp
     Nothing -> sendResponseStatus badRequest400 ("BADREQUEST: MISSING channel_slug param" :: Text)
 
@@ -57,4 +58,12 @@ usersPresentQuery chanKey lastseen = E.select $
                                                   heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
                                                   heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
                                      return user
+
+channelMembersQuery ::  MonadIO m => Key Channel -> SqlPersistT m [Entity User]
+channelMembersQuery chanKey = E.select $
+                              E.from $ \user -> do
+                              E.where_ $ E.exists $
+                                         E.from $ \membership ->
+                                         E.where_ (membership E.^. MembershipChannel E.==. E.val chanKey E.&&. membership E.^. MembershipUser E.==. user E.^. UserId)
+                              return user
 

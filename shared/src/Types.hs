@@ -39,6 +39,7 @@ data RtmStartRp = RtmStartRp
   { rtmStartUrl      :: Text
   , rtmStartSelf     :: Maybe Self
   , rtmStartUsers    :: [User]
+  , rtmStartMembers  :: [User]
   }
 
 data Self = Self

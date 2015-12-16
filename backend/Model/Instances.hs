@@ -144,12 +144,14 @@ instance FromJSON RtmStartRp where
     <$> o .: "url"
     <*> o .:? "self"
     <*> o .: "users"
+    <*> o .: "members"
 
 instance ToJSON RtmStartRp where
-  toJSON (RtmStartRp url self users) = object
+  toJSON (RtmStartRp url self users members) = object
     [ "url"   .= url
     , "self"  .= self
     , "users" .= users
+    , "members" .= members
     ]
 
 instance FromJSON Self where

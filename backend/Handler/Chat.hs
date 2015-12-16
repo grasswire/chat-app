@@ -25,6 +25,11 @@ import Handler.Home (getHomeR)
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
+addMember :: Key Channel -> Key User -> Handler (Either (Entity Membership) (Key Membership))
+addMember channelId user = do 
+    now    <- liftIO getCurrentTime 
+    runDB $ insertBy (Membership user channelId now)
+
 chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug
             -> Maybe (Entity User) -> WebSocketsT Handler ()
 chatApp exceptionHandler channelId channelSlug userEntity =
@@ -56,13 +61,18 @@ chatApp exceptionHandler channelId channelSlug userEntity =
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
+      
+      runInnerHandler <- lift handlerToIO
+      
+      liftIO $ runInnerHandler $ do
+        void $ addMember channelId (entityKey user)
 
       sourceWS $$ mapM_C $ \ case
         RtmHeartbeat _ -> lift wasSeen
         RtmPing ping -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
         inEvent -> do
           ackMessage inEvent
-          runInnerHandler <- lift handlerToIO
+          -- runInnerHandler <- lift handlerToIO
           void $ liftIO $ forkIO $ runInnerHandler $ do
             wasSeen
             ts <- liftIO getCurrentTime
