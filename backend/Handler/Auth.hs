@@ -11,7 +11,10 @@ import Web.Authenticate.OAuth (OAuth(..), Credential(..))
 import qualified Data.Map as M
 import qualified Web.Twitter.Types as TT
 import Database.Persist.Sql (fromSqlKey)
+import Handler.Home (getHomeR)
 
+getLogOutR :: Handler Html
+getLogOutR = clearSession >> getHomeR
 
 getRequestToken :: Text -> TwitterConf -> OAuth
 getRequestToken callback (TwitterConf _ _ (TwitterConsumerKey consumerKey) (TwitterConsumerSecret secret)) = twitterOAuth

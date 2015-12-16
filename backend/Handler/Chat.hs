@@ -23,10 +23,6 @@ import qualified Control.Exception.Lifted as EL
 import Network.WebSockets (ConnectionException)
 import Handler.Home (getHomeR)
 
-
-getHealthCheckR :: Handler Text
-getHealthCheckR = return "all good!!"
-
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
 chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug 
@@ -178,6 +174,3 @@ makeSlug =  replaceAll "[ _]" "-"
           
 makeTitle :: ChannelSlug -> Text 
 makeTitle = replaceAll "[-]" " " . T.map toLower . unSlug
-
-getLogOutR :: Handler Html
-getLogOutR = clearSession >> getHomeR

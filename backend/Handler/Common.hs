@@ -14,3 +14,6 @@ getFaviconR = return $ TypedContent "image/x-icon"
 getRobotsR :: Handler TypedContent
 getRobotsR = return $ TypedContent typePlain
                     $ toContent $(embedFile "config/robots.txt")
+
+getHealthCheckR :: Handler Text
+getHealthCheckR = return "all good!!"
