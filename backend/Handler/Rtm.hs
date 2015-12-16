@@ -9,6 +9,7 @@ import           Data.Time.Clock
 import           DataStore
 import           Taplike.Schema
 import qualified Database.Esqueleto   as E
+import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val)
 import qualified Types                as TP
 import           Control.Concurrent   (forkIO)
 import           Taplike.Shared       (userFromEntity)
@@ -54,9 +55,9 @@ usersPresentQuery chanKey lastseen = E.select $
                                      E.from $ \user -> do
                                      E.where_ $ E.exists $
                                                 E.from $ \heartbeat ->
-                                                E.where_ (heartbeat E.^. HeartbeatChannel E.==. E.val chanKey E.&&.
-                                                  heartbeat E.^. HeartbeatUser E.==. user E.^. UserId E.&&.
-                                                  heartbeat E.^. HeartbeatLastSeen E.>=. E.val lastseen)
+                                                E.where_ (heartbeat ^. HeartbeatChannel ==. val chanKey &&.
+                                                  heartbeat ^. HeartbeatUser ==. user ^. UserId &&.
+                                                  heartbeat ^. HeartbeatLastSeen >=. val lastseen)
                                      return user
 
 channelMembersQuery ::  MonadIO m => Key Channel -> SqlPersistT m [Entity User]
@@ -64,6 +65,6 @@ channelMembersQuery chanKey = E.select $
                               E.from $ \user -> do
                               E.where_ $ E.exists $
                                          E.from $ \membership ->
-                                         E.where_ (membership E.^. MembershipChannel E.==. E.val chanKey E.&&. membership E.^. MembershipUser E.==. user E.^. UserId)
+                                         E.where_ (membership ^. MembershipChannel ==. val chanKey &&. membership ^. MembershipUser ==. user ^. UserId)
                               return user
 
