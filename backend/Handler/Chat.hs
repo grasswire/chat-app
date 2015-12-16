@@ -25,9 +25,9 @@ import Handler.Home (getHomeR)
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
-chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug 
+chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug
             -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp exceptionHandler channelId channelSlug userEntity = 
+chatApp exceptionHandler channelId channelSlug userEntity =
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
     app <- getYesod
@@ -41,17 +41,18 @@ chatApp exceptionHandler channelId channelSlug userEntity =
     outbound chan = forever $ atomically (readTChan chan) >>= sendTextData
     inbound (App { redisConn }) user chan = do
       let wasSeen = do now <- liftIO getCurrentTime
-                       void $ runDB 
-                        (upsert 
-                            (Heartbeat (entityKey user) now channelId) 
+                       void $ runDB
+                        (upsert
+                            (Heartbeat (entityKey user) now channelId)
                             [HeartbeatLastSeen =. now])
 
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan
                     (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ 
-                 S.broadcastEvent channelSlug 
+        res <- runRedisAction redisConn $
+                 S.broadcastEvent channelSlug
                  (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
+        print res
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
@@ -66,42 +67,41 @@ chatApp exceptionHandler channelId channelSlug userEntity =
             wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
-            maybe (return ()) (\e -> void 
-                  (liftIO $ runRedisAction redisConn $ 
-                          S.broadcastEvent channelSlug e) >> 
+            maybe (return ()) (\e -> void
+                  (liftIO $ runRedisAction redisConn $
+                          S.broadcastEvent channelSlug e) >>
                           persistEvent (entityKey user) e) processedMsg
           pure ()
 
     persistEvent :: UserId -> RtmEvent -> Handler ()
     persistEvent userId event = case event of
-                                  RtmMessage msg -> 
-                                          void $ runDB $ insert 
-                                            (Message userId 
-                                              (TP.unMessageText $ TP.messageText msg) 
-                                              (TP.messageTS msg) channelId 
+                                  RtmMessage msg ->
+                                          void $ runDB $ insert
+                                            (Message userId
+                                              (TP.unMessageText $ TP.messageText msg)
+                                              (TP.messageTS msg) channelId
                                               (MessageUUID $ TP.messageUUID msg))
                                   _              -> return ()
 
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
-      sendTextData (RtmReplyOk 
-                     (ReplyOk 
-                       (TP.incomingMessageUUID incoming) 
-                       (Just now) 
-                       (Just $ TP.unMessageText $ 
+      sendTextData (RtmReplyOk
+                     (ReplyOk
+                       (TP.incomingMessageUUID incoming)
+                       (Just now)
+                       (Just $ TP.unMessageText $
                                incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
 wsExceptionHandler conn channelSlug e = do
-  liftIO $ putStrLn "decrementing chan presence"
   _ <- liftIO . void . runRedisAction conn $ decrChannelPresence channelSlug
   throwM e
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
-                              (RtmSendMessage incoming) -> 
-                                      Just $ RtmMessage 
+                              (RtmSendMessage incoming) ->
+                                      Just $ RtmMessage
                                         (TP.Message (TP.UserId $ fromSqlKey userId )
                                           (incomingMessageMessageText incoming) 
                                           (TP.incomingMessageTS incoming) 
@@ -122,21 +122,22 @@ getChatR slug = do
     renderFunc <- getUrlRender
     let rtmStartUrl = renderFuncP RtmStartR [("channel_slug", unSlug slug)]
         signature = "chatroom" :: Text
+        htmlSlug = unSlug slug
         modalSignin = $(widgetFile "partials/modals/signin")
         redirectUrl = renderFunc $ (ChatR slug)
         loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
-    chatUser <- maybe (return Nothing) 
-                  (\userId -> fmap (Entity userId) <$> 
+    chatUser <- maybe (return Nothing)
+                  (\userId -> fmap (Entity userId) <$>
                           runDB (get userId)) authId
     case channel of
       Just c -> do
         let room = entityVal c
             isLoggedIn = isJust authId
             chanSlug = channelCrSlug room
-        webSockets $ chatApp 
-          (wsExceptionHandler (redisConn app) chanSlug) 
+        webSockets $ chatApp
+          (wsExceptionHandler (redisConn app) chanSlug)
             (entityKey c) chanSlug chatUser
-        defaultLayout $ do 
+        defaultLayout $ do
           setTitle $ toHtml $ makeTitle slug <> " | TapLike"
           $(widgetFile "chat-room")
       Nothing -> getHomeR
@@ -153,14 +154,14 @@ postNewChatR = do
             title = TP.unChannelTitle $ TP.newChannelTitle channel
             color = TP.unChannelColor $ TP.newChannelColor channel
             newChannel = Channel title topic slug currentTime chanCreator color
-        runDB (insert newChannel) >>= 
-                \key -> sendResponseStatus status201 
-                    (toJSON (ChannelCreatedRp 
-                              (TP.Channel 
+        runDB (insert newChannel) >>=
+                \key -> sendResponseStatus status201
+                    (toJSON (ChannelCreatedRp
+                              (TP.Channel
                                 (TP.UserId $ fromSqlKey chanCreator) currentTime
-                                (TP.ChannelTopic topic) (TP.ChannelSlug $ unSlug slug) 
-                                (TP.ChannelTitle title) (TP.NumberUsersPresent 0) 
-                                (TP.ChannelColor color)) 
+                                (TP.ChannelTopic topic) (TP.ChannelSlug $ unSlug slug)
+                                (TP.ChannelTitle title) (TP.NumberUsersPresent 0)
+                                (TP.ChannelColor color))
                               (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
@@ -171,6 +172,6 @@ makeSlug :: Text -> Text
 makeSlug =  replaceAll "[ _]" "-"
           . replaceAll "[^a-z0-9_ ]+" ""
           . T.map toLower
-          
-makeTitle :: ChannelSlug -> Text 
+
+makeTitle :: ChannelSlug -> Text
 makeTitle = replaceAll "[-]" " " . T.map toLower . unSlug
