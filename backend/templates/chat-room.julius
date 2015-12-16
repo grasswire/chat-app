@@ -1,4 +1,3 @@
 App.routes.chatRoom    = "@{ChatR slug}";
-App.routes.rtmStartUrl = "#{rawJS rtmStartUrl}"
-App.routes.loginWithChatRedirect = "#{rawJS loginWithChatRedirect}"
-
+App.routes.rtmStartUrl = "#{rawJS rtmStartUrl}";
+App.routes.likes = "@{MessageLikeR}";

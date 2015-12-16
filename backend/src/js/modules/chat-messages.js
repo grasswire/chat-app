@@ -15,7 +15,7 @@ App.Modules.ChatMessages = function () {
       var message = {
             message_text: $(".js-chat-input").val(),
             uuid: Utils.generateUUID(),
-            channel_id: "first",
+            channel_id: $('body').data('channel'),
             type: "incoming_message",
             ts: new Date().toISOString()
       };
@@ -46,8 +46,8 @@ App.Modules.ChatMessages = function () {
    };
 
    var standardMessage = function(data) {
-
       var transformer = {
+         messageId: data.uuid,
          timestamp: moment(data.ts).format('h:mm:ss A'),
          text: data.text,
          user: App.data.users[data.user]

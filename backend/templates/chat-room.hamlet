@@ -1,4 +1,4 @@
-<body class="#{signature}" data-is-logged-in="#{isLoggedIn}">
+<body class="#{signature}" data-is-logged-in="#{isLoggedIn}" data-channel="#{htmlSlug}">
   <div class="room">
     <aside class="room__sidebar">
       <header class="room__masthead">
