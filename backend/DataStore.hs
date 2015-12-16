@@ -1,12 +1,22 @@
-module DataStore where
+{-# LANGUAGE OverloadedStrings #-}
+
+module DataStore 
+  (
+    RedisAction
+  , runRedisAction
+  , numUsersPresent
+  , setChannelPresence
+  , incrChannelPresence
+  , decrChannelPresence
+  , getPresenceForChannels    
+  ) where 
 
 import           ClassyPrelude
 import           Database.Redis
 import qualified Types as TP
 import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
-import           Data.Binary (encode)
-import Taplike.Schema (ChannelSlug)
+import           Taplike.Schema (ChannelSlug, unSlug)
 
 type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 
@@ -17,45 +27,49 @@ withRedisExcept :: (Connection -> IO (Either Reply a)) -> RedisAction a
 withRedisExcept = ExceptT . ReaderT
 
 channelPresenceSetKey :: ByteString
-channelPresenceSetKey = C8.pack "chan_presence_hash"
+channelPresenceSetKey = C8.pack "channels:presence"
 
-mkChannelPresenceSetValue :: ChannelSlug -> ByteString
-mkChannelPresenceSetValue = encodeUtf8 . pack . show 
-
-chanKey2bs :: ChannelSlug -> ByteString
-chanKey2bs = mkChannelPresenceSetValue
+channelPresenceKey :: ChannelSlug -> ByteString
+channelPresenceKey =  encodeUtf8 . (\slug -> "channel:" <> slug <> ":presence") . unSlug
 
 numUsersPresent :: ChannelSlug -> RedisAction (Maybe TP.NumberUsersPresent)
-numUsersPresent key = withRedisExcept $ \conn -> do
-    score <- runRedis conn $ zscore channelPresenceSetKey (mkChannelPresenceSetValue key)
-    return $ fmap toUsersPresent <$> score
+numUsersPresent key = listToMaybe <$> getPresenceForChannels [key]
 
 toUsersPresent :: Double -> TP.NumberUsersPresent
 toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
 
-setChannelPresence :: Integer -> ChannelSlug -> RedisAction Bool
+setChannelPresence :: Integer -> ChannelSlug -> RedisAction Integer
 setChannelPresence score channelId = withRedisExcept $ \conn -> do
-  let action = hset channelPresenceSetKey (chanKey2bs channelId) (toStrict $ encode score)
-  runRedis conn action
-
+  let key = channelPresenceKey channelId
+  runRedis conn $ do
+    currentPresence <- hget channelPresenceSetKey key
+    case currentPresence of 
+      Left err -> pure $ Left err
+      Right x -> 
+        case x of 
+          Just p -> do
+            let maybeInteger = fst <$> C8.readInteger p
+            case maybeInteger of 
+              Just i -> hincrby channelPresenceSetKey key (score - i)
+              _ -> pure $ Left (Error $ C8.pack "could not parse hash field as an integer")
+          _ -> pure $ Left (Error $ C8.pack "received Nothing for hash field")    
+              
 incrChannelPresence :: ChannelSlug -> RedisAction Integer
 incrChannelPresence channelId = withRedisExcept $ \conn -> do
-  let action = hincrby channelPresenceSetKey (chanKey2bs channelId) 1
+  let action = hincrby channelPresenceSetKey (channelPresenceKey channelId) 1
   runRedis conn action
 
 decrChannelPresence :: ChannelSlug -> RedisAction Integer
 decrChannelPresence channelId = withRedisExcept $ \conn -> do
-  let action = hincrby channelPresenceSetKey (chanKey2bs channelId) (-1)
+  let action = hincrby channelPresenceSetKey (channelPresenceKey channelId) (-1)
   runRedis conn action
 
 getPresenceForChannels :: [ChannelSlug] -> RedisAction [TP.NumberUsersPresent]
 getPresenceForChannels channelIds = withRedisExcept $ \conn -> do 
-    let fields = fmap chanKey2bs channelIds
+    let fields = fmap channelPresenceKey channelIds
         action = hmget channelPresenceSetKey fields 
         defaultPresence = TP.NumberUsersPresent 0
     result <- runRedis conn action 
     case result of 
       Right xs -> return $ Right $ fmap (maybe defaultPresence (\x -> fromMaybe defaultPresence (TP.NumberUsersPresent <$> readMay (C8.unpack x)))) xs
-      _        -> return $ Right (replicate (length channelIds) defaultPresence) 
-  
-
+      _        -> return $ Right (replicate (length channelIds) defaultPresence)

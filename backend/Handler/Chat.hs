@@ -53,10 +53,9 @@ chatApp exceptionHandler channelId channelSlug userEntity =
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan
                     (userTwitterUserId $ entityVal user)
-        res <- runRedisAction redisConn $ 
+        void . runRedisAction redisConn $ 
                  S.broadcastEvent channelSlug 
                  (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
-        print res         
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
@@ -99,6 +98,7 @@ chatApp exceptionHandler channelId channelSlug userEntity =
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
 wsExceptionHandler conn channelSlug e = do
+  liftIO $ putStrLn "decrementing chan presence"
   _ <- liftIO . void . runRedisAction conn $ decrChannelPresence channelSlug
   throwM e
 

@@ -29,14 +29,18 @@ getRtmStartR = do
       let channelSlug = ChannelSlug slug
           url = renderer $ ChatR channelSlug
       maybeChan <- runDB (getBy $ UniqueChannelSlug channelSlug)
+      now <- liftIO getCurrentTime
       users <- case maybeChan of
                 Just channel -> do
-                  timeNow <- liftIO getCurrentTime
-                  let hourAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
-                  runDB (usersPresentQuery (entityKey channel) hourAgo)
+                  maybe (return ()) (\key -> void $ runDB (upsert (Heartbeat key now (entityKey channel)) 
+                                 [HeartbeatLastSeen =. now])) authId
+                  let timeAgo = addUTCTime (negate 120 :: NominalDiffTime) now
+                  runDB (usersPresentQuery (entityKey channel) timeAgo)
                 _ ->  return []
       case maybeChan of
-        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
+        Just chan -> do 
+          liftIO $ print (length users)
+          liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) (setChannelPresence (fromIntegral $ length users :: Integer) (channelCrSlug $ entityVal chan)))
         _ -> return ()
       let jsonResp = case user of
                       Just u -> RtmStartRp url (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) (fmap userFromEntity users)

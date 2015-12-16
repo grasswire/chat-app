@@ -35,8 +35,6 @@ newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 
 newtype ID a = ID { unID :: Text } deriving (Eq, Ord)
 
-
-
 data RtmStartRp = RtmStartRp
   { rtmStartUrl      :: Text
   , rtmStartSelf     :: Maybe Self
