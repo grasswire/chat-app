@@ -36,9 +36,8 @@ chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug
 chatApp exceptionHandler channelId channelSlug userEntity =
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
-    app <- getYesod
-    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app)
-                channelSlug
+    app    <- getYesod
+    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelSlug
     toSend <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u  -> race_ (outbound toSend) (inbound app u chan)
@@ -47,16 +46,12 @@ chatApp exceptionHandler channelId channelSlug userEntity =
     outbound chan = forever $ atomically (readTChan chan) >>= sendTextData
     inbound (App { redisConn }) user chan = do
       let wasSeen = do now <- liftIO getCurrentTime
-                       void $ runDB
-                        (upsert
-                            (Heartbeat (entityKey user) now channelId)
-                            [HeartbeatLastSeen =. now])
+                       void $ runDB (upsert (Heartbeat (entityKey user) now channelId) [HeartbeatLastSeen =. now])
 
       void $ liftIO $ do
         atomically $ S.chanAddClient S.JoinReasonConnected chan
                     (userTwitterUserId $ entityVal user)
-        res <- runRedisAction redisConn $
-                 S.broadcastEvent channelSlug
+        void . runRedisAction redisConn $ S.broadcastEvent channelSlug
                  (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
@@ -68,7 +63,7 @@ chatApp exceptionHandler channelId channelSlug userEntity =
 
       sourceWS $$ mapM_C $ \ case
         RtmHeartbeat _ -> lift wasSeen
-        RtmPing ping -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
+        RtmPing ping   -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
         inEvent -> do
           ackMessage inEvent
           void $ liftIO $ forkIO $ runInnerHandler $ do
@@ -89,22 +84,14 @@ chatApp exceptionHandler channelId channelSlug userEntity =
 
     persistEvent :: UserId -> RtmEvent -> Handler ()
     persistEvent userId event = case event of
-                                  RtmMessage msg ->
-                                          void $ runDB $ insert
-                                            (Message userId
-                                              (TP.unMessageText $ TP.messageText msg)
-                                              (TP.messageTS msg) channelId
-                                              (MessageUUID $ TP.messageUUID msg))
+                                  RtmMessage msg -> void $ runDB $ insert 
+                                    (Message userId (TP.unMessageText $ TP.messageText msg) 
+                                                    (TP.messageTS msg) channelId (MessageUUID $ TP.messageUUID msg))
                                   _              -> return ()
 
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
-      sendTextData (RtmReplyOk
-                     (ReplyOk
-                       (TP.incomingMessageUUID incoming)
-                       (Just now)
-                       (Just $ TP.unMessageText $
-                               incomingMessageMessageText incoming)))
+      sendTextData (RtmReplyOk (ReplyOk (TP.incomingMessageUUID incoming) (Just now) (Just $ TP.unMessageText $ incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
@@ -114,15 +101,11 @@ wsExceptionHandler conn channelSlug e = do
 
 processMessage :: UserId -> RtmEvent -> UTCTime -> Maybe RtmEvent
 processMessage userId event eventTS = case event of
-                              (RtmSendMessage incoming) ->
-                                      Just $ RtmMessage
-                                        (TP.Message (TP.UserId $ fromSqlKey userId )
-                                          (incomingMessageMessageText incoming) 
-                                          (TP.incomingMessageTS incoming) 
-                                          (Just eventTS) 
-                                          (TP.incomingMessageChannelId incoming) 
+                               RtmSendMessage incoming  -> Just $ 
+                                 RtmMessage (TP.Message (TP.UserId $ fromSqlKey userId ) (incomingMessageMessageText incoming) 
+                                          (TP.incomingMessageTS incoming) (Just eventTS) (TP.incomingMessageChannelId incoming) 
                                           (TP.incomingMessageUUID incoming) [])
-                              _                         -> Nothing
+                               _                        -> Nothing
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
@@ -140,9 +123,7 @@ getChatR slug = do
         modalSignin = $(widgetFile "partials/modals/signin")
         redirectUrl = renderFunc (ChatR slug)
         loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
-    chatUser <- maybe (return Nothing)
-                  (\userId -> fmap (Entity userId) <$>
-                          runDB (get userId)) authId
+    chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     case channel of
       Just c -> do
         let room = entityVal c
