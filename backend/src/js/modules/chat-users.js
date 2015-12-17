@@ -13,7 +13,9 @@ App.Modules.ChatUsers = function () {
 
    var sanitizeUsers = function(response) {
       App.data.users = _.extend(mapUsers(response.users), mapUsers([response.self]));
-      Events.publish('tl/chat/users/init', {});
+      Events.publish('tl/chat/users/init', {
+         currentUser: response.self
+      });
    };
 
    var generateUserList = function(data) {
@@ -22,6 +24,10 @@ App.Modules.ChatUsers = function () {
 
    var displayUserCount = function(data) {
       $(".js-user-count").html(_.keys(App.data.users).length);
+   };
+
+   var displayProfileImage = function(data) {
+     $(".js-avatar").attr('src', App.data.users[data.currentUser.user_id].profileImageUrl);
    };
 
    var mapUsers = function(userList) {
@@ -57,6 +63,8 @@ App.Modules.ChatUsers = function () {
 
          Events.subscribe("tl/chat/users/init", generateUserList);
          Events.subscribe("tl/chat/users/init", displayUserCount);
+         Events.subscribe("tl/chat/users/init", displayProfileImage);
+
          Events.subscribe("tl/chat/users/updated", generateUserList);
          Events.subscribe("tl/chat/users/updated", displayUserCount);
 

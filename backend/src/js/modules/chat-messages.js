@@ -29,6 +29,7 @@ App.Modules.ChatMessages = function () {
    var message = function(response) {
       try {
          var msg = JSON.parse(response.message.data);
+         console.log(msg);
       } catch (e) {
          Events.publish("tl/chat/messages/welcome", {
             text: response.message.data

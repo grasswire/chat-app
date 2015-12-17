@@ -1,9 +1,10 @@
 <ul class="user__list">
    {{#each this}}
+      <h4 class="user__title">Members (<span class="js-user-count"></span>)</h4>
       <li class="user__item">
          <a href="" class="user__profile-button">
             <img class="user__avatar" src="{{this.profileImageUrl}}" alt="{{this.screenName}}">
-            <div class="user__name">@{{this.screenName}}</div>
+            <div class="user__name">{{this.screenName}}</div>
          </a>
       </li>
    {{/each}}

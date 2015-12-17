@@ -12,7 +12,7 @@
                 <a href="/logout">Log Out
           $nothing
             <li class="navigation-main__item">
-              <a href="@{TwitterAuthR}?modal=create" class="js-trigger-modal" data-modal-trigger="create">Create
+              <a href="@{TwitterAuthR}?modal=create">Create
             <li class="navigation-main__item">
                 <a href="@{TwitterAuthR}">Log In
     <div class="masthead__content-container">
