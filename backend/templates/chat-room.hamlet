@@ -8,8 +8,10 @@
         <div class="notification-center">
           <div class="notification-center__unread" style="display: none;">
           <p>
-            <a href="#" class="js-dropdown" data-dropdown-name="notification">
+            <a href="#" class="js-dropdown-button" data-dropdown-name="notification">
               <img src="@{StaticR images_avatar_png}" class="js-avatar avatar">
+      <section style="margin-top: 75px;">
+        <div class="room__likes js-room-likes" style="color: #fff;">
     <main class="room__chat">
       <header class="room__details-bar">
         <div class="room__description">
@@ -20,10 +22,12 @@
         <div class="room__buttons">
           <nav>
             <ul class="room__buttons-list">
-              <li class="room__buttons-item">
-                <a href="#" class="js-dropdown" data-dropdown-name="users">
+              <li class="room__buttons-item js-dropdown-parent">
+                <a href="#" class="js-dropdown-button" data-dropdown-name="users">
                   <span class="fa fa-users">
                   <span class="js-user-count room__buttons-user-count">
+                <div class="dropdown--user-list js-dropdown-content" data-dropdown="users" style="display: none;">
+                  <div class="js-userlist-output">
               <li class="room__buttons-item">
                 <a href="#" class="js-dropdown" data-dropdown-name="share">
                   <span class="fa fa-share-alt">

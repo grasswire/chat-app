@@ -12,8 +12,10 @@ App.Modules.ChatUsers = function () {
    }
 
    var sanitizeUsers = function(response) {
-      App.data.users = _.extend(mapUsers(response.users), mapUsers([response.self]));
-      Events.publish('tl/chat/users/init', {});
+      App.data.users = _.extend(App.Helpers.mapUsers(response.users), App.Helpers.mapUsers([response.self]));
+      Events.publish('tl/chat/users/init', {
+         currentUser: response.self
+      });
    };
 
    var generateUserList = function(data) {
@@ -24,28 +26,13 @@ App.Modules.ChatUsers = function () {
       $(".js-user-count").html(_.keys(App.data.users).length);
    };
 
-   var mapUsers = function(userList) {
-      var mapped = _.object(
-         _.map(
-            _.map(userList, function(u) {
-               return {
-                  id: u.user_id,
-                  profileImageUrl: u.profile_image_url,
-                  screenName: u.twitter_screen_name
-               }
-            }),
-            function(user) {
-               return [user.id, user]
-            }
-         )
-      );
-
-      return mapped;
+   var displayProfileImage = function(data) {
+     $(".js-avatar").attr('src', App.data.users[data.currentUser.user_id].profileImageUrl);
    };
 
    var updateUserList = function(data) {
       if (!_.has(App.data.users, data.user.user_id)) {
-         App.data.users = _.extend(App.data.users, mapUsers([data.user]));
+         App.data.users = _.extend(App.data.users, App.Helpers.mapUsers([data.user]));
          $('.js-chat-output').append(Handlebars.templates.userJoinedChat(App.data.users[data.user.user_id]));
       }
    };
@@ -57,6 +44,8 @@ App.Modules.ChatUsers = function () {
 
          Events.subscribe("tl/chat/users/init", generateUserList);
          Events.subscribe("tl/chat/users/init", displayUserCount);
+         Events.subscribe("tl/chat/users/init", displayProfileImage);
+
          Events.subscribe("tl/chat/users/updated", generateUserList);
          Events.subscribe("tl/chat/users/updated", displayUserCount);
 
