@@ -94,7 +94,7 @@ lookupOrCreateChannel conn server@Server{..} name = do
         Just chan -> return chan
 
 messageCallback :: Server -> Redis.Message -> IO PubSub
-messageCallback server@Server{..} msg = do 
+messageCallback server@Server{..} msg = 
   atomically $ do
     channel <- lookupChannel server (ChannelSlug $ decodeUtf8 $ msgChannel msg)
     case channel of

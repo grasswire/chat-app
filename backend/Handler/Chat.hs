@@ -64,8 +64,7 @@ chatApp exceptionHandler channelId channelSlug userEntity =
       
       runInnerHandler <- lift handlerToIO
       
-      liftIO $ runInnerHandler $ do
-        void $ addMember channelId (entityKey user)
+      liftIO $ runInnerHandler $ void $ addMember channelId (entityKey user)
 
       sourceWS $$ mapM_C $ \ case
         RtmHeartbeat _ -> lift wasSeen
@@ -82,7 +81,7 @@ chatApp exceptionHandler channelId channelSlug userEntity =
                 case event of 
                   RtmMessage msg -> do 
                     let msgText = TP.unMessageText $ TP.messageText msg
-                    either ($(logError) . pack . show) (\subs -> $(logInfo) ("sent msg " <> msgText <> " to " <> (pack $ show subs) <> " subscribers")) pub
+                    either ($(logError) . pack . show) (\subs -> $(logInfo) ("sent msg " <> msgText <> " to " <> pack (show subs) <> " subscribers")) pub
                   _             -> return ()   
                 persistEvent (entityKey user) event
               Nothing    -> return ()
@@ -139,7 +138,7 @@ getChatR slug = do
         signature = "chatroom" :: Text
         htmlSlug = unSlug slug
         modalSignin = $(widgetFile "partials/modals/signin")
-        redirectUrl = renderFunc $ (ChatR slug)
+        redirectUrl = renderFunc (ChatR slug)
         loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
     chatUser <- maybe (return Nothing)
                   (\userId -> fmap (Entity userId) <$>

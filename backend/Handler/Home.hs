@@ -48,7 +48,7 @@ popularChannels' ts = do
   chans <- chansByMessages
   E.select $
     E.from $ \channel -> do 
-    E.where_ (channel ^. ChannelId `E.in_` (E.valList $ E.unValue <$> chans))
+    E.where_ (channel ^. ChannelId `E.in_` E.valList (E.unValue <$> chans))
     return channel  
   where chansByMessages = E.select $ 
                           E.from $ \message -> do 
