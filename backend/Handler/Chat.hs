@@ -76,7 +76,6 @@ chatApp exceptionHandler channelId channelSlug userEntity =
             wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
-            $(logInfo) "processed message"
             case processedMsg of 
               Just event -> do 
                 pub <- liftIO $ runRedisAction redisConn $ S.broadcastEvent channelSlug event
