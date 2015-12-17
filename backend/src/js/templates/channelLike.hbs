@@ -1,12 +1,13 @@
-{{#each foo}}
+{{#each this}}
 <div class="js-blurb blurb--liked" data-message-id="{{ this.uuid }}">
    <div class="blurb__content">
       <div class="blurb__info">
-         <a class="blurb__like-button js-like" href="#" title=""><span class="fa fa-heart"></span>{{ this.likes.length }}</a>
-         <!--<div class="blurb__image">
-            <img src="{{this.user.profileImageUrl}}">
-         </div>
-         <span class="blurb__username">{{this.user.screenName}}</span> -->
+         <a class="blurb__like-button" href="#" title="">
+            <span class="fa fa-heart"></span>
+            <span class="blurb__count">{{ this.likes.length }}</span>
+         </a>
+         <div class="blurb__image"><img src="{{this.user.profileImageUrl}}"></div>
+         <span class="blurb__username">{{this.user.screenName}}</span>
          <span class="blurb__timestamp">{{this.timestamp}}</span>
       </div>
       <p class="blurb__text">

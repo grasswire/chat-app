@@ -23,10 +23,18 @@ App.Modules.Like = function () {
    };
 
    var displayChannelLikes = function(response) {
+      var likeList = mergeUsers(response.responseArray, App.data.channelMembers);
+
       if (!_.isUndefined(response.responseArray)) {
-         console.log(response.responseArray);
-         $(".js-room-likes").append(Handlebars.templates.channelLike({foo: response.responseArray}));
+         $(".js-room-likes").append(Handlebars.templates.channelLike(likeList));
       }
+   };
+
+   var mergeUsers = function(list, users) {
+
+      return _.each(list, function(item) {
+         item.user = App.data.channelMembers[item.user];
+      });
    };
 
    var toggleLikeButton = function(data) {
