@@ -49,14 +49,7 @@ App.Modules.ChatMessages = function () {
    };
 
    var standardMessage = function(data) {
-      var transformer = {
-         messageId: data.uuid,
-         timestamp: moment(data.ts).format('h:mm A'),
-         text: data.text,
-         user: App.data.activeMembers[data.user]
-      };
-
-      display(Handlebars.templates.blurb(transformer));
+      display(Handlebars.templates.blurb(Mapper.item(data, App.Transformers.blurb)));
    };
 
    var display = function(compiledTemplate) {

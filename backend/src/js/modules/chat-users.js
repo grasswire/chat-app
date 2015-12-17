@@ -11,18 +11,30 @@ App.Modules.ChatUsers = function () {
          });
    }
 
-   var sanitizeUsers = function(response) {
-      console.log(response);
-      App.data.channelMembers = App.Helpers.mapUsers(response.members);
-      App.data.activeMembers = _.extend(App.Helpers.mapUsers(response.users), App.Helpers.mapUsers([response.self]));
+   var generateUserCollection = function(rawList) {
+      return _.object(
+         Mapper.collection(
+            Mapper.collection(rawList, App.Transformers.users),
+               function(item) { return [item.id, item]}
+            )
+         );
+   };
 
-      Events.publish('tl/chat/users/init', {
-         currentUser: response.self
-      });
+   var sanitizeUsers = function(response) {
+      App.data.thisMember    = null;
+      App.data.allMembers    = generateUserCollection(response.members);
+      App.data.activeMembers = generateUserCollection(response.users);
+
+      if (! _.isNull(response.self)) {
+         App.data.thisMember    = Mapper.item(response.self, App.Transformers.users);
+         App.data.activeMembers = _.extend(App.data.activeMembers, generateUserCollection(response.self));
+      }
+
+      Events.publish('tl/chat/users/init');
    };
 
    var generateUserList = function(data) {
-      $('.js-userlist-output').html(Handlebars.templates.userList(App.data.channelMembers));
+      $('.js-userlist-output').html(Handlebars.templates.userList(App.data.allMembers));
    };
 
    var displayUserCount = function(data) {
@@ -30,12 +42,12 @@ App.Modules.ChatUsers = function () {
    };
 
    var displayProfileImage = function(data) {
-     $(".js-avatar").attr('src', App.data.activeMembers[data.currentUser.user_id].profileImageUrl);
+     $(".js-avatar").attr('src', App.data.thisMember.profileImageUrl);
    };
 
    var updateUserList = function(data) {
       if (!_.has(App.data.activeMembers, data.user.user_id)) {
-         App.data.activeMembers = _.extend(App.data.activeMembers, App.Helpers.mapUsers([data.user]));
+         App.data.activeMembers = _.extend(App.data.activeMembers, generateUserCollection(data.user));
          $('.js-chat-output').append(Handlebars.templates.userJoinedChat(App.data.activeMembers[data.user.user_id]));
       }
    };
