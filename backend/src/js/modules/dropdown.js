@@ -10,7 +10,6 @@ App.Modules.Dropdown = function () {
    };
 
    var hideOnFocus = function(data) {
-
       $(".js-dropdown-content[data-dropdown="+data.eventElement.find(o.dropdown).data("dropdown-name")+"]").hide();
    };
 

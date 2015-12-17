@@ -24,7 +24,7 @@
                 <a href="#" class="js-dropdown-button" data-dropdown-name="users">
                   <span class="fa fa-users">
                   <span class="js-user-count room__buttons-user-count">
-                <div class="dropdown--user-list js-dropdown-content" data-dropdown="users" style="display: block;">
+                <div class="dropdown--user-list js-dropdown-content" data-dropdown="users" style="display: none;">
                   <div class="js-userlist-output">
 
               <li class="room__buttons-item">
