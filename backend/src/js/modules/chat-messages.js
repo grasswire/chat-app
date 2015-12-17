@@ -51,7 +51,7 @@ App.Modules.ChatMessages = function () {
    var standardMessage = function(data) {
       var transformer = {
          messageId: data.uuid,
-         timestamp: moment(data.ts).format('h:mm:ss A'),
+         timestamp: moment(data.ts).format('h:mm A'),
          text: data.text,
          user: App.data.activeMembers[data.user]
       };
