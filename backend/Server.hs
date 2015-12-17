@@ -95,7 +95,6 @@ lookupOrCreateChannel conn server@Server{..} name = do
 
 messageCallback :: Server -> Redis.Message -> IO PubSub
 messageCallback server@Server{..} msg = do 
-  TIO.putStrLn $ decodeUtf8 (msgMessage msg)
   atomically $ do
     channel <- lookupChannel server (ChannelSlug $ decodeUtf8 $ msgChannel msg)
     case channel of

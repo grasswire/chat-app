@@ -58,7 +58,6 @@ chatApp exceptionHandler channelId channelSlug userEntity =
         res <- runRedisAction redisConn $
                  S.broadcastEvent channelSlug
                  (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
-        print res
         void . runRedisAction redisConn $ incrChannelPresence channelSlug
 
       lift wasSeen
@@ -73,15 +72,21 @@ chatApp exceptionHandler channelId channelSlug userEntity =
         RtmPing ping -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
         inEvent -> do
           ackMessage inEvent
-          -- runInnerHandler <- lift handlerToIO
           void $ liftIO $ forkIO $ runInnerHandler $ do
             wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
-            maybe (return ()) (\e -> void
-                  (liftIO $ runRedisAction redisConn $
-                          S.broadcastEvent channelSlug e) >>
-                          persistEvent (entityKey user) e) processedMsg
+            $(logInfo) "processed message"
+            case processedMsg of 
+              Just event -> do 
+                pub <- liftIO $ runRedisAction redisConn $ S.broadcastEvent channelSlug event
+                case event of 
+                  RtmMessage msg -> do 
+                    let msgText = TP.unMessageText $ TP.messageText msg
+                    either ($(logError) . pack . show) (\subs -> $(logInfo) ("sent msg " <> msgText <> " to " <> (pack $ show subs) <> " subscribers")) pub
+                  _             -> return ()   
+                persistEvent (entityKey user) event
+              Nothing    -> return ()
           pure ()
 
     persistEvent :: UserId -> RtmEvent -> Handler ()
