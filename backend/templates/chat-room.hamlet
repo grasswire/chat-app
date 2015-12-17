@@ -10,8 +10,8 @@
           <p>
             <a href="#" class="js-dropdown-button" data-dropdown-name="notification">
               <img src="@{StaticR images_avatar_png}" class="js-avatar avatar">
-      <section style="margin-top: 75px;">
-        <div class="room__likes js-room-likes" style="color: #fff;">
+      <section class="room__likes">
+        <div class="js-room-likes">
     <main class="room__chat">
       <header class="room__details-bar">
         <div class="room__description">

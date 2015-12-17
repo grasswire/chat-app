@@ -27,6 +27,10 @@ App.Modules.ChatMessages = function () {
    };
 
    var message = function(response) {
+      if (_.has(App.Helpers.getQueryParams(location.search), "debug") && s.startsWith(window.location.href, "http://localhost:3000")) {
+         console.log(response.message.data);
+      }
+
       try {
          var msg = JSON.parse(response.message.data);
       } catch (e) {
@@ -38,7 +42,6 @@ App.Modules.ChatMessages = function () {
       if (_.has(msg, "type")) {
          Events.publish("tl/chat/messages/"+msg.type, msg);
       }
-
    };
 
    var welcomeMessage = function(data) {
@@ -50,7 +53,7 @@ App.Modules.ChatMessages = function () {
          messageId: data.uuid,
          timestamp: moment(data.ts).format('h:mm:ss A'),
          text: data.text,
-         user: App.data.users[data.user]
+         user: App.data.activeMembers[data.user]
       };
 
       display(Handlebars.templates.blurb(transformer));

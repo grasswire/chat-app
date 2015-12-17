@@ -8,6 +8,11 @@
       width: 30%;
    }
 
+   &__likes {
+      margin-top: $masthead-height;
+      padding: 20px 30px;
+   }
+
    &__masthead {
       @include flex-container(center, center);
       background: get-color(boston-blue);

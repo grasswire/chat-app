@@ -61,4 +61,46 @@
       }
    }
 
+   &--liked {
+      padding-bottom: 20px;
+
+      .blurb {
+         &__like-button {
+            @extend .blurb__like-button--liked;
+         }
+
+         &__image {
+            img {
+               height: 20px;
+               width: 20px;
+            }
+         }
+
+         &__username {
+            @extend .blurb__username;
+            @include font-size(15px);
+            color: get-color(white);
+            font-weight: get-font-weight(semi-bold);
+         }
+
+         &__text {
+            @extend .blurb__text;
+            @include font-size(13px);
+            color: rgba(get-color(white), 0.55);
+            line-height: get-line-height(13px, 18px);
+         }
+
+         &__count {
+            @include font-size(11px);
+            color: rgba(get-color(white), 0.35);
+         }
+
+         &__timestamp {
+            @include font-size(11px);
+            color: rgba(get-color(white), 0.35);
+         }
+      }
+   }
+
 }
+
