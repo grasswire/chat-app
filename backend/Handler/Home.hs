@@ -8,6 +8,8 @@ import qualified Types as TP
 import Model.Instances ()
 import DataStore
 import Data.Time.Clock
+import qualified Database.Esqueleto   as E
+import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val)
 
 getHomeR :: Handler Html
 getHomeR = do
@@ -16,9 +18,8 @@ getHomeR = do
     let signature = "home" :: String
     let modalCreate = $(widgetFile "partials/modals/create")
     timeNow <- liftIO getCurrentTime
-    let minActiveAgo = addUTCTime (negate 3600 :: NominalDiffTime) timeNow
     (topChannels, allChannels) <- do
-        chanEntities <- runDB (popularChannels minActiveAgo)
+        chanEntities <- runDB (popularChannels' (addUTCTime (negate 3600 :: NominalDiffTime) timeNow))
         presences <- liftIO $ runRedisAction (redisConn app) $ 
                         getPresenceForChannels (channelCrSlug . entityVal <$> chanEntities)
         let zipped = case presences of
@@ -36,3 +37,20 @@ popularChannelsStatement = "select ?? from channel where id in " <>
 
 popularChannels :: MonadIO m => UTCTime -> ReaderT SqlBackend m [Entity Channel]
 popularChannels since = rawSql popularChannelsStatement [PersistUTCTime since]
+
+popularChannels' :: MonadIO m => UTCTime -> SqlPersistT m [Entity Channel]
+popularChannels' ts = do 
+  chans <- chansByMessages
+  E.select $
+    E.from $ \channel -> do 
+    E.where_ (channel ^. ChannelId `E.in_` (E.valList $ E.unValue <$> chans))
+    return channel  
+  where chansByMessages = E.select $ 
+                          E.from $ \message -> do 
+                          E.where_ (message ^. MessageTimestamp E.>=. val ts)
+                          E.groupBy (message ^. MessageChannel)
+                          let cnt :: E.Esqueleto query expr backend => expr (E.Value Int)
+                              cnt = E.countRows
+                          E.orderBy [E.desc cnt]
+                          E.limit 27
+                          return (message ^. MessageChannel)  
