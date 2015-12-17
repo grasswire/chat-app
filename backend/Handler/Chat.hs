@@ -1,6 +1,7 @@
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
 module Handler.Chat where
+
 import           Text.Julius
 import           Import hiding (toLower)
 import           Yesod.WebSockets
@@ -16,12 +17,12 @@ import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
 import qualified Database.Redis as Redis
 import qualified Types as TP
-import Model.Instances ()
-import DataStore
-import Control.Concurrent (forkIO)
+import           Model.Instances ()
+import           DataStore
+import           Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
-import Network.WebSockets (ConnectionException)
-import Handler.Home (getHomeR)
+import           Network.WebSockets (ConnectionException)
+import           Handler.Home (getHomeR)
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
