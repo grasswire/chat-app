@@ -126,6 +126,7 @@ instance Yesod App where
         appShouldLogAll (appSettings app)
             || level == LevelWarn
             || level == LevelError
+            || level >= appLogLevel (appSettings app)
 
     makeLogger = return . appLogger
 

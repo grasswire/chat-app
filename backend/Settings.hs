@@ -20,6 +20,7 @@ import Network.Wai.Handler.Warp    (HostPreference)
 import Yesod.Default.Config2       (applyEnvValue, configSettingsYml)
 import Yesod.Default.Util          (WidgetFileSettings, widgetFileNoReload,
                                     widgetFileReload)
+                                    
 -- | Runtime settings to configure this application. These settings can be
 -- loaded from various sources: defaults, environment variables, config files,
 -- theoretically even a database.
@@ -58,6 +59,7 @@ data AppSettings = AppSettings
     -- ^ Twitter API credentials
     , redisConf                 :: RedisConf
     -- ^ Redis connection info
+    , appLogLevel               :: LogLevel 
     }
 
 instance FromJSON AppSettings where
@@ -85,6 +87,7 @@ instance FromJSON AppSettings where
         appAnalytics              <- o .:? "analytics"
         twitterConf               <- o .: "twitter"
         redisConf                 <- o .: "redis"
+        appLogLevel               <- o .: "log-level" >>= \level -> maybe (fail "unknown log level") pure  (readMay (level :: Text))
 
         return AppSettings {..}
 
@@ -92,7 +95,6 @@ newtype TwitterAccessKey = TwitterAccessKey Text deriving (Show, Generic)
 newtype TwitterAccessSecret = TwitterAccessSecret Text deriving (Show, Generic)
 newtype TwitterConsumerKey = TwitterConsumerKey Text deriving (Show, Generic)
 newtype TwitterConsumerSecret = TwitterConsumerSecret Text deriving (Show, Generic)
-
 newtype TwitterToken = TwitterToken Text deriving Show
 newtype TwitterSecret = TwitterSecret Text deriving Show
 

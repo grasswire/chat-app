@@ -1,13 +1,16 @@
 {-# LANGUAGE QuasiQuotes, TemplateHaskell, TypeFamilies, OverloadedStrings, TypeSynonymInstances, FlexibleContexts #-}
 
 module Handler.Home where 
-import           Import hiding (toLower)
-import           Database.Persist.Sql (rawSql)
+
+import           DataStore
 import           Taplike.Schema
 import qualified Types as TP
-import Model.Instances ()
-import DataStore
-import Data.Time.Clock
+import           Model.Instances      ()
+
+import           Yesod.Core.Types (loggerPutStr)
+import           Import hiding (toLower)
+import           Database.Persist.Sql (rawSql)
+import           Data.Time.Clock
 import qualified Database.Esqueleto   as E
 import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val)
 
@@ -15,8 +18,10 @@ getHomeR :: Handler Html
 getHomeR = do
     authId <- maybeAuthId
     app <- getYesod
+    $(logInfo) "getHomeR"
+    -- liftIO $ loggerPutStr (appLogger app) "getHomeR"
     let signature = "home" :: String
-    let modalCreate = $(widgetFile "partials/modals/create")
+        modalCreate = $(widgetFile "partials/modals/create")
     timeNow <- liftIO getCurrentTime
     (topChannels, allChannels) <- do
         chanEntities <- runDB (popularChannels' (addUTCTime (negate 3600 :: NominalDiffTime) timeNow))

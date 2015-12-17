@@ -12,7 +12,8 @@ ip-from-header: "_env:IP_FROM_HEADER:false"
 #
 # development: false
 detailed-logging: true
-should-log-all: true
+should-log-all: false
+log-level: "LevelInfo"
 # reload-templates: false
 # mutable-static: false
 # skip-combining: false
