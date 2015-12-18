@@ -8,7 +8,7 @@ App.Modules.CreateChatroom = function () {
          .to(App.routes.newChat, {
             title: $('.js-create-title-input').val(),
             topic: $('.js-create-description-input').val(),
-            color: "f8f8f8"
+            color: $('.js-create-color.js-color-selected').data('color')
          })
          .on({
             complete: redirectToRoom

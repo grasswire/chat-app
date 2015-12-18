@@ -1,5 +1,5 @@
 <div class="modal--full-screen js-modal" data-modal-name="create" data-modal-type="full-screen" style="display: none;">
-  <div class="content-container">
+  <div class="content-container--modal">
     <header class="modal__header">
       <a href="#" class="js-trigger-modal-close">
         <span class="modal__close fa fa-times">
@@ -12,6 +12,28 @@
         <label class="js-create-description create__label">
           Description
           <input type="text" name="" class="create__input--description js-create-description-input">
+        <label class="create__label--color-picker">
+          Choose a room color
+          <ul class="create__color-list js-color-pallet">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color js-color-selected" data-color="434343" style="background-color: #434343; border: 4px solid #ff0;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="918f7e" style="background-color: #918f7e;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="94bd5e" style="background-color: #94bd5e;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="09b788" style="background-color: #09b788;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="3774bd" style="background-color: #3774bd;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="7451b9" style="background-color: #7451b9;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="a558a8" style="background-color: #a558a8;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="d04a6b" style="background-color: #d04a6b;">
+            <li class="create__color-item">
+              <a href="#" class="js-create-color" data-color="f56360" style="background-color: #f56360;">
+
         <button type="submit" class="button">Create It
         <p>
           <a href="#" class="create__links js-trigger-modal-close">Nevermind

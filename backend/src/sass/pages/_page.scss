@@ -22,6 +22,12 @@
     margin: 0 auto;
     max-width: $max-page-width;
     padding: 0 40px;
+
+    &--modal {
+       @extend .content-container;
+       max-width: 756px;
+       padding: 0;
+    }
 }
 
 .avatar {

@@ -7,6 +7,12 @@
       display: block;
       text-align: left;
       width: 100%;
+
+      &--color-picker {
+         @extend .create__label;
+         padding-bottom: 84px;
+         padding-top: 48px;
+      }
    }
 
    &__input {
@@ -23,6 +29,28 @@
       &--description {
          @extend .create__input;
          min-height: 75px;
+      }
+   }
+
+   &__color-list {
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
+   }
+
+   &__color-item {
+      display: inline-block;
+      padding: 0 14px 0 0;
+
+      @include last() {
+         padding: 0;
+      }
+
+      a {
+         display: block;
+         height: 68px;
+         width: 68px;
+
       }
    }
 

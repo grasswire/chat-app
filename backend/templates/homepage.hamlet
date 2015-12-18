@@ -30,7 +30,7 @@
       <h3 class="page__headline">Trending Chats
       <div class="card__container">
         $forall channel <- topChannels
-          <a class="card" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">
+          <a class="card" style="background: #{TP.unChannelColor $ TP.channelColor channel} ;" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">
             <h3 class="card__title">#{TP.unChannelTitle $ TP.channelTitle channel}
             <p class="card__meta">
               <span class="fa fa-user">
