@@ -49,6 +49,7 @@ App.Modules.ChatMessages = function () {
    };
 
    var standardMessage = function(data) {
+      console.log(Mapper.item(data, App.Transformers.blurb));
       display(Handlebars.templates.blurb(Mapper.item(data, App.Transformers.blurb)));
    };
 

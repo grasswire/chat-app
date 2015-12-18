@@ -4,11 +4,13 @@ App.Modules.Modal = function () {
    var openModal = function(data) {
       var modalName = _.has(data, "eventElement") ? data.eventElement.attr("data-modal-trigger") : data.modal;
       $('.js-modal[data-modal-name='+modalName+']').attr('data-modal-open', true).fadeIn(50);
+      $('body').css('overflow', 'hidden');
    };
 
    var closeModal = function(data) {
       var openModal = $('.js-modal[data-modal-open=true]');
       openModal.fadeOut(50).attr('data-modal-open', false);
+      $('body').css('overflow', '');
       var params = App.Helpers.getQueryParams(location.search);
 
       if (_.has(params, "modal")) {

@@ -26,8 +26,10 @@ App.Modules.ChatUsers = function () {
       App.data.activeMembers = generateUserCollection(response.users);
 
       if (! _.isNull(response.self)) {
+         var currentUser = generateUserCollection(response.self);
          App.data.thisMember    = Mapper.item(response.self, App.Transformers.users);
-         App.data.activeMembers = _.extend(App.data.activeMembers, generateUserCollection(response.self));
+         App.data.activeMembers = _.extend(App.data.activeMembers, currentUser);
+         App.data.allMembers    = _.extend(App.data.allMembers, currentUser)
       }
 
       Events.publish('tl/chat/users/init');
