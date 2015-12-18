@@ -49,8 +49,13 @@ App.Modules.ChatMessages = function () {
    };
 
    var standardMessage = function(data) {
-      console.log(Mapper.item(data, App.Transformers.blurb));
-      display(Handlebars.templates.blurb(Mapper.item(data, App.Transformers.blurb)));
+      var last = $('.js-blurb').last();
+      var latestBlurb = Mapper.item(data, App.Transformers.blurb);
+      if (last.data('user-id') == latestBlurb.user.id) {
+         display(Handlebars.templates.blurbMultiline(latestBlurb));
+         return false;
+      }
+      display(Handlebars.templates.blurb(latestBlurb));
    };
 
    var display = function(compiledTemplate) {

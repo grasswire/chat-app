@@ -61,6 +61,22 @@
       }
    }
 
+   &--multiline {
+      padding-bottom: 10px;
+      margin-top: -10px;
+
+      .blurb {
+         &__content {
+            @extend .blurb__content;
+            padding-left: 55px;
+            margin: -10px 0 0 0;
+         }
+
+         &__text {
+            @extend .blurb__text;
+         }
+      }
+   }
    &--liked {
       padding-bottom: 20px;
 
