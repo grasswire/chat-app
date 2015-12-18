@@ -105,6 +105,7 @@ var scripts = {
       config.src.js    + "app.js",
       config.src.js    + "resources/**/*.js",
       config.src.js    + "helpers/**/*.js",
+      config.src.js    + "transformers/**/*.js",
       config.src.js    + "modules/**/*.js",
       config.src.js    + "main.js"
    ],

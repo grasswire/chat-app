@@ -30,7 +30,7 @@
                   <div class="js-userlist-output">
               <li class="room__buttons-item">
                 <a href="#" class="js-dropdown" data-dropdown-name="share">
-                  <span class="fa fa-share-alt">
+                  <span class="fa fa-share">
               <li class="room__buttons-item">
                 <a href="#" class="js-star-room" data-room-is-starred="false">
                   <span class="fa fa-star-o">

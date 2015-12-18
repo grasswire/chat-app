@@ -8,10 +8,10 @@
       <form method="post" class="js-create create">
         <label class="js-create-title create__label">
           Title
-          <input type="text" name="" class="create__input js-create-title-input" placeholder="Enter a title">
+          <input type="text" name="" class="create__input js-create-title-input" placeholder="Enter a title" autofocus>
         <label class="js-create-description create__label">
           Description
-          <textarea type="text" name="" class="create__input--description js-create-description-input">
+          <input type="text" name="" class="create__input--description js-create-description-input">
         <button type="submit" class="button">Create It
         <p>
           <a href="#" class="create__links js-trigger-modal-close">Nevermind
