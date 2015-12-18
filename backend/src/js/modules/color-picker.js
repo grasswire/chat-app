@@ -4,8 +4,8 @@ App.Modules.ColorPicker = function () {
    var o = {};
 
    var setNewRoomColor = function(data) {
-      $(".js-create-color.js-color-selected").removeClass("js-color-selected").css("border", "0");
-      data.eventElement.addClass("js-color-selected").css("border", "4px solid #ff0");
+      $(".js-create-color.js-color-selected").removeClass("js-color-selected").parent().removeClass("selected");
+      data.eventElement.addClass("js-color-selected").parent().addClass("selected");
    };
 
    return {

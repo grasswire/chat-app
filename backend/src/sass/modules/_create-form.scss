@@ -1,3 +1,7 @@
+.selected {
+   border: 2px solid #699 !important;
+}
+
 .create {
    text-align: center;
 
@@ -39,11 +43,14 @@
    }
 
    &__color-item {
+      border: 2px solid transparent;
       display: inline-block;
-      padding: 0 14px 0 0;
+      margin: 0 5px 0 0;
+      padding: 2px;
 
       @include last() {
-         padding: 0;
+         margin: 0;
+         padding: 2px
       }
 
       a {
