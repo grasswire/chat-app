@@ -18,6 +18,7 @@ extra-deps:
 - uuid-aeson-0.1.0.0
 - text-show-instances-2.1
 - text-regex-replace-0.1.1.1
+- unagi-chan-0.4.0.0
 flags:
   twitter-types:
     time15: true

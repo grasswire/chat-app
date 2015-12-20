@@ -137,6 +137,7 @@ library
                  , wai-cors
                  , random 
                  , errors
+                 , unagi-chan
 
 executable         chat-app
     if flag(library-only)
