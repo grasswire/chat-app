@@ -138,7 +138,6 @@ library
                  , random 
                  , errors
 
-
 executable         chat-app
     if flag(library-only)
         Buildable: False

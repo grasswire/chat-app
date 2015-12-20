@@ -93,6 +93,19 @@ lookupOrCreateChannel conn server@Server{..} name = do
           return newServerChan
         Just chan -> return chan
 
+lookupOrCreateChannels :: Connection -> Server -> [ChannelSlug] -> IO [Channel]
+lookupOrCreateChannels conn server@Server{..} channels = do
+      chanLookup <- atomically $ traverse (lookupChannel server) channels
+      let xs = chanLookup `zip` channels 
+          (found, notfound) = partition (isJust . fst) xs
+      let pubSubChans = (chanId2Bs . snd) <$> notfound 
+      newServerChannels <- forM (snd <$> notfound) (\name -> atomically $ do
+              chan <- newChannel name
+              modifyTVar serverChannels . M.insert name $ chan
+              return chan)
+      void $ forkIO $ runRedis conn (pubSub (subscribe pubSubChans) (messageCallback server))  
+      return (newServerChannels ++ (catMaybes (fst <$> found)))
+
 messageCallback :: Server -> Redis.Message -> IO PubSub
 messageCallback server@Server{..} msg = 
   atomically $ do

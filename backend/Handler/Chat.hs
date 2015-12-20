@@ -23,6 +23,21 @@ import           Control.Concurrent (forkIO)
 import qualified Control.Exception.Lifted as EL
 import           Network.WebSockets (ConnectionException)
 import           Handler.Home (getHomeR)
+import qualified Data.List.NonEmpty as NonEmpty
+import           Data.List.NonEmpty (NonEmpty(..))
+
+data ChatSettings = AnonymousSettings AnonymousChat | LoggedInSettings LoggedInChat 
+
+data AnonymousChat = AnonymousChat { anonymousChatChannel :: Entity Channel }
+
+data LoggedInChat = LoggedInChat 
+  { loggedInChatUser     :: Entity User 
+  , loggedInChatChannels :: NonEmpty (Entity Channel)
+  }
+  
+settingsChannels :: ChatSettings -> [ChannelSlug]
+settingsChannels (AnonymousSettings settings) = [crSlug . entityVal (anonymousChatChannel settings)]
+settingsChannels (LoggedInSettings settings)  = (crSlug . entityVal) <$> toList (loggedInChatChannels settings)
 
 type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 
@@ -30,14 +45,41 @@ addMember :: Key Channel -> Key User -> Handler (Either (Entity Membership) (Key
 addMember channelId user = do 
     now    <- liftIO getCurrentTime 
     runDB $ insertBy (Membership user channelId now)
+    
+getChatR :: ChannelSlug -> Handler Html
+getChatR slug = do
+    app <- getYesod
+    channel <- runDB (getBy $ UniqueChannelSlug slug)
+    authId <- maybeAuthId
+    renderFuncP <- getUrlRenderParams
+    renderFunc <- getUrlRender
+    chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
+    let rtmStartUrl = renderFuncP RtmStartR [("channel_slug", unSlug slug)]
+        signature = "chatroom" :: Text
+        htmlSlug = unSlug slug
+        modalSignin = $(widgetFile "partials/modals/signin")
+        redirectUrl = renderFunc (ChatR slug)
+        loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
+    case channel of
+      Just c -> do
+        let room = entityVal c
+            isLoggedIn = isJust authId
+            chanSlug = channelCrSlug room
+            chatSettings = case chatUser of 
+                             Nothing   -> AnonymousSettings (AnonymousChat c)
+                             Just user -> LoggedInSettings (LoggedInChat user (c :| []))
+        webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) chatSettings
+        defaultLayout $ do
+          setTitle $ toHtml $ makeTitle slug <> " | TapLike"
+          $(widgetFile "chat-room")
+      Nothing -> getHomeR
 
-chatApp :: WSExceptionHandler -> Key Channel -> ChannelSlug
-            -> Maybe (Entity User) -> WebSocketsT Handler ()
-chatApp exceptionHandler channelId channelSlug userEntity =
+chatApp :: WSExceptionHandler -> ChatSettings -> WebSocketsT Handler ()
+chatApp exceptionHandler settings =
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
     app    <- getYesod
-    chan   <- liftIO $ S.lookupOrCreateChannel (redisConn app) (chatServer app) channelSlug
+    chans  <- liftIO $ S.lookupOrCreateChannels (redisConn app) (chatServer app) (settingsChannels settings)
     toSend <- atomically $ dupTChan (S.channelBroadcastChan chan)
     case userEntity of
       Just u  -> race_ (outbound toSend) (inbound app u chan)
@@ -109,33 +151,6 @@ processMessage userId event eventTS = case event of
 
 getUsername :: YesodRequest -> Maybe TL.Text
 getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
-
-getChatR :: ChannelSlug -> Handler Html
-getChatR slug = do
-    app <- getYesod
-    channel <- runDB (getBy $ UniqueChannelSlug slug)
-    authId <- maybeAuthId
-    renderFuncP <- getUrlRenderParams
-    renderFunc <- getUrlRender
-    let rtmStartUrl = renderFuncP RtmStartR [("channel_slug", unSlug slug)]
-        signature = "chatroom" :: Text
-        htmlSlug = unSlug slug
-        modalSignin = $(widgetFile "partials/modals/signin")
-        redirectUrl = renderFunc (ChatR slug)
-        loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
-    chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
-    case channel of
-      Just c -> do
-        let room = entityVal c
-            isLoggedIn = isJust authId
-            chanSlug = channelCrSlug room
-        webSockets $ chatApp
-          (wsExceptionHandler (redisConn app) chanSlug)
-            (entityKey c) chanSlug chatUser
-        defaultLayout $ do
-          setTitle $ toHtml $ makeTitle slug <> " | TapLike"
-          $(widgetFile "chat-room")
-      Nothing -> getHomeR
 
 postNewChatR :: Handler ()
 postNewChatR = do
