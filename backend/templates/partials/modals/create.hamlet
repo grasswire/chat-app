@@ -8,10 +8,10 @@
       <form method="post" class="js-create create">
         <label class="js-create-title create__label">
           Title
-          <input type="text" name="" class="create__input js-create-title-input" placeholder="Enter a title" autofocus>
+          <input type="text" name="create-title" class="create__input js-create-title-input" placeholder="Enter a title" autofocus>
         <label class="js-create-description create__label">
           Description
-          <input type="text" name="" class="create__input--description js-create-description-input">
+          <input type="text" name="create-description" class="create__input js-create-description-input" placeholder="Enter a description">
         <label class="create__label--color-picker">
           Choose a room color
           <ul class="create__color-list js-color-pallet">

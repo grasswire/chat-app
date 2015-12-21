@@ -9,13 +9,14 @@
       @include font-size(16px);
       font-weight: get-font-weight(semi-bold);
       display: block;
+      margin-bottom: 50px;
       text-align: left;
       width: 100%;
 
       &--color-picker {
          @extend .create__label;
-         padding-bottom: 84px;
-         padding-top: 48px;
+         margin-bottom: 84px;
+         margin-top: 48px;
       }
    }
 
@@ -25,7 +26,6 @@
       border-bottom: 1px solid get-color(mercury);
       font-weight: get-font-weight(light);
       line-height: get-line-height(26px, 32px);
-      margin-bottom: 50px;
       margin-top: 20px;
       outline: none;
       width: 100%;

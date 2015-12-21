@@ -1,0 +1,4 @@
+App.routes.home = "@{HomeR}";
+App.routes.login = "@{TwitterAuthR}";
+App.routes.logout = "@{LogOutR}";
+App.routes.newChat = "@{NewChatR}";

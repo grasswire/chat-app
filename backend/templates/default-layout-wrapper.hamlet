@@ -9,7 +9,9 @@ $newline never
     ^{pageHead pc}
 
   ^{pageBody pc}
-
+  <div class="message js-message" style="display: none;">
+    <div class="message__container">
+      <p class="js-message-text">
   $maybe analytics <- appAnalytics $ appSettings master
     <script>
       if(!window.location.href.match(/localhost/)){

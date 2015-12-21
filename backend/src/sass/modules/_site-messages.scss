@@ -1,0 +1,16 @@
+.message {
+   background: get-color(sunglow);
+   border: 1px solid darken(get-color(sunglow), 10%);
+   position: absolute;
+   top: 0;
+   width: 100%;
+   z-index: get-zindex(200);
+
+   &__container {
+      @include font-size(18px);
+      color: get-color(ebony-clay);
+      margin: 0 auto;
+      padding: 15px 0;
+      width: $max-page-width;
+   }
+}
