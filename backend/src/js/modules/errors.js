@@ -6,11 +6,15 @@ App.Modules.Errors = function () {
       $(".js-message-text").html("Sorry we've run into an issue while trying to create your room");
    };
 
+   var closeMessage = function() {
+      $(".js-message").hide();
+      $(".js-message-text").html("");
+   }
    return {
       init: function() { return this; },
       events: function() {
          Events.subscribe('tl/errors', displayError);
-
+         Events.bind("key", [27]).to(closeMessage, window);
          return this;
       }
    };
