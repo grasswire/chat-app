@@ -6,8 +6,6 @@ import           Text.Julius
 import           Import hiding (toLower)
 import           Yesod.WebSockets
 import qualified Server as S
-import           Network.Wai (remoteHost)
-import qualified Data.Text.Lazy as TL
 import qualified Data.Text as T
 import           Types (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import           Taplike.Shared (userFromEntity)
@@ -54,15 +52,14 @@ getChatR slug = do
     app <- getYesod
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
-    renderFuncP <- getUrlRenderParams
-    renderFunc <- getUrlRender
+    renderFunc <- getUrlRenderParams
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
-    let rtmStartUrl = renderFuncP RtmStartR [("channel_slug", unSlug slug)]
-        signature = "chatroom" :: Text
-        htmlSlug = unSlug slug
-        modalSignin = $(widgetFile "partials/modals/signin")
-        redirectUrl = renderFunc (ChatR slug)
-        loginWithChatRedirect = renderFuncP TwitterAuthR [("redirect_url", redirectUrl)]
+    let rtmStartUrl           = renderFunc RtmStartR [("channel_slug", unSlug slug)]
+        signature             = "chatroom" :: Text
+        htmlSlug              = unSlug slug
+        modalSignin           = $(widgetFile "partials/modals/signin")
+        redirectUrl           = renderFunc (ChatR slug) []
+        loginWithChatRedirect = renderFunc TwitterAuthR [("redirect_url", redirectUrl)]
     case channel of
       Just c -> do
         let room = entityVal c
@@ -71,14 +68,14 @@ getChatR slug = do
             chatSettings = case chatUser of 
                              Nothing   -> AnonymousSettings (AnonymousChat c)
                              Just user -> LoggedInSettings (LoggedInChat user (c :| []))
-        webSockets $ chatApp (wsExceptionHandler (redisConn app) chanSlug) chatSettings
+        webSockets $ socketsApp (wsExceptionHandler (redisConn app) chanSlug) chatSettings
         defaultLayout $ do
           setTitle $ toHtml $ makeTitle slug <> " | TapLike"
           $(widgetFile "chat-room")
       Nothing -> getHomeR
 
-chatApp :: WSExceptionHandler -> ChatSettings -> WebSocketsT Handler ()
-chatApp exceptionHandler settings =
+socketsApp :: WSExceptionHandler -> ChatSettings -> WebSocketsT Handler ()
+socketsApp exceptionHandler settings =
   flip EL.catch exceptionHandler $ do
     sendTextData RtmHello
     app    <- getYesod
@@ -152,9 +149,6 @@ processMessage userId event eventTS = case event of
                                           (TP.incomingMessageUUID incoming) [])
                                _                        -> Nothing
 
-getUsername :: YesodRequest -> Maybe TL.Text
-getUsername req = Just $ TL.pack $ (show . remoteHost . reqWaiRequest) req
-
 postNewChatR :: Handler ()
 postNewChatR = do
     channel <- requireJsonBody :: Handler TP.NewChannel
@@ -169,13 +163,10 @@ postNewChatR = do
             newChannel = Channel title topic slug currentTime chanCreator color
         runDB (insert newChannel) >>=
                 \key -> sendResponseStatus status201
-                    (toJSON (ChannelCreatedRp
-                              (TP.Channel
-                                (TP.UserId $ fromSqlKey chanCreator) currentTime
+                    (toJSON (ChannelCreatedRp (TP.Channel (TP.UserId $ fromSqlKey chanCreator) currentTime
                                 (TP.ChannelTopic topic) (TP.ChannelSlug $ unSlug slug)
                                 (TP.ChannelTitle title) (TP.NumberUsersPresent 0)
-                                (TP.ChannelColor color))
-                              (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
+                                (TP.ChannelColor color)) (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChannelSlug

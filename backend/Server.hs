@@ -1,16 +1,16 @@
 {-# LANGUAGE LambdaCase, RecordWildCards #-}
 
 module Server
- ( Server
- , Client 
- , LeaveReason(..)
- , JoinReason(..)
- , broadcastEvent
- , newClient 
- , subscribe 
- , readMessage 
- , newServer
- ) where
+  ( Server
+  , Client 
+  , LeaveReason(..)
+  , JoinReason(..)
+  , broadcastEvent
+  , newClient 
+  , subscribe 
+  , readMessage 
+  , newServer
+  ) where
 
 import           ClassyPrelude              hiding ((<>))
 import qualified Data.ByteString            as BS
@@ -101,7 +101,8 @@ lookupSubscribers chanSlug server@Server{..} = do
   (return . maybe [] Set.toList) (Map.lookup chanSlug clientMap)
   
 broadcastEvent :: ChannelSlug -> RtmEvent -> RedisAction Integer
-broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
+broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> 
+  runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
 chanId2Bs = encodeUtf8 . unSlug
