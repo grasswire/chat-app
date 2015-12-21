@@ -7,6 +7,7 @@
          _.each(App.Modules, function(key, value) {
             App.Modules[value].init().events();
          });
+
       }
    };
 

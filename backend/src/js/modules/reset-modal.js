@@ -6,6 +6,8 @@ App.Modules.ResetModal = function () {
       form.find('input:text, input:password, input:file, select, textarea').val('');
       form.find('input:radio, input:checkbox')
            .removeAttr('checked').removeAttr('selected');
+      form.find('input.error, select.error, textarea.error').removeClass("error")
+      form.find('label.error').detach();
    };
 
    return {
