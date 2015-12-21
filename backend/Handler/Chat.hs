@@ -23,6 +23,7 @@ import           Network.WebSockets (ConnectionException)
 import           Handler.Home (getHomeR)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
+import Queries 
 
 data ChatSettings = AnonymousSettings AnonymousChat | LoggedInSettings LoggedInChat 
 
@@ -65,9 +66,13 @@ getChatR slug = do
         let room = entityVal c
             isLoggedIn = isJust authId
             chanSlug = channelCrSlug room
-            chatSettings = case chatUser of 
-                             Nothing   -> AnonymousSettings (AnonymousChat c)
-                             Just user -> LoggedInSettings (LoggedInChat user (c :| []))
+        chatSettings <- case chatUser of 
+          Just user -> do 
+            usersChans <- runDB (usersChannels (entityKey user))
+            case usersChans of 
+              h:t -> return (LoggedInSettings (LoggedInChat user (h :| t)))
+              _ ->   return (AnonymousSettings (AnonymousChat c))
+          Nothing -> return (AnonymousSettings (AnonymousChat c)) 
         webSockets $ socketsApp (wsExceptionHandler (redisConn app) chanSlug) chatSettings
         defaultLayout $ do
           setTitle $ toHtml $ makeTitle slug <> " | TapLike"
@@ -114,12 +119,7 @@ socketsApp exceptionHandler settings =
             let processedMsg = processMessage (entityKey user) inEvent ts
             case processedMsg of 
               Just event -> do 
-                pub <- liftIO $ runRedisAction redisConn $ S.broadcastEvent (NonEmpty.head $ settingsSlugs settings) event
-                case event of 
-                  RtmMessage msg -> do 
-                    let msgText = TP.unMessageText $ TP.messageText msg
-                    either ($(logError) . pack . show) (\subs -> $(logInfo) ("sent msg " <> msgText <> " to " <> pack (show subs) <> " subscribers")) pub
-                  _             -> return ()   
+                _ <- liftIO $ runRedisAction redisConn $ S.broadcastEvent (NonEmpty.head $ settingsSlugs settings) event
                 persistEvent (entityKey user) event
               Nothing    -> return ()
           pure ()
