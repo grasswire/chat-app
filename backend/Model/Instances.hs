@@ -5,15 +5,17 @@ module Model.Instances where
 
 import ClassyPrelude
 import Types
-import Control.Applicative     (empty)
-import Data.Aeson              (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode)
-import Data.Aeson.Types        (Parser, typeMismatch, Value(..))
-import TextShow.TH             (deriveTextShow)
-import Network.WebSockets      (WebSocketsData(fromLazyByteString, toLazyByteString))
+import Control.Applicative (empty)
+import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode, withScientific)
+import Data.Aeson.Types (Parser, typeMismatch, Value(..))
+import TextShow.TH (deriveTextShow)
+import Network.WebSockets (WebSocketsData(fromLazyByteString, toLazyByteString))
 import Taplike.TextShowOrphans ()
-import Data.UUID.Aeson         ()
-import TextShow.Data.Time      ()
-import Data.Maybe              (fromJust)
+import Data.UUID.Aeson ()
+import TextShow.Data.Time ()
+import Data.Maybe (fromJust)
+import TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
+import Data.Scientific (toBoundedInteger)
 
 instance FromJSON NewChannel where
   parseJSON (Object v) = NewChannel <$>
@@ -47,6 +49,7 @@ deriving instance FromJSON ChannelSlug
 deriving instance FromJSON TwitterUserId
 deriving instance FromJSON TwitterScreenName
 deriving instance FromJSON ProfileImageUrl
+deriving instance FromJSON NumberUsersPresent
 deriving instance ToJSON ChannelTitle
 deriving instance ToJSON ChannelTopic
 deriving instance ToJSON ChannelColor
@@ -76,7 +79,7 @@ instance ToJSON ChannelCreatedRp where
   toJSON (ChannelCreatedRp room roomId slug) = object ["chat_room" .= room, "id" .= roomId, "slug" .= slug]
   
 instance ToJSON Channel where 
-  toJSON (Channel creator created topic slug title numPresent color) = object 
+  toJSON (Channel creator created topic slug title numPresent color members) = object 
     [ "creator"           .= creator
     , "created"           .= created
     , "topic"             .= topic 
@@ -84,13 +87,34 @@ instance ToJSON Channel where
     , "title"             .= title 
     , "num_users_present" .= numPresent
     , "color"             .= color
+    , "members"           .= members
     ]
+
+instance FromJSON Channel where
+  parseJSON = withObject "channel object" $ \ o -> Channel
+    <$> o .: "creator"  
+    <*> o .: "created"  
+    <*> o .: "topic"
+    <*> o .: "slug"
+    <*> o .: "title" 
+    <*> o .: "num_users_present"
+    <*> o .: "color" 
+    <*> o .: "members" 
   
 instance FromJSON TS where
   parseJSON = withText "timestamp" $ pure . TS
 
 instance ToJSON TS where
   toJSON (TS t) = String t
+
+-- instance FromJSON NumberUsersPresent where
+--   parseJSON = withScientific "num_users_present" $ \ s ->
+--     case toBoundedInteger s of
+--       Just i64 -> pure (NumberUsersPresent i64)
+--       Nothing  -> fail . unpack $ "out of bound Int64 " <> showt (FromStringShow s)
+-- 
+-- instance ToJSON NumberUsersPresent where
+--   toJSON (NumberUsersPresent n) = Number n
 
 deriveTextShow ''TS  
 instance FromJSON (ID a) where
@@ -115,6 +139,7 @@ deriving instance Eq ReplyNotOk
 deriving instance Eq Presence
 deriving instance Eq PresenceChange
 deriving instance Eq MessageLikeAdded
+deriving instance Eq Channel
 
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
@@ -138,20 +163,23 @@ deriveTextShow ''TwitterScreenName
 deriveTextShow ''ProfileImageUrl
 deriveTextShow ''MessageLike
 deriveTextShow ''MessageId
+deriveTextShow ''Channel
+deriveTextShow ''NumberUsersPresent
+deriveTextShow ''ChannelTopic
+deriveTextShow ''ChannelTitle
+deriveTextShow ''ChannelColor
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
-    <$> o .: "url"
-    <*> o .:? "self"
+    <$> o .:? "self"
     <*> o .: "users"
     <*> o .: "members"
 
 instance ToJSON RtmStartRp where
-  toJSON (RtmStartRp url self users members) = object
-    [ "url"   .= url
-    , "self"  .= self
+  toJSON (RtmStartRp self users channels) = object
+    [ "self"  .= self
     , "users" .= users
-    , "members" .= members
+    , "channels" .= channels
     ]
 
 instance FromJSON Self where
@@ -332,13 +360,6 @@ instance ToJSON MessageLikeAdded where
     , "user_id"    .= user
     , "message_id" .= message
     ]
-
--- data MessageLike = MessageLike 
---  { messageLikeMessageId   :: MessageId
---  , messageLikeUserId      :: UserId
---  , messageLikeChannelSlug :: ChannelSlug
---  , messageLikeTimestamp   :: UTCTime
---  } deriving (Eq, Show)
 
 instance FromJSON MessageLike where
   parseJSON = withObject "Message Like" $ \o -> MessageLike

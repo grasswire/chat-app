@@ -9,51 +9,38 @@ import           Data.Time.Clock
 import           DataStore
 import           Taplike.Schema
 import qualified Database.Esqueleto   as E
-import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val)
+import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val, (?.), LeftOuterJoin)
 import qualified Types                as TP
 import           Control.Concurrent   (forkIO)
 import           Taplike.Shared       (userFromEntity)
 import           Database.Persist.Sql (fromSqlKey)
 import           Types                (RtmStartRp(..), Self(..))
 
+-- data RtmStartRp = RtmStartRp
+--   { rtmStartUrl      :: Text
+--   , rtmStartSelf     :: Maybe Self
+--   , rtmStartUsers    :: [User]
+--   , rtmStartChannels :: [Channel]
+--   }
+
 getRtmStartR :: Handler Value
-getRtmStartR = do
+getRtmStartR = do 
   app <- getYesod
   authId <- maybeAuthId
   user <- case authId of
             Just i -> fmap (Entity i) <$> runDB (get i)
             _      -> return Nothing
-  mparam <- lookupGetParam "channel_slug"
-  case mparam of
-    Just slug -> do
-      renderer <- getUrlRender
-      let channelSlug = ChannelSlug slug
-          url = renderer $ ChatR channelSlug
-      maybeChan <- runDB (getBy $ UniqueChannelSlug channelSlug)
-      now <- liftIO getCurrentTime
-      users <- case maybeChan of
-                Just channel -> do
-                  maybe (return ()) (\key -> void $ runDB (upsert (Heartbeat key now (entityKey channel)) 
-                                 [HeartbeatLastSeen =. now])) authId
-                  let timeAgo = addUTCTime (negate 120 :: NominalDiffTime) now
-                  runDB (usersPresentQuery (entityKey channel) timeAgo)
-                _ ->  return []
-      members <- case maybeChan of 
-        Just channel -> runDB (channelMembersQuery $ entityKey channel)          
-        _            -> return []
-      case maybeChan of
-        Just chan -> liftIO $ void $ forkIO (void $ runRedisAction (redisConn app) 
-                                            (setChannelPresence (fromIntegral $ length users :: Integer) 
-                                            (channelCrSlug $ entityVal chan)))
-        _         -> return ()
-      let jsonResp = case user of
-                      Just u -> RtmStartRp url (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) 
-                                               (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) 
-                                               (fmap userFromEntity users) (fmap userFromEntity members)
-                      _      -> RtmStartRp url Nothing (fmap userFromEntity users) (fmap userFromEntity members)
-      returnJson jsonResp
-    Nothing -> sendResponseStatus badRequest400 ("BADREQUEST: MISSING channel_slug param" :: Text)
-
+  case user of 
+    Nothing -> anonymousRtm 
+    Just u  -> authenticatedRtm u
+  where anonymousRtm       = sendResponseStatus badRequest400 ("BADREQUEST: MISSING channel_slug param" :: Text)
+        authenticatedRtm u = do 
+          users <- runDB (usersInUserChannels (entityKey u))
+          let response = RtmStartRp (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) 
+                                    (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) 
+                                    (fmap userFromEntity users) []
+          returnJson response
+          
 usersPresentQuery ::  MonadIO m => Key Channel -> UTCTime -> SqlPersistT m [Entity User]
 usersPresentQuery chanKey lastseen = E.select $
                                      E.from $ \user -> do
@@ -73,3 +60,37 @@ channelMembersQuery chanKey = E.select $
                                          membership ^. MembershipUser ==. user ^. UserId)
                               return user
 
+-- select * from channel left join membership on channel.id = membership.channel where membership.in_channel = true;
+usersChannels :: MonadIO m => Key User -> SqlPersistT m [(Entity Channel, E.Value (Maybe (Key User)))]
+usersChannels userKey = do 
+  myChannels <- userMemberships userKey
+  E.select $
+    E.from $ \(channel `E.LeftOuterJoin` membership) -> do 
+    E.on (E.just (channel ^. ChannelId) ==. membership ?. MembershipChannel) 
+    E.where_ (channel ^. ChannelId `E.in_` E.valList (E.unValue <$> myChannels) &&. membership ?. MembershipInChannel ==. E.just (E.val True))
+    return (channel, membership ?. MembershipUser)
+  
+
+
+
+-- list of users who were/are members of any channel I'm a member of 
+-- this is analogous to Slack's rtm.start which includes a list of all members of a team 
+-- the query should be ~ to: select * from taplike_users where id in (select "user" from membership where channel in (select channel from membership where "user" = 3));
+usersInUserChannels ::  MonadIO m => Key User -> SqlPersistT m [Entity User]
+usersInUserChannels userKey = do 
+  myChannels <- userMemberships userKey
+  users      <- usersInMyChans myChannels
+  E.select $ 
+    E.from $ \user -> do
+    E.where_ (user ^. UserId `E.in_` E.valList (E.unValue <$> users))
+    return user
+  where usersInMyChans chans = E.select $ 
+                               E.from $ \membership -> do
+                               E.where_ (membership ^. MembershipChannel `E.in_` E.valList (E.unValue <$> chans))
+                               return   (membership ^. MembershipUser)
+
+userMemberships ::  MonadIO m => Key User -> SqlPersistT m [E.Value (Key Channel)]                             
+userMemberships userKey = E.select $
+                        E.from $ \membership -> do
+                        E.where_ (membership ^. MembershipUser ==. val userKey)
+                        return   (membership ^. MembershipChannel)

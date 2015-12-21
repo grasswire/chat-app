@@ -45,7 +45,7 @@ type WSExceptionHandler = ConnectionException -> WebSocketsT Handler ()
 addMember :: Key Channel -> Key User -> Handler (Either (Entity Membership) (Key Membership))
 addMember channelId user = do 
     now    <- liftIO getCurrentTime 
-    runDB $ insertBy (Membership user channelId now)
+    runDB $ insertBy (Membership user channelId now True)
     
 getChatR :: ChannelSlug -> Handler Html
 getChatR slug = do
@@ -166,7 +166,7 @@ postNewChatR = do
                     (toJSON (ChannelCreatedRp (TP.Channel (TP.UserId $ fromSqlKey chanCreator) currentTime
                                 (TP.ChannelTopic topic) (TP.ChannelSlug $ unSlug slug)
                                 (TP.ChannelTitle title) (TP.NumberUsersPresent 0)
-                                (TP.ChannelColor color)) (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
+                                (TP.ChannelColor color) []) (fromSqlKey key) (TP.ChannelSlug $ unSlug slug)))
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChannelSlug

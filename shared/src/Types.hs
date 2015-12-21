@@ -36,10 +36,9 @@ newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 newtype ID a = ID { unID :: Text } deriving (Eq, Ord)
 
 data RtmStartRp = RtmStartRp
-  { rtmStartUrl      :: Text
-  , rtmStartSelf     :: Maybe Self
+  { rtmStartSelf     :: Maybe Self
   , rtmStartUsers    :: [User]
-  , rtmStartMembers  :: [User]
+  , rtmStartChannels :: [Channel]
   }
 
 data Self = Self
@@ -156,7 +155,8 @@ data Channel = Channel
   , channelChannelSlug     :: ChannelSlug
   , channelTitle           :: ChannelTitle
   , channelNumUsersPresent :: NumberUsersPresent
-  , channelColor           :: ChannelColor  
+  , channelColor           :: ChannelColor 
+  , channelMembers         :: [UserId]
   }
 
 data NewMessageLike = NewMessageLike 

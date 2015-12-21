@@ -28,7 +28,7 @@ getHomeR = do
         let zipped = case presences of
                       Right ps -> chanEntities `zip` ps
                       Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ uncurry chanFromEntity <$> zipped
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ flip (uncurry chanFromEntity) [] <$> zipped
 
     defaultLayout $ do
       setTitle "Taplike / Home"

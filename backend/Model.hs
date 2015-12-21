@@ -23,12 +23,13 @@ deriving instance TextShow (Key Channel)
 deriveTextShow ''User
 deriveTextShow ''Channel
 
-chanFromEntity :: Entity Channel -> TP.NumberUsersPresent -> TP.Channel
-chanFromEntity entity numPresent = TP.Channel { TP.channelCreator = TP.UserId (fromSqlKey $ entityKey entity)
+chanFromEntity :: Entity Channel -> TP.NumberUsersPresent -> [Key User] -> TP.Channel
+chanFromEntity entity numPresent members = TP.Channel { TP.channelCreator = TP.UserId (fromSqlKey $ entityKey entity)
                                               , TP.channelCreated = channelCreated $ entityVal entity
                                               , TP.channelTopic = TP.ChannelTopic $ channelTopic $ entityVal entity
                                               , TP.channelChannelSlug = TP.ChannelSlug $ unSlug $ channelCrSlug $ entityVal entity
                                               , TP.channelTitle = TP.ChannelTitle $ channelTitle $ entityVal entity
                                               , TP.channelNumUsersPresent = numPresent
                                               , TP.channelColor = TP.ChannelColor ("#" <> channelColor (entityVal entity))
+                                              , TP.channelMembers = TP.UserId . fromSqlKey <$> members 
                                               }                                           
