@@ -41,8 +41,8 @@ App.Modules.Like = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.subscribe("tl/chat/users/init", getChannelLikes);
-         Events.bind("click", ".js-like").to(toggleLike, this);
+         //Events.subscribe("tl/chat/users/init", getChannelLikes);
+         //Events.bind("click", ".js-like").to(toggleLike, this);
 
          return this;
       }

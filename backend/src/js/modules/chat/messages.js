@@ -1,5 +1,5 @@
 App.Modules = App.Modules || {};
-App.Modules.ChatMessages = function () {
+App.Modules.Messages = function () {
 
   var o = { };
 
@@ -40,6 +40,7 @@ App.Modules.ChatMessages = function () {
       }
 
       if (_.has(msg, "type")) {
+         console.log(msg);
          Events.publish("tl/chat/messages/"+msg.type, msg);
       }
    };
@@ -51,11 +52,16 @@ App.Modules.ChatMessages = function () {
    var standardMessage = function(data) {
       var last = $('.js-blurb').last();
       var latestBlurb = Mapper.item(data, App.Transformers.blurb);
-      if (last.data('user-id') == latestBlurb.user.id) {
-         display(Handlebars.templates.blurbMultiline(latestBlurb));
-         return false;
+      App.data.memberChannels[latestBlurb.channelId].messages.push(latestBlurb);
+
+      console.log(App.data.memberChannels);
+      if (latestBlurb.channelId == App.data.slug) {
+         if (last.data('user-id') == latestBlurb.user.id) {
+            display(Handlebars.templates.blurbMultiline(latestBlurb));
+            return false;
+         }
+         display(Handlebars.templates.blurb(latestBlurb));
       }
-      display(Handlebars.templates.blurb(latestBlurb));
    };
 
    var display = function(compiledTemplate) {
