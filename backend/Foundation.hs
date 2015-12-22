@@ -154,10 +154,8 @@ instance YesodAuth App where
         settings <- appSettings <$> getYesod
         if appAllowDummyAuth settings
           then do 
-            liftIO $ print "looking up dummy auth!!"
             auth1 <- lookupGetParam "dummy_auth"
             auth2 <- lookupPostParam "dummy_auth"
-            maybe (liftIO $ print "not dummy auth :(") (const $ liftIO $ print "found dummy auth") auth1
             return ((auth1 <|> auth2) >>= \a -> either (return Nothing) (Just . toSqlKey . fst)  (decimal a))
           else do   
             userIdFromSession <- lookupSession sessionUserIdKey

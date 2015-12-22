@@ -5,6 +5,8 @@ import qualified Types as T
 import TestImport
 import Data.Aeson
 import Network.HTTP.Types.Method
+import Database.Persist.Sql (fromSqlKey)
+
 
 spec :: Spec
 spec = withApp $ do
@@ -42,12 +44,12 @@ spec = withApp $ do
   
     it "returns a 201 if a user creates a channel" $ do 
       now <- liftIO getCurrentTime
-      runDB $ insert (User 1 "LeviNotik" "some-url" Nothing now)
+      userId <- runDB $ insert (User 1 "LeviNotik" "some-url" Nothing now)
       request $ do 
         setMethod methodPost
         setUrl NewChatR
         setRequestBody (encode $ object ["title" .= ("title" :: Value), "topic" .= ("topic" :: Value), "color" .= ("color" :: Value)]) 
-        addGetParam "dummy_auth" "1"
+        addGetParam "dummy_auth" (pack . show . fromSqlKey $ userId)
       
       statusIs 201
         

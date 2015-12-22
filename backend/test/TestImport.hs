@@ -13,6 +13,19 @@ import Test.Hspec            as X
 import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (ignoreEnv, loadAppSettings)
 import Yesod.Test            as X
+import System.IO.Unsafe (unsafePerformIO)
+
+{-# NOINLINE unsafeApp #-}
+unsafeApp :: IORef App
+unsafeApp = unsafePerformIO (newIORef (unsafePerformIO initializeTestApp))
+
+initializeTestApp :: IO App
+initializeTestApp = do 
+      settings <- loadAppSettings
+          ["config/test-settings.yml", "config/settings.yml"]
+          []
+          ignoreEnv
+      makeFoundation settings
 
 runDB :: SqlPersistM a -> YesodExample App a
 runDB query = do
@@ -25,11 +38,12 @@ runDBWithApp app query = runSqlPersistMPool query (appConnPool app)
 
 withApp :: SpecWith App -> Spec
 withApp = before $ do
-    settings <- loadAppSettings
-        ["config/test-settings.yml", "config/settings.yml"]
-        []
-        ignoreEnv
-    foundation <- makeFoundation settings
+    -- settings <- loadAppSettings
+    --     ["config/test-settings.yml", "config/settings.yml"]
+    --     []
+    --     ignoreEnv
+    -- foundation <- makeFoundation settings
+    foundation <- readIORef unsafeApp
     wipeDB foundation
     return foundation
 
