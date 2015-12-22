@@ -60,6 +60,8 @@ data AppSettings = AppSettings
     , redisConf                 :: RedisConf
     -- ^ Redis connection info
     , appLogLevel               :: LogLevel 
+    
+    , appAllowDummyAuth         :: Bool
     }
 
 instance FromJSON AppSettings where
@@ -88,7 +90,7 @@ instance FromJSON AppSettings where
         twitterConf               <- o .: "twitter"
         redisConf                 <- o .: "redis"
         appLogLevel               <- o .: "log-level" >>= \level -> maybe (fail "unknown log level") pure  (readMay (level :: Text))
-
+        appAllowDummyAuth         <- o .: "allow-dummy-auth"
         return AppSettings {..}
 
 newtype TwitterAccessKey = TwitterAccessKey Text deriving (Show, Generic)

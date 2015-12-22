@@ -1,2 +1,3 @@
+allow-dummy-auth: true
 database:
-  database: chat-app_test
+  database: taplike_test
