@@ -3,15 +3,7 @@ App.Modules.ChatUsers = function () {
 
   var o = { };
 
-   var getChatroomList = function() {
-      AjaxRoute.as("get")
-         .to(App.routes.rtmStartUrl, {})
-         .on({
-            success: sanitizeUsers
-         });
-   }
-
-   var generateUserCollection = function(rawList) {
+   var generateAllMemberCollection = function(rawList) {
       return _.object(
          Mapper.collection(
             Mapper.collection(rawList, App.Transformers.users),
@@ -21,15 +13,13 @@ App.Modules.ChatUsers = function () {
    };
 
    var sanitizeUsers = function(response) {
+      console.log(response.users);
+      App.data.allMembers    = generateAllMemberCollection(response.users);
       App.data.thisMember    = null;
-      App.data.allMembers    = generateUserCollection(response.members);
-      App.data.activeMembers = generateUserCollection(response.users);
 
       if (! _.isNull(response.self)) {
-         var currentUser = generateUserCollection(response.self);
          App.data.thisMember    = Mapper.item(response.self, App.Transformers.users);
-         App.data.activeMembers = _.extend(App.data.activeMembers, currentUser);
-         App.data.allMembers    = _.extend(App.data.allMembers, currentUser)
+         App.data.allMembers    = _.extend(App.data.allMembers, generateAllMemberCollection(response.self))
       }
 
       Events.publish('tl/chat/users/init');
@@ -57,7 +47,7 @@ App.Modules.ChatUsers = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.bind("load").where('body[class]', 'chatroom').to(getChatroomList, this);
+         Events.subscribe('tl/chat/start', sanitizeUsers);
 
          Events.subscribe("tl/chat/users/init", generateUserList);
          Events.subscribe("tl/chat/users/init", displayUserCount);

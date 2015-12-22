@@ -77,7 +77,7 @@ App.Modules.ChatMessages = function () {
    return {
       init: function() { return this; },
       events: function() {
-         Events.subscribe("tl/chat/socket/ready", chatReady);
+         Events.subscribe("tl/chat/start", chatReady);
 
          Events.subscribe("tl/chat/messages/received", message);
          Events.subscribe("tl/chat/messages/welcome", welcomeMessage);

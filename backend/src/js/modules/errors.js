@@ -8,7 +8,7 @@ App.Modules.Errors = function () {
 
    var closeMessage = function() {
       $(".js-message").hide();
-      $(".js-message-text").html("");
+      $(".js-message-text").html("check-signin.js");
    }
    return {
       init: function() { return this; },
