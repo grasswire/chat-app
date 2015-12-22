@@ -49,7 +49,7 @@ getRtmStartR = do
         presenceFunc = do 
           now <- getCurrentTime
           let func u = if diffUTCTime now (userLastSeen (entityVal u)) <= diffUTCTime now (addUTCTime (negate 1800 :: NominalDiffTime) now)
-                     then TP.PresenceActive 
-                     else TP.PresenceAway
+                       then TP.PresenceActive 
+                       else TP.PresenceAway
           return func            
                      

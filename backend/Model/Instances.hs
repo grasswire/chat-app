@@ -141,6 +141,8 @@ deriving instance Eq PresenceChange
 deriving instance Eq MessageLikeAdded
 deriving instance Eq Channel
 deriving instance Eq User
+deriving instance Eq ChannelJoin
+deriving instance Eq ChannelJoined
 
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
@@ -169,6 +171,8 @@ deriveTextShow ''NumberUsersPresent
 deriveTextShow ''ChannelTopic
 deriveTextShow ''ChannelTitle
 deriveTextShow ''ChannelColor
+deriveTextShow ''ChannelJoin
+deriveTextShow ''ChannelJoined
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
@@ -239,20 +243,24 @@ instance FromJSON RtmEvent where
               "not_ok"                  -> RtmReplyNotOk <$> recur
               "presence_change"         -> RtmPresenceChange <$> recur
               "message_like_added"      -> RtmMessageLikeAdded <$> recur
+              "channel_joined"          -> RtmChannelJoined <$> recur
+              "channel_join"            -> RtmChannelJoin <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
-                  RtmSendMessage msg            -> toJSON msg
-                  RtmMessage message            -> toJSON message
-                  RtmHeartbeat beat             -> toJSON beat
-                  RtmHello                      -> object ["type" .= ("hello" :: Text)]
-                  RtmPing ping                  -> toJSON ping
-                  RtmPong pong                  -> toJSON pong
-                  RtmReplyOk ok                 -> toJSON ok
-                  RtmReplyNotOk notok           -> toJSON notok
-                  RtmMessageLikeAdded likeAdded -> toJSON likeAdded
-                  RtmPresenceChange change      -> toJSON change
+                  RtmSendMessage msg             -> toJSON msg
+                  RtmMessage message             -> toJSON message
+                  RtmHeartbeat beat              -> toJSON beat
+                  RtmHello                       -> object ["type" .= ("hello" :: Text)]
+                  RtmPing ping                   -> toJSON ping
+                  RtmPong pong                   -> toJSON pong
+                  RtmReplyOk ok                  -> toJSON ok
+                  RtmReplyNotOk notok            -> toJSON notok
+                  RtmMessageLikeAdded likeAdded  -> toJSON likeAdded
+                  RtmPresenceChange change       -> toJSON change
+                  RtmChannelJoin channelJoin     -> toJSON channelJoin
+                  RtmChannelJoined channelJoined -> toJSON channelJoined
 
 instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
@@ -382,3 +390,40 @@ instance ToJSON MessageLike where
 instance ToJSON Presence where
   toJSON PresenceActive = String "active"
   toJSON PresenceAway   = String "away"
+  
+-- data ChannelJoin = ChannelJoin 
+--  { channelJoinChannel :: ChannelSlug
+--  , channelJoinUser    :: User 
+--  , channelJoinTS      :: UTCTime 
+--  }
+--  
+-- data ChannelJoined = ChannelJoined
+--  { channelJoinedChannel :: Channel 
+--  , channelJoinedTS      :: UTCTime 
+--  }
+
+instance FromJSON ChannelJoin where
+  parseJSON = withObject "channel join" $ \o -> ChannelJoin
+    <$> o .: "channel"
+    <*> o .: "user"
+    <*> o .: "timestamp"
+
+instance ToJSON ChannelJoin where
+  toJSON (ChannelJoin chan user ts) = object
+    [ "type"       .= ("channel_join" :: Text)
+    , "channel"    .= chan
+    , "user"      .= user
+    , "timestamp" .= ts
+    ]
+
+instance FromJSON ChannelJoined where
+  parseJSON = withObject "channel joined" $ \o -> ChannelJoined
+    <$> o .: "channel"
+    <*> o .: "timestamp"
+
+instance ToJSON ChannelJoined where
+  toJSON (ChannelJoined chan ts) = object
+    [ "type"       .= ("channel_joined" :: Text)
+    , "channel"    .= chan
+    , "timestamp" .= ts
+    ]

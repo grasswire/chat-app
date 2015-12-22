@@ -10,32 +10,29 @@ module Server
   , subscribe 
   , readMessage 
   , newServer
+  , notifyChannelJoin
   ) where
 
-import           ClassyPrelude              hiding ((<>))
-import qualified Data.ByteString            as BS
-import qualified Data.ByteString.Lazy       as BL
-import           Data.Set (Set)
+import           ClassyPrelude hiding ((<>))
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
 import qualified Data.Set as Set
-import           Types                      (RtmEvent(..))
-import           Model.Instances            ()
-import           Model                      (Message(..))
-import           Database.Redis             hiding (Message, subscribe)
-import qualified Database.Redis             as Redis
+import           Types hiding (ChannelSlug)
+import qualified Types 
+import           Model.Instances ()
+import           Database.Redis hiding (Message, subscribe)
+import qualified Database.Redis as Redis
 import qualified Data.ByteString.Lazy.Char8 as LC8
-import           DataStore
-import           Control.Monad.Trans.Except
-import qualified Data.Aeson                 as Aeson
-import           Control.Concurrent         (forkIO)
-import           Taplike.Schema             (ChannelSlug, unSlug, ChannelSlug(..))
+import qualified Data.Aeson as Aeson
+import           Control.Concurrent (forkIO)
+import           Taplike.Schema (ChannelSlug, unSlug, ChannelSlug(..))
 import qualified Control.Concurrent.Chan.Unagi.Bounded as Unagi
 import           Control.Concurrent.Chan.Unagi.Bounded (InChan, OutChan)
-import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Data.UUID.V4 (nextRandom)
 import           Data.UUID (UUID)
 import qualified Data.Map.Strict as Map
-import qualified Data.Map        as M
+import qualified Data.Map as M
 
 type ClientId = UUID
 
@@ -100,9 +97,13 @@ lookupSubscribers chanSlug server@Server{..} = do
   clientMap <- atomically $ readTVar serverClients
   (return . maybe [] Set.toList) (Map.lookup chanSlug clientMap)
   
-broadcastEvent :: ChannelSlug -> RtmEvent -> RedisAction Integer
-broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> 
-  runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
+broadcastEvent :: ChannelSlug -> RtmEvent -> Server -> IO (Either Reply Integer)
+broadcastEvent chanId event server@Server{..} = runRedis serverConnection $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
+
+notifyChannelJoin :: ChannelSlug -> User -> Server -> IO (Either Reply Integer)
+notifyChannelJoin slug user server@Server{..} = do 
+  now <- getCurrentTime
+  runRedis serverConnection $ publish (chanId2Bs slug) (BL.toStrict $ Aeson.encode (RtmChannelJoin (ChannelJoin (Types.ChannelSlug $ unSlug slug) user now)))
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
 chanId2Bs = encodeUtf8 . unSlug

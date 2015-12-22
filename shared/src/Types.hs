@@ -9,6 +9,31 @@ import Data.Typeable
 import Data.Word (Word64)
 import Data.UUID
 
+data RtmEvent
+  = RtmHello
+  | RtmReplyOk ReplyOk
+  | RtmReplyNotOk ReplyNotOk
+  | RtmMessage Message
+  | RtmSendMessage IncomingMessage
+  | RtmHeartbeat Heartbeat
+  | RtmPing Ping
+  | RtmPong Pong
+  | RtmPresenceChange PresenceChange
+  | RtmMessageLikeAdded MessageLikeAdded 
+  | RtmChannelJoin ChannelJoin
+  | RtmChannelJoined ChannelJoined
+  
+data ChannelJoin = ChannelJoin 
+ { channelJoinChannel :: ChannelSlug
+ , channelJoinUser    :: User 
+ , channelJoinTS      :: UTCTime 
+ }
+ 
+data ChannelJoined = ChannelJoined
+ { channelJoinedChannel :: Channel 
+ , channelJoinedTS      :: UTCTime 
+ }
+
 newtype ChannelColor =
   ChannelColor { unChannelColor :: Text }
   deriving (Eq, Show, Typeable, Read)
@@ -71,18 +96,6 @@ data Heartbeat = Heartbeat
   , heartBeatChannel :: ChannelSlug
   }
 
-data RtmEvent
-  = RtmHello
-  | RtmReplyOk ReplyOk
-  | RtmReplyNotOk ReplyNotOk
-  | RtmMessage Message
-  | RtmSendMessage IncomingMessage
-  | RtmHeartbeat Heartbeat
-  | RtmPing Ping
-  | RtmPong Pong
-  | RtmPresenceChange PresenceChange
-  | RtmMessageLikeAdded MessageLikeAdded 
-  
 data MessageLikeAdded = MessageLikeAdded 
   { messageLikeAddedUser      :: UserId
   , messageLikeAddedMessageId :: UUID  
@@ -107,7 +120,6 @@ data PresenceChange = PresenceChange
   { presenceChangeUser     :: User
   , presenceChangePresence :: Presence
   }
-
 
 newtype MessageId = 
   MessageId { unMessageId :: UUID } 

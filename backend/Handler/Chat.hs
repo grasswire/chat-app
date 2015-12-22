@@ -23,7 +23,8 @@ import           Network.WebSockets (ConnectionException)
 import           Handler.Home (getHomeR)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
-import Queries 
+import           Queries 
+import           Data.Either (isLeft)
 
 data ChatSettings = AnonymousSettings AnonymousChat | LoggedInSettings LoggedInChat 
 
@@ -68,6 +69,8 @@ getChatR slug = do
             chanSlug = channelCrSlug room
         chatSettings <- case chatUser of 
           Just user -> do 
+            joined <- isLeft <$> addMember (entityKey c) (entityKey user)
+            when joined (liftIO . void $ S.notifyChannelJoin chanSlug (userFromEntity user TP.PresenceActive) (chatServer app))
             usersChans <- runDB (usersChannels (entityKey user))
             case usersChans of 
               h:t -> return (LoggedInSettings (LoggedInChat user (h :| t)))
@@ -91,15 +94,15 @@ socketsApp exceptionHandler settings =
       _                  ->        outbound $ S.readMessage client
   where
     outbound readMessages = forever $ liftIO readMessages >>= sendTextData
-    inbound (App { redisConn }) user = do
+    inbound app@App{..} user = do
       -- let wasSeen = do now <- liftIO getCurrentTime
       --                  void $ runDB (upsert (Heartbeat (entityKey user) now channelId) [HeartbeatLastSeen =. now])
       -- 
       liftIO $ 
         -- atomically $ S.chanAddClient S.JoinReasonConnected chan
         --             (userTwitterUserId $ entityVal user)
-        void . runRedisAction redisConn $ S.broadcastEvent (ChannelSlug "haskell")
-                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive))
+        void $ S.broadcastEvent (ChannelSlug "haskell")
+                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive)) chatServer
       --   void . runRedisAction redisConn $ incrChannelPresence channelSlug
       -- 
       -- lift wasSeen
@@ -119,7 +122,7 @@ socketsApp exceptionHandler settings =
             let processedMsg = processMessage (entityKey user) inEvent ts
             case processedMsg of 
               Just event -> do 
-                _ <- liftIO $ runRedisAction redisConn $ S.broadcastEvent (NonEmpty.head $ settingsSlugs settings) event
+                _ <- liftIO . void $ S.broadcastEvent (NonEmpty.head $ settingsSlugs settings) event chatServer
                 persistEvent (entityKey user) event
               Nothing    -> return ()
           pure ()
