@@ -16,6 +16,7 @@ import           Server
 import           Taplike.Schema
 import           Database.Persist.Sql (ConnectionPool, runSqlPool, toSqlKey)
 import qualified Database.Redis        as Redis
+import                                 Data.Text.Read (decimal)
 
 
 type OAuthToken = BS.ByteString
@@ -150,8 +151,15 @@ instance YesodAuth App where
     authPlugins _ = []
 
     maybeAuthId = do
-        userIdFromSession <- lookupSession sessionUserIdKey
-        return (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
+        settings <- appSettings <$> getYesod
+        if appAllowDummyAuth settings
+          then do 
+            auth1 <- lookupGetParam "dummy_auth"
+            auth2 <- lookupPostParam "dummy_auth"
+            return ((auth1 <|> auth2) >>= \a -> either (return Nothing) (Just . toSqlKey . fst)  (decimal a))
+          else do   
+            userIdFromSession <- lookupSession sessionUserIdKey
+            return (toSqlKey <$> ((fromIntegral . fst <$> (encodeUtf8 <$> userIdFromSession >>= S8.readInt)) :: Maybe Int64))
 
 
     authHttpManager = getHttpManager

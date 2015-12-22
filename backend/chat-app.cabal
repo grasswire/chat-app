@@ -187,3 +187,6 @@ test-suite test
                  , hspec >= 2.0.0
                  , classy-prelude
                  , classy-prelude-yesod
+                 , shared
+                 , aeson
+                 , http-types
