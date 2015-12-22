@@ -14,6 +14,10 @@ import Text.Shakespeare.Text (st)
 import Yesod.Default.Config2 (ignoreEnv, loadAppSettings)
 import Yesod.Test            as X
 import System.IO.Unsafe (unsafePerformIO)
+import Database.Persist.Sql (fromSqlKey)
+import qualified Data.ByteString.Lazy as BL
+import Yesod.Core (Route)
+import Network.HTTP.Types.Method
 
 {-# NOINLINE unsafeApp #-}
 unsafeApp :: IORef App
@@ -68,3 +72,22 @@ getTables = do
     |] []
 
     return $ map unSingle tables
+    
+getWithAuth :: Route App -> YesodExample App ()        
+getWithAuth resource = do 
+  now <- liftIO getCurrentTime
+  userId <- runDB $ insert (User 1 "LeviNotik" "some-url" Nothing now)
+  request $ do 
+    setMethod methodGet 
+    setUrl resource
+    addGetParam "dummy_auth" (pack . show . fromSqlKey $ userId)
+  
+postWithAuth :: Route App -> Maybe BL.ByteString -> YesodExample App ()
+postWithAuth resource body = do 
+  now <- liftIO getCurrentTime
+  userId <- runDB $ insert (User 1 "LeviNotik" "some-url" Nothing now)
+  request $ do 
+    setMethod methodPost 
+    setUrl resource
+    maybe (return ()) setRequestBody body
+    addGetParam "dummy_auth" (pack . show . fromSqlKey $ userId)
