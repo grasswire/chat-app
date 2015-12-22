@@ -140,6 +140,7 @@ deriving instance Eq Presence
 deriving instance Eq PresenceChange
 deriving instance Eq MessageLikeAdded
 deriving instance Eq Channel
+deriving instance Eq User
 
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
@@ -328,11 +329,12 @@ instance FromJSON ReplyNotOk where
     <*> o .: "msg"
 
 instance ToJSON User where
-  toJSON (User userId twitterUserId twitterScreenName profileImage) = object
+  toJSON (User userId twitterUserId twitterScreenName profileImage presence) = object
     [ "profile_image_url" .= profileImage
     , "twitter_screen_name" .= twitterScreenName
     , "user_id" .= userId
     , "twitter_user_id" .= twitterUserId
+    , "presence" .= presence
     ]
 
 instance FromJSON User where
@@ -341,6 +343,7 @@ instance FromJSON User where
     <*> o .: "twitter_user_id" 
     <*> o .: "twitter_screen_name"
     <*> o .: "profile_image_url" 
+    <*> o .: "presence" 
 
 instance ToJSON PresenceChange where
   toJSON (PresenceChange user presence) = object

@@ -3,6 +3,7 @@ User json sql=taplike_users
   twitterScreenName Text
   profileImageUrl Text
   emailAddress Text Maybe
+  lastSeen UTCTime default=current_timestamp
   UniqueUser twitterUserId
   deriving Eq Show Typeable
 

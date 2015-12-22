@@ -7,10 +7,10 @@ import           Database.Persist.Types (Entity(..))
 import           Database.Persist.Sql   (fromSqlKey)
 import qualified Taplike.Schema as Schema
 
-userFromEntity :: Entity Model.User -> TP.User
+userFromEntity :: Entity Model.User -> TP.Presence -> TP.User
 userFromEntity userEntity = TP.User (TP.UserId $ fromSqlKey key) (TP.TwitterUserId $ Model.userTwitterUserId userVal) 
-                                    (TP.TwitterScreenName $ Model.userTwitterScreenName userVal) 
-                                    (TP.ProfileImageUrl $ Model.userProfileImageUrl userVal) 
+                                     (TP.TwitterScreenName $ Model.userTwitterScreenName userVal) 
+                                     (TP.ProfileImageUrl $ Model.userProfileImageUrl userVal)
   where userVal = entityVal userEntity
         key     = entityKey userEntity
         

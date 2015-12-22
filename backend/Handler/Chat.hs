@@ -99,7 +99,7 @@ socketsApp exceptionHandler settings =
         -- atomically $ S.chanAddClient S.JoinReasonConnected chan
         --             (userTwitterUserId $ entityVal user)
         void . runRedisAction redisConn $ S.broadcastEvent (ChannelSlug "haskell")
-                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user) TP.PresenceActive))
+                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive))
       --   void . runRedisAction redisConn $ incrChannelPresence channelSlug
       -- 
       -- lift wasSeen
@@ -170,10 +170,8 @@ postNewChatR = do
       Nothing  -> sendResponseStatus status401 ("UNAUTHORIZED" :: Text)
 
 slugify :: Text -> ChannelSlug
-slugify = ChannelSlug . makeSlug
-
-makeSlug :: Text -> Text
-makeSlug =  replaceAll "[ _]" "-"
+slugify = ChannelSlug 
+          . replaceAll "[ _]" "-"
           . replaceAll "[^a-z0-9_ ]+" ""
           . T.map toLower
 

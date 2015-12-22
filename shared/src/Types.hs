@@ -142,7 +142,8 @@ data User = User
   , userTwitterUserId     :: TwitterUserId
   , userTwitterScreenName :: TwitterScreenName
   , userProfileImageUrl   :: ProfileImageUrl
-  } deriving (Eq, Show)
+  , userPresence          :: Presence
+  }
 
 newtype NumberUsersPresent =
   NumberUsersPresent { unNumberUsersPresent :: Int64 }
