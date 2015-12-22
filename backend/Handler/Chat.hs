@@ -24,7 +24,6 @@ import           Handler.Home (getHomeR)
 import qualified Data.List.NonEmpty as NonEmpty
 import           Data.List.NonEmpty (NonEmpty(..))
 import           Queries 
-import           Data.Either (isLeft)
 
 data ChatSettings = AnonymousSettings AnonymousChat | LoggedInSettings LoggedInChat 
 
@@ -69,9 +68,10 @@ getChatR slug = do
             chanSlug = channelCrSlug room
         chatSettings <- case chatUser of 
           Just user -> do 
-            joined <- isLeft <$> addMember (entityKey c) (entityKey user)
-            when joined (liftIO . void $ S.notifyChannelJoin chanSlug (userFromEntity user TP.PresenceActive) (chatServer app))
+            -- joined <- isLeft <$> addMember (entityKey c) (entityKey user)
             usersChans <- runDB (usersChannels (entityKey user))
+            unless (any (\chan -> channelCrSlug (entityVal chan) == chanSlug) usersChans) (void $ addMember (entityKey c) (entityKey user) >>  
+              liftIO (void (S.notifyChannelJoin chanSlug (userFromEntity user TP.PresenceActive) (chatServer app))))
             case usersChans of 
               h:t -> return (LoggedInSettings (LoggedInChat user (h :| t)))
               _ ->   return (AnonymousSettings (AnonymousChat c))
@@ -95,29 +95,22 @@ socketsApp exceptionHandler settings =
   where
     outbound readMessages = forever $ liftIO readMessages >>= sendTextData
     inbound app@App{..} user = do
-      -- let wasSeen = do now <- liftIO getCurrentTime
-      --                  void $ runDB (upsert (Heartbeat (entityKey user) now channelId) [HeartbeatLastSeen =. now])
-      -- 
-      liftIO $ 
-        -- atomically $ S.chanAddClient S.JoinReasonConnected chan
-        --             (userTwitterUserId $ entityVal user)
-        void $ S.broadcastEvent (ChannelSlug "haskell")
-                 (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive)) chatServer
-      --   void . runRedisAction redisConn $ incrChannelPresence channelSlug
-      -- 
-      -- lift wasSeen
+      let wasSeen =  liftIO getCurrentTime >>= \now -> void $ runDB (update (entityKey user) [UserLastSeen =. now])
+       
+      liftIO $ void $ S.broadcastEvent (ChannelSlug "haskell")
+                      (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive)) chatServer
+      
+      lift wasSeen
       
       runInnerHandler <- lift handlerToIO
-      
-      -- liftIO $ runInnerHandler $ void $ addMember channelId (entityKey user)
 
       sourceWS $$ mapM_C $ \ case
-        RtmHeartbeat _ -> return () -- lift wasSeen
+        RtmHeartbeat _ -> return () 
         RtmPing ping   -> sendTextData $ RtmPong (TP.Pong $ TP.pingId ping)
         inEvent -> do
           ackMessage inEvent
           void $ liftIO $ forkIO $ runInnerHandler $ do
-            -- wasSeen
+            wasSeen
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
             case processedMsg of 
@@ -129,14 +122,16 @@ socketsApp exceptionHandler settings =
 
     persistEvent :: UserId -> RtmEvent -> Handler ()
     persistEvent userId event = case event of
-                                  RtmMessage msg -> void $ runDB $ insert 
-                                    (Message userId (TP.unMessageText $ TP.messageText msg) 
-                                                    (TP.messageTS msg) (entityKey (NonEmpty.head $ settingsChannels settings)) (MessageUUID $ TP.messageUUID msg))
+                                  RtmMessage msg -> void $ runDB $ insert (Message userId (TP.unMessageText $ TP.messageText msg) 
+                                                                          (TP.messageTS msg) 
+                                                                          (entityKey (NonEmpty.head $ settingsChannels settings)) 
+                                                                          (MessageUUID $ TP.messageUUID msg))
                                   _              -> return ()
 
     ackMessage (RtmSendMessage incoming) = do
       now <- liftIO getCurrentTime
-      sendTextData (RtmReplyOk (ReplyOk (TP.incomingMessageUUID incoming) (Just now) (Just $ TP.unMessageText $ incomingMessageMessageText incoming)))
+      sendTextData (RtmReplyOk (ReplyOk (TP.incomingMessageUUID incoming) (Just now) 
+                   (Just $ TP.unMessageText $ incomingMessageMessageText incoming)))
     ackMessage _ = return ()
 
 wsExceptionHandler :: Redis.Connection -> ChannelSlug -> ConnectionException -> WebSocketsT Handler ()
