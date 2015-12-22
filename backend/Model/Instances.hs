@@ -6,7 +6,7 @@ module Model.Instances where
 import ClassyPrelude
 import Types
 import Control.Applicative (empty)
-import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode, withScientific)
+import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode)
 import Data.Aeson.Types (Parser, typeMismatch, Value(..))
 import TextShow.TH (deriveTextShow)
 import Network.WebSockets (WebSocketsData(fromLazyByteString, toLazyByteString))
@@ -14,8 +14,6 @@ import Taplike.TextShowOrphans ()
 import Data.UUID.Aeson ()
 import TextShow.Data.Time ()
 import Data.Maybe (fromJust)
-import TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
-import Data.Scientific (toBoundedInteger)
 
 instance FromJSON NewChannel where
   parseJSON (Object v) = NewChannel <$>
@@ -106,15 +104,6 @@ instance FromJSON TS where
 
 instance ToJSON TS where
   toJSON (TS t) = String t
-
--- instance FromJSON NumberUsersPresent where
---   parseJSON = withScientific "num_users_present" $ \ s ->
---     case toBoundedInteger s of
---       Just i64 -> pure (NumberUsersPresent i64)
---       Nothing  -> fail . unpack $ "out of bound Int64 " <> showt (FromStringShow s)
--- 
--- instance ToJSON NumberUsersPresent where
---   toJSON (NumberUsersPresent n) = Number n
 
 deriveTextShow ''TS  
 instance FromJSON (ID a) where

@@ -5,7 +5,6 @@ module Handler.Channel where
 import Import 
 import Database.Persist.Sql (rawSql)
 import Data.Time.Clock
-import Control.Arrow ((***))
 import Taplike.Schema
 import Taplike.Shared (messageFromEntity)
 import qualified Types as TP
@@ -14,7 +13,6 @@ import qualified Types as TP
 getChannelLikesR :: Handler Value
 getChannelLikesR = do 
   let chanParam = "channel"
-  app <- getYesod 
   channel <- lookupGetParam chanParam
   case channel of 
     Just slug -> do 

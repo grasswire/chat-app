@@ -2,19 +2,9 @@
 
 module Queries where
 
-import Import hiding ((==.), (>=.))
-
-import           Data.Time.Clock
-import           DataStore
-import           Taplike.Schema
+import           Import hiding ((==.), (>=.))
 import qualified Database.Esqueleto as E
-import           Database.Esqueleto ((==.), (^.), (>=.), (&&.), val, (?.))
-import qualified Types as TP
-import           Control.Concurrent (forkIO)
-import           Taplike.Shared (userFromEntity)
-import           Database.Persist.Sql (fromSqlKey)
-import           Types (RtmStartRp(..), Self(..))
-
+import           Database.Esqueleto ((==.), (^.), (&&.), val, (?.))
           
 -- list of all channels along with their current members for the given user 
 usersChannelsWithMembers :: MonadIO m => Key User -> SqlPersistT m [(Entity Channel, E.Value (Maybe (Key User)))]
