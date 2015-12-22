@@ -9,6 +9,31 @@ import Data.Typeable
 import Data.Word (Word64)
 import Data.UUID
 
+data RtmEvent
+  = RtmHello
+  | RtmReplyOk ReplyOk
+  | RtmReplyNotOk ReplyNotOk
+  | RtmMessage Message
+  | RtmSendMessage IncomingMessage
+  | RtmHeartbeat Heartbeat
+  | RtmPing Ping
+  | RtmPong Pong
+  | RtmPresenceChange PresenceChange
+  | RtmMessageLikeAdded MessageLikeAdded 
+  | RtmChannelJoin ChannelJoin
+  | RtmChannelJoined ChannelJoined
+  
+data ChannelJoin = ChannelJoin 
+ { channelJoinChannel :: ChannelSlug
+ , channelJoinUser    :: User 
+ , channelJoinTS      :: UTCTime 
+ }
+ 
+data ChannelJoined = ChannelJoined
+ { channelJoinedChannel :: Channel 
+ , channelJoinedTS      :: UTCTime 
+ }
+
 newtype ChannelColor =
   ChannelColor { unChannelColor :: Text }
   deriving (Eq, Show, Typeable, Read)
@@ -36,10 +61,9 @@ newtype TS = TS { unTS :: Text } deriving (Eq, Ord)
 newtype ID a = ID { unID :: Text } deriving (Eq, Ord)
 
 data RtmStartRp = RtmStartRp
-  { rtmStartUrl      :: Text
-  , rtmStartSelf     :: Maybe Self
+  { rtmStartSelf     :: Maybe Self
   , rtmStartUsers    :: [User]
-  , rtmStartMembers  :: [User]
+  , rtmStartChannels :: [Channel]
   }
 
 data Self = Self
@@ -72,18 +96,6 @@ data Heartbeat = Heartbeat
   , heartBeatChannel :: ChannelSlug
   }
 
-data RtmEvent
-  = RtmHello
-  | RtmReplyOk ReplyOk
-  | RtmReplyNotOk ReplyNotOk
-  | RtmMessage Message
-  | RtmSendMessage IncomingMessage
-  | RtmHeartbeat Heartbeat
-  | RtmPing Ping
-  | RtmPong Pong
-  | RtmPresenceChange PresenceChange
-  | RtmMessageLikeAdded MessageLikeAdded 
-  
 data MessageLikeAdded = MessageLikeAdded 
   { messageLikeAddedUser      :: UserId
   , messageLikeAddedMessageId :: UUID  
@@ -108,7 +120,6 @@ data PresenceChange = PresenceChange
   { presenceChangeUser     :: User
   , presenceChangePresence :: Presence
   }
-
 
 newtype MessageId = 
   MessageId { unMessageId :: UUID } 
@@ -143,7 +154,8 @@ data User = User
   , userTwitterUserId     :: TwitterUserId
   , userTwitterScreenName :: TwitterScreenName
   , userProfileImageUrl   :: ProfileImageUrl
-  } deriving (Eq, Show)
+  , userPresence          :: Presence
+  }
 
 newtype NumberUsersPresent =
   NumberUsersPresent { unNumberUsersPresent :: Int64 }
@@ -156,7 +168,8 @@ data Channel = Channel
   , channelChannelSlug     :: ChannelSlug
   , channelTitle           :: ChannelTitle
   , channelNumUsersPresent :: NumberUsersPresent
-  , channelColor           :: ChannelColor  
+  , channelColor           :: ChannelColor 
+  , channelMembers         :: [UserId]
   }
 
 data NewMessageLike = NewMessageLike 

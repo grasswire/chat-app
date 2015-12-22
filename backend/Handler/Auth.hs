@@ -86,8 +86,8 @@ getTwitterCallbackR = do
           maybePersistedUser <- runDB $ getBy (UniqueUser twitterUserId)
           case maybePersistedUser of
             Nothing -> do
-              userId <- runDB $ insert $ User twitterUserId (TT.userScreenName user) 
-                                         (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing
+              userId <- liftIO getCurrentTime >>= \ts -> runDB $ insert $ User twitterUserId (TT.userScreenName user) 
+                                         (fromMaybe (pack "default-image.png") (TT.userProfileImageURLHttps user)) Nothing ts
               setSession sessionUserIdKey (pack . show $ userId)
               maybe (redirect homeR) redirect redirectParam
             Just u -> do

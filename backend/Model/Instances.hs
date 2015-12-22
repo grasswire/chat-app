@@ -5,15 +5,17 @@ module Model.Instances where
 
 import ClassyPrelude
 import Types
-import Control.Applicative     (empty)
-import Data.Aeson              (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode)
-import Data.Aeson.Types        (Parser, typeMismatch, Value(..))
-import TextShow.TH             (deriveTextShow)
-import Network.WebSockets      (WebSocketsData(fromLazyByteString, toLazyByteString))
+import Control.Applicative (empty)
+import Data.Aeson (object, (.=), (.:), ToJSON(toJSON), FromJSON(parseJSON), (.:?), withText, withObject, encode, decode, withScientific)
+import Data.Aeson.Types (Parser, typeMismatch, Value(..))
+import TextShow.TH (deriveTextShow)
+import Network.WebSockets (WebSocketsData(fromLazyByteString, toLazyByteString))
 import Taplike.TextShowOrphans ()
-import Data.UUID.Aeson         ()
-import TextShow.Data.Time      ()
-import Data.Maybe              (fromJust)
+import Data.UUID.Aeson ()
+import TextShow.Data.Time ()
+import Data.Maybe (fromJust)
+import TextShow (FromStringShow(FromStringShow), TextShow(showb), showt)
+import Data.Scientific (toBoundedInteger)
 
 instance FromJSON NewChannel where
   parseJSON (Object v) = NewChannel <$>
@@ -47,6 +49,7 @@ deriving instance FromJSON ChannelSlug
 deriving instance FromJSON TwitterUserId
 deriving instance FromJSON TwitterScreenName
 deriving instance FromJSON ProfileImageUrl
+deriving instance FromJSON NumberUsersPresent
 deriving instance ToJSON ChannelTitle
 deriving instance ToJSON ChannelTopic
 deriving instance ToJSON ChannelColor
@@ -76,7 +79,7 @@ instance ToJSON ChannelCreatedRp where
   toJSON (ChannelCreatedRp room roomId slug) = object ["chat_room" .= room, "id" .= roomId, "slug" .= slug]
   
 instance ToJSON Channel where 
-  toJSON (Channel creator created topic slug title numPresent color) = object 
+  toJSON (Channel creator created topic slug title numPresent color members) = object 
     [ "creator"           .= creator
     , "created"           .= created
     , "topic"             .= topic 
@@ -84,13 +87,34 @@ instance ToJSON Channel where
     , "title"             .= title 
     , "num_users_present" .= numPresent
     , "color"             .= color
+    , "members"           .= members
     ]
+
+instance FromJSON Channel where
+  parseJSON = withObject "channel object" $ \ o -> Channel
+    <$> o .: "creator"  
+    <*> o .: "created"  
+    <*> o .: "topic"
+    <*> o .: "slug"
+    <*> o .: "title" 
+    <*> o .: "num_users_present"
+    <*> o .: "color" 
+    <*> o .: "members" 
   
 instance FromJSON TS where
   parseJSON = withText "timestamp" $ pure . TS
 
 instance ToJSON TS where
   toJSON (TS t) = String t
+
+-- instance FromJSON NumberUsersPresent where
+--   parseJSON = withScientific "num_users_present" $ \ s ->
+--     case toBoundedInteger s of
+--       Just i64 -> pure (NumberUsersPresent i64)
+--       Nothing  -> fail . unpack $ "out of bound Int64 " <> showt (FromStringShow s)
+-- 
+-- instance ToJSON NumberUsersPresent where
+--   toJSON (NumberUsersPresent n) = Number n
 
 deriveTextShow ''TS  
 instance FromJSON (ID a) where
@@ -115,6 +139,10 @@ deriving instance Eq ReplyNotOk
 deriving instance Eq Presence
 deriving instance Eq PresenceChange
 deriving instance Eq MessageLikeAdded
+deriving instance Eq Channel
+deriving instance Eq User
+deriving instance Eq ChannelJoin
+deriving instance Eq ChannelJoined
 
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
@@ -138,20 +166,25 @@ deriveTextShow ''TwitterScreenName
 deriveTextShow ''ProfileImageUrl
 deriveTextShow ''MessageLike
 deriveTextShow ''MessageId
+deriveTextShow ''Channel
+deriveTextShow ''NumberUsersPresent
+deriveTextShow ''ChannelTopic
+deriveTextShow ''ChannelTitle
+deriveTextShow ''ChannelColor
+deriveTextShow ''ChannelJoin
+deriveTextShow ''ChannelJoined
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
-    <$> o .: "url"
-    <*> o .:? "self"
+    <$> o .:? "self"
     <*> o .: "users"
     <*> o .: "members"
 
 instance ToJSON RtmStartRp where
-  toJSON (RtmStartRp url self users members) = object
-    [ "url"   .= url
-    , "self"  .= self
+  toJSON (RtmStartRp self users channels) = object
+    [ "self"  .= self
     , "users" .= users
-    , "members" .= members
+    , "channels" .= channels
     ]
 
 instance FromJSON Self where
@@ -210,20 +243,24 @@ instance FromJSON RtmEvent where
               "not_ok"                  -> RtmReplyNotOk <$> recur
               "presence_change"         -> RtmPresenceChange <$> recur
               "message_like_added"      -> RtmMessageLikeAdded <$> recur
+              "channel_joined"          -> RtmChannelJoined <$> recur
+              "channel_join"            -> RtmChannelJoin <$> recur
               other                     -> fail . unpack $ "unknown RTM event type " <> other
 
 instance ToJSON RtmEvent where
   toJSON event = case event of
-                  RtmSendMessage msg            -> toJSON msg
-                  RtmMessage message            -> toJSON message
-                  RtmHeartbeat beat             -> toJSON beat
-                  RtmHello                      -> object ["type" .= ("hello" :: Text)]
-                  RtmPing ping                  -> toJSON ping
-                  RtmPong pong                  -> toJSON pong
-                  RtmReplyOk ok                 -> toJSON ok
-                  RtmReplyNotOk notok           -> toJSON notok
-                  RtmMessageLikeAdded likeAdded -> toJSON likeAdded
-                  RtmPresenceChange change      -> toJSON change
+                  RtmSendMessage msg             -> toJSON msg
+                  RtmMessage message             -> toJSON message
+                  RtmHeartbeat beat              -> toJSON beat
+                  RtmHello                       -> object ["type" .= ("hello" :: Text)]
+                  RtmPing ping                   -> toJSON ping
+                  RtmPong pong                   -> toJSON pong
+                  RtmReplyOk ok                  -> toJSON ok
+                  RtmReplyNotOk notok            -> toJSON notok
+                  RtmMessageLikeAdded likeAdded  -> toJSON likeAdded
+                  RtmPresenceChange change       -> toJSON change
+                  RtmChannelJoin channelJoin     -> toJSON channelJoin
+                  RtmChannelJoined channelJoined -> toJSON channelJoined
 
 instance ToJSON IncomingMessage where
   toJSON (IncomingMessage uuid ts channelId msgText) = object
@@ -300,11 +337,12 @@ instance FromJSON ReplyNotOk where
     <*> o .: "msg"
 
 instance ToJSON User where
-  toJSON (User userId twitterUserId twitterScreenName profileImage) = object
+  toJSON (User userId twitterUserId twitterScreenName profileImage presence) = object
     [ "profile_image_url" .= profileImage
     , "twitter_screen_name" .= twitterScreenName
     , "user_id" .= userId
     , "twitter_user_id" .= twitterUserId
+    , "presence" .= presence
     ]
 
 instance FromJSON User where
@@ -313,6 +351,7 @@ instance FromJSON User where
     <*> o .: "twitter_user_id" 
     <*> o .: "twitter_screen_name"
     <*> o .: "profile_image_url" 
+    <*> o .: "presence" 
 
 instance ToJSON PresenceChange where
   toJSON (PresenceChange user presence) = object
@@ -333,13 +372,6 @@ instance ToJSON MessageLikeAdded where
     , "message_id" .= message
     ]
 
--- data MessageLike = MessageLike 
---  { messageLikeMessageId   :: MessageId
---  , messageLikeUserId      :: UserId
---  , messageLikeChannelSlug :: ChannelSlug
---  , messageLikeTimestamp   :: UTCTime
---  } deriving (Eq, Show)
-
 instance FromJSON MessageLike where
   parseJSON = withObject "Message Like" $ \o -> MessageLike
     <$> o .: "message_id"
@@ -358,3 +390,40 @@ instance ToJSON MessageLike where
 instance ToJSON Presence where
   toJSON PresenceActive = String "active"
   toJSON PresenceAway   = String "away"
+  
+-- data ChannelJoin = ChannelJoin 
+--  { channelJoinChannel :: ChannelSlug
+--  , channelJoinUser    :: User 
+--  , channelJoinTS      :: UTCTime 
+--  }
+--  
+-- data ChannelJoined = ChannelJoined
+--  { channelJoinedChannel :: Channel 
+--  , channelJoinedTS      :: UTCTime 
+--  }
+
+instance FromJSON ChannelJoin where
+  parseJSON = withObject "channel join" $ \o -> ChannelJoin
+    <$> o .: "channel"
+    <*> o .: "user"
+    <*> o .: "timestamp"
+
+instance ToJSON ChannelJoin where
+  toJSON (ChannelJoin chan user ts) = object
+    [ "type"       .= ("channel_join" :: Text)
+    , "channel"    .= chan
+    , "user"      .= user
+    , "timestamp" .= ts
+    ]
+
+instance FromJSON ChannelJoined where
+  parseJSON = withObject "channel joined" $ \o -> ChannelJoined
+    <$> o .: "channel"
+    <*> o .: "timestamp"
+
+instance ToJSON ChannelJoined where
+  toJSON (ChannelJoined chan ts) = object
+    [ "type"       .= ("channel_joined" :: Text)
+    , "channel"    .= chan
+    , "timestamp" .= ts
+    ]

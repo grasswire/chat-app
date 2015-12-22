@@ -1,27 +1,40 @@
 {-# LANGUAGE LambdaCase, RecordWildCards #-}
 
-module Server where
+module Server
+  ( Server
+  , Client 
+  , LeaveReason(..)
+  , JoinReason(..)
+  , broadcastEvent
+  , newClient 
+  , subscribe 
+  , readMessage 
+  , newServer
+  , notifyChannelJoin
+  ) where
 
-import           ClassyPrelude              hiding ((<>))
-import qualified Data.Map                   as M
-import qualified Data.Set                   as S
-import qualified Data.ByteString            as BS
-import qualified Data.ByteString.Lazy       as BL
-import           Types                      (RtmEvent(..))
-import           Model.Instances            ()
-import           Model                      (Message(..))
-import           Database.Redis             hiding (Message)
-import qualified Database.Redis             as Redis
+import           ClassyPrelude hiding ((<>))
+import qualified Data.ByteString as BS
+import qualified Data.ByteString.Lazy as BL
+import qualified Data.Set as Set
+import           Types hiding (ChannelSlug)
+import qualified Types 
+import           Model.Instances ()
+import           Database.Redis hiding (Message, subscribe)
+import qualified Database.Redis as Redis
 import qualified Data.ByteString.Lazy.Char8 as LC8
-import           DataStore
-import           Control.Monad.Trans.Except
-import qualified Data.Aeson                 as Aeson
-import           Control.Concurrent         (forkIO)
-import           Taplike.Schema             (ChannelSlug, unSlug, ChannelSlug(..))
-import Debug.Trace
-import qualified Data.Text.IO as TIO
+import qualified Data.Aeson as Aeson
+import           Control.Concurrent (forkIO)
+import           Taplike.Schema (ChannelSlug, unSlug, ChannelSlug(..))
+import qualified Control.Concurrent.Chan.Unagi.Bounded as Unagi
+import           Control.Concurrent.Chan.Unagi.Bounded (InChan, OutChan)
+import           Data.List.NonEmpty (NonEmpty(..))
+import           Data.UUID.V4 (nextRandom)
+import           Data.UUID (UUID)
+import qualified Data.Map.Strict as Map
+import qualified Data.Map as M
 
-type ClientId = Int64
+type ClientId = UUID
 
 data LeaveReason
     = LeaveReasonLeft
@@ -31,120 +44,66 @@ data JoinReason
     = JoinReasonJoined
     | JoinReasonConnected
 
--- Note there is no notion of DMs here. That would have to be a specific, fixed channel
+data Server = Server 
+  { serverConnection :: Connection 
+  , serverClients    :: TVar (Map ChannelSlug (Set Client)) 
+  }
+
 data Client = Client
-    { clientName          :: ClientId
-    , clientKicked        :: TVar (Maybe (String, String)) -- should be Map String String since multiple channels
-    , clientChans         :: TVar (Map Channel (TChan Message)) -- client can be in multiple channels
+    { clientId       :: ClientId
+    , clientInChan   :: InChan RtmEvent
+    , clientOutChan  :: OutChan RtmEvent
     }
+    
+instance Eq Client where 
+  c1 == c2 = clientId c1 == clientId c2
+  
+instance Ord Client where 
+  compare c1 c2 = clientId c1 `compare` clientId c2
+  
+newClient :: IO Client
+newClient = do
+  randId            <- nextRandom
+  (inChan, outChan) <- Unagi.newChan 1000 
+  return (Client randId inChan outChan)
 
-newClient :: ClientId -> STM Client
-newClient name  = do
-    broadcastChan <- newTVar M.empty
-    kicked        <- newTVar Nothing
-    return Client
-        { clientName    = name
-        , clientKicked  = kicked
-        , clientChans   = broadcastChan
-        }
+newServer :: Connection -> IO Server
+newServer conn = atomically $ Server conn <$> newTVar M.empty 
 
--- Chat channel datatype, not to be confused with a TChan.
-data Channel = Channel
-    { channelId            :: ChannelSlug
-    , channelClients       :: TVar (S.Set ClientId)
-    , channelBroadcastChan :: TChan RtmEvent
-    }
-
-newChannel :: ChannelSlug -> STM Channel
-newChannel name = Channel name <$> newTVar S.empty <*> newBroadcastTChan
-
--- Send a Notice to the channel.
-chanNotify :: Channel -> RtmEvent -> STM ()
-chanNotify = chanMessage
-
--- Send a Message to the channel.
-chanMessage :: Channel -> RtmEvent -> STM ()
-chanMessage = writeTChan . channelBroadcastChan
-
--- Notify the channel a client has connected.
-chanNotifyHasConnected :: Channel -> ClientId -> STM ()
-chanNotifyHasConnected chan name = chanNotify chan RtmHello
-
-data Server = Server
-    { serverChannels       :: TVar (Map ChannelSlug Channel)
-    , serverClients        :: TVar (Map ClientId Client)
-    , serverSubscriptions  :: TVar PubSub
-    }
-
-newServer :: IO Server
-newServer = atomically $ Server <$> newTVar M.empty <*> newTVar M.empty <*> newTVar mempty
-
-lookupOrCreateChannel :: Connection -> Server -> ChannelSlug -> IO Channel
-lookupOrCreateChannel conn server@Server{..} name = do
-      channel <- atomically $ lookupChannel server name
-      let pubSubChan = chanId2Bs name
-      case channel of
-        Nothing -> do
-          newServerChan <- atomically $ do
-              chan <- newChannel name
-              modifyTVar serverChannels . M.insert name $ chan
-              return chan
-          void $ forkIO $ runRedis conn (pubSub (subscribe [pubSubChan]) (messageCallback server))
-          return newServerChan
-        Just chan -> return chan
+subscribe :: NonEmpty ChannelSlug -> Client -> Server -> IO () 
+subscribe chans client@Client{..} server@Server{..} = do 
+  newSubs <- (\ c -> filter (`Map.notMember` c) (toList chans)) <$> atomically (readTVar serverClients)
+  atomically $ modifyTVar serverClients (\mMap -> foldl' (\m c -> 
+      case Map.lookup c m of  
+        Nothing -> Map.insert c (Set.singleton client) m 
+        Just clients -> Map.update (Just . Set.insert client) c m) mMap chans)
+  void $ forkIO $ runRedis serverConnection (pubSub (Redis.subscribe (chanId2Bs <$> newSubs)) (messageCallback server))
+  
+readMessage :: Client -> IO RtmEvent  
+readMessage client@Client{..} = Unagi.readChan clientOutChan
 
 messageCallback :: Server -> Redis.Message -> IO PubSub
-messageCallback server@Server{..} msg = 
-  atomically $ do
-    channel <- lookupChannel server (ChannelSlug $ decodeUtf8 $ msgChannel msg)
-    case channel of
-      Just chan -> do
-        let broadcastMsg = Aeson.eitherDecode (LC8.fromStrict $ msgMessage msg) :: Either String RtmEvent
-        case broadcastMsg of
-          Right bMsg -> writeTChan (channelBroadcastChan chan) bMsg
-          Left err   -> return ()
-      Nothing -> return ()
-    return mempty
+messageCallback server@Server{..} msg = do
+  let slug = ChannelSlug $ decodeUtf8 (msgChannel msg)
+  inChans <- fmap clientInChan <$> lookupSubscribers slug server
+  unless (null inChans)
+        (case Aeson.eitherDecode (LC8.fromStrict $ msgMessage msg) :: Either String RtmEvent of
+          Right broadcastMsg -> forM_ inChans (`Unagi.writeChan` broadcastMsg)
+          Left _  -> return ())
+  return mempty
+  
+lookupSubscribers :: ChannelSlug -> Server -> IO [Client]
+lookupSubscribers chanSlug server@Server{..} = do 
+  clientMap <- atomically $ readTVar serverClients
+  (return . maybe [] Set.toList) (Map.lookup chanSlug clientMap)
+  
+broadcastEvent :: ChannelSlug -> RtmEvent -> Server -> IO (Either Reply Integer)
+broadcastEvent chanId event server@Server{..} = runRedis serverConnection $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
 
-broadcastEvent :: ChannelSlug -> RtmEvent -> RedisAction Integer
-broadcastEvent chanId event = ExceptT $ ReaderT $ \conn -> runRedis conn $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
-
-lookupClient :: Server -> ClientId -> STM (Maybe Client)
-lookupClient Server{..} name = M.lookup name <$> readTVar serverClients
+notifyChannelJoin :: ChannelSlug -> User -> Server -> IO (Either Reply Integer)
+notifyChannelJoin slug user server@Server{..} = do 
+  now <- getCurrentTime
+  runRedis serverConnection $ publish (chanId2Bs slug) (BL.toStrict $ Aeson.encode (RtmChannelJoin (ChannelJoin (Types.ChannelSlug $ unSlug slug) user now)))
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
 chanId2Bs = encodeUtf8 . unSlug
-
-lookupChannel :: Server -> ChannelSlug -> STM (Maybe Channel)
-lookupChannel Server{..} name = M.lookup name <$> readTVar serverChannels
-
-tryAddClient :: Server -> ClientId  -> IO (Maybe Client)
-tryAddClient server@Server{..} name = atomically $ do
-    clients <- readTVar serverClients
-    if M.member name clients
-        then return Nothing
-        else do
-            client <- newClient name
-            writeTVar serverClients $ M.insert name client clients
-            return (Just client)
-
-chanAddClient :: JoinReason -> Channel -> ClientId -> STM ()
-chanAddClient JoinReasonJoined    = chanAddClient' chanNotifyHasJoined
-chanAddClient JoinReasonConnected = chanAddClient' chanNotifyHasConnected
-
-chanAddClient' :: (Channel -> ClientId -> STM ()) -> Channel -> ClientId -> STM ()
-chanAddClient' notifyAction chan@Channel{..} name = do
-    notifyAction chan name
-    modifyTVar channelClients . S.insert $ name
-
--- Notify the channel a client has left.
-chanNotifyHasLeft :: Channel -> ClientId -> STM ()
-chanNotifyHasLeft chan name = chanNotify chan RtmHello
-
--- Notify the channel a client has disconnected.
-chanNotifyHasDisconnected :: Channel -> ClientId -> STM ()
-chanNotifyHasDisconnected chan name = chanNotify chan RtmHello
-
--- Notify the channel a client has joined.
-chanNotifyHasJoined :: Channel -> ClientId -> STM ()
-chanNotifyHasJoined chan name = chanNotify chan RtmHello

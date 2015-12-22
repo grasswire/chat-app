@@ -4,23 +4,21 @@ module Handler.Home where
 
 import           DataStore
 import           Taplike.Schema
-import qualified Types as TP
+import qualified Types                as TP
 import           Model.Instances      ()
 
-import           Yesod.Core.Types (loggerPutStr)
-import           Import hiding (toLower)
+import           Import
 import           Database.Persist.Sql (rawSql)
 import           Data.Time.Clock
 import qualified Database.Esqueleto   as E
-import           Database.Esqueleto   ((==.), (^.), (>=.), (&&.), val)
+import           Database.Esqueleto   ((^.), val)
 
 getHomeR :: Handler Html
 getHomeR = do
     authId <- maybeAuthId
     app <- getYesod
     $(logInfo) "getHomeR"
-    -- liftIO $ loggerPutStr (appLogger app) "getHomeR"
-    let signature = "home" :: String
+    let signature   = "home" :: String
         modalCreate = $(widgetFile "partials/modals/create")
     timeNow <- liftIO getCurrentTime
     (topChannels, allChannels) <- do
@@ -30,7 +28,7 @@ getHomeR = do
         let zipped = case presences of
                       Right ps -> chanEntities `zip` ps
                       Left _   -> chanEntities `zip` replicate (length chanEntities) (TP.NumberUsersPresent 0)
-        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ uncurry chanFromEntity <$> zipped
+        return $ splitAt 9 $ sortBy (flip compare `on` TP.channelNumUsersPresent ) $ flip (uncurry chanFromEntity) [] <$> zipped
 
     defaultLayout $ do
       setTitle "Taplike / Home"

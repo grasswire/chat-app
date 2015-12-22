@@ -29,6 +29,7 @@ library
                      Handler.Home
                      Handler.Channel
                      Server
+                     Queries 
                      Taplike.Shared
                      Taplike.TextShowOrphans
                      Taplike.Schema
@@ -137,7 +138,7 @@ library
                  , wai-cors
                  , random 
                  , errors
-
+                 , unagi-chan
 
 executable         chat-app
     if flag(library-only)

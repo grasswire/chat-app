@@ -7,7 +7,6 @@ import qualified Server as S
 import qualified Types as TP
 import Model.Instances ()
 import Taplike.Schema
-import DataStore
 import Control.Concurrent (forkIO)
 import           Database.Persist.Sql (fromSqlKey)
 
@@ -30,16 +29,11 @@ postMessageLikeR =  do
           MessageLike (MessageUUID msgId) userId (ChannelSlug channelSlug)
 
         broadcastLikeAdded :: App -> UserId -> TP.NewMessageLike -> Handler ()
-        broadcastLikeAdded (App { redisConn }) userId msgLike = do
+        broadcastLikeAdded app@App{ .. } userId msgLike = do
           channel <- runDB (getBy $ UniqueChannelSlug (ChannelSlug $ TP.unChannelSlug $ TP.newMessageLikeChannel msgLike))
           case channel of 
-            Just chan -> liftIO . void . runRedisAction redisConn $ 
-              S.broadcastEvent (channelCrSlug $ entityVal chan) 
-                             (TP.RtmMessageLikeAdded 
-                               (TP.MessageLikeAdded (TP.UserId $ fromSqlKey userId) 
-                               (TP.unMessageId $ TP.newMessageLikeMessageId msgLike)))
+            Just chan -> liftIO . void $ S.broadcastEvent (channelCrSlug $ entityVal chan) 
+                                        (TP.RtmMessageLikeAdded 
+                                        (TP.MessageLikeAdded (TP.UserId $ fromSqlKey userId) 
+                                        (TP.unMessageId $ TP.newMessageLikeMessageId msgLike))) chatServer
             Nothing   -> return ()
-
-
-
-
