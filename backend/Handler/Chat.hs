@@ -68,7 +68,6 @@ getChatR slug = do
             chanSlug = channelCrSlug room
         chatSettings <- case chatUser of 
           Just user -> do 
-            -- joined <- isLeft <$> addMember (entityKey c) (entityKey user)
             usersChans <- runDB (usersChannels (entityKey user))
             unless (any (\chan -> channelCrSlug (entityVal chan) == chanSlug) usersChans) (void $ addMember (entityKey c) (entityKey user) >>  
               liftIO (void (S.notifyChannelJoin chanSlug (userFromEntity user TP.PresenceActive) (chatServer app))))
@@ -96,9 +95,6 @@ socketsApp exceptionHandler settings =
     outbound readMessages = forever $ liftIO readMessages >>= sendTextData
     inbound app@App{..} user = do
       let wasSeen =  liftIO getCurrentTime >>= \now -> void $ runDB (update (entityKey user) [UserLastSeen =. now])
-       
-      liftIO $ void $ S.broadcastEvent (ChannelSlug "haskell")
-                      (TP.RtmPresenceChange (TP.PresenceChange (userFromEntity user TP.PresenceActive) TP.PresenceActive)) chatServer
       
       lift wasSeen
       
