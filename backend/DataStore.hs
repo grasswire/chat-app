@@ -17,6 +17,9 @@ import qualified Types as TP
 import           Control.Monad.Trans.Except
 import qualified Data.ByteString.Char8 as C8
 import           Taplike.Schema (ChannelSlug, unSlug)
+import Data.Typeable
+import Control.Monad.Catch 
+import Control.Monad.IO.Class
 
 type RedisAction a = ExceptT Reply (ReaderT Connection IO) a
 
@@ -38,21 +41,43 @@ numUsersPresent key = listToMaybe <$> getPresenceForChannels [key]
 toUsersPresent :: Double -> TP.NumberUsersPresent
 toUsersPresent = TP.NumberUsersPresent . fromIntegral . round
 
-setChannelPresence :: Integer -> ChannelSlug -> RedisAction Integer
-setChannelPresence score channelId = withRedisExcept $ \conn -> do
+-- setChannelPresence :: Integer -> ChannelSlug -> RedisAction Integer
+-- setChannelPresence score channelId = withRedisExcept $ \conn -> do
+--   let key = channelPresenceKey channelId
+--   runRedis conn $ do
+--     currentPresence <- hget channelPresenceSetKey key
+--     case currentPresence of 
+--       Left err -> pure $ Left err
+--       Right x -> 
+--         case x of 
+--           Just p -> do
+--             let maybeInteger = fst <$> C8.readInteger p
+--             case maybeInteger of 
+--               Just i -> hincrby channelPresenceSetKey key (score - i)
+--               _ -> pure $ Left (Error $ C8.pack "could not parse hash field as an integer")
+--           _ -> pure $ Left (Error $ C8.pack "received Nothing for hash field")    
+
+data RedisException = RedisException String 
+    deriving (Show, Typeable)
+
+instance Exception RedisException
+
+setChannelPresence :: (MonadIO m, MonadThrow m) => Integer -> ChannelSlug -> ReaderT Connection m Integer
+setChannelPresence score channelId = do
   let key = channelPresenceKey channelId
-  runRedis conn $ do
-    currentPresence <- hget channelPresenceSetKey key
-    case currentPresence of 
-      Left err -> pure $ Left err
-      Right x -> 
-        case x of 
-          Just p -> do
-            let maybeInteger = fst <$> C8.readInteger p
-            case maybeInteger of 
-              Just i -> hincrby channelPresenceSetKey key (score - i)
-              _ -> pure $ Left (Error $ C8.pack "could not parse hash field as an integer")
-          _ -> pure $ Left (Error $ C8.pack "received Nothing for hash field")    
+  conn <- ask
+  currentPresence <- liftIO $ runRedis conn (hget channelPresenceSetKey key)
+  case currentPresence of 
+    Left e -> throwM (RedisException $ show e)
+    Right x -> case x of
+      Nothing -> throwM (RedisException "received Nothing for hash field")
+      Just p -> do 
+        let maybeInteger = fst <$> C8.readInteger p
+        case maybeInteger of 
+          Just i -> do 
+            result <- liftIO $ runRedis conn (hincrby channelPresenceSetKey key (score - i))
+            either (throwM . RedisException . show) return result
+          Nothing -> throwM (RedisException "could not parse hash field as an integer")  
               
 incrChannelPresence :: ChannelSlug -> RedisAction Integer
 incrChannelPresence channelId = withRedisExcept $ \conn -> do

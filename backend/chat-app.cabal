@@ -139,6 +139,7 @@ library
                  , random 
                  , errors
                  , unagi-chan
+                 , exceptions
 
 executable         chat-app
     if flag(library-only)

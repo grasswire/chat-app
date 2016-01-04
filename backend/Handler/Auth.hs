@@ -66,19 +66,16 @@ getTwitterCallbackR = do
    modalParam     <- lookupGetParam "modal"
    redirectParam  <- lookupGetParam "redirect_url"
    let tokenStore = twitterTokenStore app
-   let conf = twitterConf . appSettings $ app
-   let params = if isJust modalParam then createRoomModalParams else []
+       conf = twitterConf . appSettings $ app
+       params = if isJust modalParam then createRoomModalParams else []
    renderFunc <- getUrlRenderParams
    let callback = renderFunc TwitterCallbackR params
-   let homeR = renderFunc HomeR params
-   let tokens = getRequestToken callback conf
-   mcred <- case temporaryToken of
-              Just t -> liftIO $ takeCredential (encodeUtf8 t) tokenStore
-              Nothing -> return Nothing
+       homeR = renderFunc HomeR params
+       tokens = getRequestToken callback conf
+   mcred <- maybe (return Nothing) (liftIO . (flip takeCredential) tokenStore . encodeUtf8) temporaryToken
    case (mcred, oauthVerifier) of
     (Just cred, Just authVer) -> do
-          accessTokens <- liftIO $ OA.getAccessToken tokens 
-                                   (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
+          accessTokens <- liftIO $ OA.getAccessToken tokens (OA.insert "oauth_verifier" (encodeUtf8 authVer) cred) (appHttpManager app)
           let token = getRequestToken callback conf
           manager <- appHttpManager <$> getYesod
           user <- liftIO $ verifyTwitterCreds manager (mkTwitterInfo token accessTokens)

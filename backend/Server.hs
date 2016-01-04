@@ -61,49 +61,52 @@ instance Eq Client where
 instance Ord Client where 
   compare c1 c2 = clientId c1 `compare` clientId c2
   
-newClient :: IO Client
+newClient :: MonadIO m => m Client
 newClient = do
-  randId            <- nextRandom
-  (inChan, outChan) <- Unagi.newChan 1000 
+  randId            <- liftIO nextRandom
+  (inChan, outChan) <- liftIO (Unagi.newChan 1000)
   return (Client randId inChan outChan)
 
-newServer :: Connection -> IO Server
-newServer conn = atomically $ Server conn <$> newTVar M.empty 
+newServer :: MonadIO m => Connection -> m Server
+newServer conn = liftIO (atomically $ Server conn <$> newTVar M.empty)
 
-subscribe :: NonEmpty ChannelSlug -> Client -> Server -> IO () 
+subscribe :: MonadIO m => NonEmpty ChannelSlug -> Client -> Server -> m () 
 subscribe chans client@Client{..} server@Server{..} = do 
-  newSubs <- (\ c -> filter (`Map.notMember` c) (toList chans)) <$> atomically (readTVar serverClients)
-  atomically $ modifyTVar serverClients (\mMap -> foldl' (\m c -> 
+  newSubs <- (\c -> filter (`Map.notMember` c) (toList chans)) <$> liftIO (atomically (readTVar serverClients))
+  liftIO (atomically $ modifyTVar serverClients (\mMap -> foldl' (\m c -> 
       case Map.lookup c m of  
-        Nothing -> Map.insert c (Set.singleton client) m 
-        Just clients -> Map.update (Just . Set.insert client) c m) mMap chans)
-  void $ forkIO $ runRedis serverConnection (pubSub (Redis.subscribe (chanId2Bs <$> newSubs)) (messageCallback server))
+        Nothing      -> Map.insert c (Set.singleton client) m 
+        Just clients -> Map.update (Just . Set.insert client) c m) mMap chans))
+  liftIO (void $ forkIO $ runRedis serverConnection (pubSub (Redis.subscribe (chanId2Bs <$> newSubs)) (messageCallback server)))
   
-readMessage :: Client -> IO RtmEvent  
-readMessage client@Client{..} = Unagi.readChan clientOutChan
+readMessage :: MonadIO m => Client -> m RtmEvent  
+readMessage client@Client{..} = liftIO $ Unagi.readChan clientOutChan
 
-messageCallback :: Server -> Redis.Message -> IO PubSub
+messageCallback :: MonadIO m => Server -> Redis.Message -> m PubSub
 messageCallback server@Server{..} msg = do
   let slug = ChannelSlug $ decodeUtf8 (msgChannel msg)
   inChans <- fmap clientInChan <$> lookupSubscribers slug server
   unless (null inChans)
         (case Aeson.eitherDecode (LC8.fromStrict $ msgMessage msg) :: Either String RtmEvent of
-          Right broadcastMsg -> forM_ inChans (`Unagi.writeChan` broadcastMsg)
-          Left _  -> return ())
+          Right broadcastMsg -> liftIO $ forM_ inChans (`Unagi.writeChan` broadcastMsg)
+          Left _             -> return ())
   return mempty
   
-lookupSubscribers :: ChannelSlug -> Server -> IO [Client]
+lookupSubscribers :: MonadIO m => ChannelSlug -> Server -> m [Client]
 lookupSubscribers chanSlug server@Server{..} = do 
   clientMap <- atomically $ readTVar serverClients
   (return . maybe [] Set.toList) (Map.lookup chanSlug clientMap)
   
-broadcastEvent :: ChannelSlug -> RtmEvent -> Server -> IO (Either Reply Integer)
-broadcastEvent chanId event server@Server{..} = runRedis serverConnection $ publish (chanId2Bs chanId) (BL.toStrict $ Aeson.encode event)
+broadcastEvent :: MonadIO m => ChannelSlug -> RtmEvent -> Server -> m (Either Reply Integer)
+broadcastEvent chanId event server@Server{..} = liftIO $ runRedis serverConnection $ publish (chanId2Bs chanId) 
+                                                                                     (BL.toStrict $ Aeson.encode event)
 
-notifyChannelJoin :: ChannelSlug -> User -> Server -> IO (Either Reply Integer)
+notifyChannelJoin :: MonadIO m => ChannelSlug -> User -> Server -> m (Either Reply Integer)
 notifyChannelJoin slug user server@Server{..} = do 
-  now <- getCurrentTime
-  runRedis serverConnection $ publish (chanId2Bs slug) (BL.toStrict $ Aeson.encode (RtmChannelJoin (ChannelJoin (Types.ChannelSlug $ unSlug slug) user now)))
+  now <- liftIO getCurrentTime
+  liftIO $ runRedis serverConnection $ publish (chanId2Bs slug) 
+                                       (BL.toStrict $ Aeson.encode 
+                                       (RtmChannelJoin (ChannelJoin (Types.ChannelSlug $ unSlug slug) user now)))
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
 chanId2Bs = encodeUtf8 . unSlug

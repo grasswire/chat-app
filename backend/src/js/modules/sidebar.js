@@ -38,6 +38,11 @@ App.Modules.Sidebar = function () {
          $(".js-sidebar-toggler").trigger("click");
       }
    };
+   
+   var $channelsItems = $('.js-channel_list_item').click(function(){
+     $channelsItems.css("font-weight", "normal");
+     $(this).css( "font-weight", "bold" );
+   })
 
 
    return {
