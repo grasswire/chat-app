@@ -40,8 +40,8 @@ App.Modules.Sidebar = function () {
    };
    
    var $channelsItems = $('.js-channel_list_item').click(function(){
-     $channelsItems.css("font-weight", "normal");
-     $(this).css( "font-weight", "bold" );
+     $channelsItems.removeClass("room__channel-selected");
+     $(this).addClass( "room__channel-selected" );
    })
 
 

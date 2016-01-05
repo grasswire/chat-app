@@ -21,13 +21,13 @@
         <h2>Join a live community or start your own
         <p>
           $maybe userId <- authId
-            <a href="#" class="js-trigger-modal button" data-modal-trigger="create">Create a Room
+            <a href="#" class="js-trigger-modal button" data-modal-trigger="create">Create a Channel
           $nothing
-            <a href="@{TwitterAuthR}?modal=create" class="button">Create a Room
+            <a href="@{TwitterAuthR}?modal=create" class="button">Create a Channel
 
   <main>
     <div class="content-container">
-      <h3 class="page__headline">Trending Chats
+      <h3 class="page__headline">Trending Channels
       <div class="card__container">
         $forall channel <- topChannels
           <a class="card" style="background: #{TP.unChannelColor $ TP.channelColor channel} ;" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">
@@ -38,7 +38,7 @@
             <p class="card__text">#{TP.unChannelTopic $ TP.channelTopic channel}
     <div class="page__secondary">
       <div class="content-container">
-        <h3 class="page__headline">All Chats
+        <h3 class="page__headline">All Channels
         <div class="card__container">
           $forall channel <- allChannels
             <a class="card--listing" href="@{ChatR $ (ChannelSlug (TP.unChannelSlug $ TP.channelChannelSlug channel))}">

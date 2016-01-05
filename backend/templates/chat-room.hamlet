@@ -10,18 +10,36 @@
           <p>
             <a href="#" class="js-dropdown-button" data-dropdown-name="notification">
               <img src="@{StaticR images_avatar_png}" class="js-avatar avatar">
-      <section class="room__likes">
-        <div class="js-room-likes">
+      
+      <section class="room__channels-container js-room-likes">
+        <h3 class="room__channel-heading">My Channels
       $case chatSettings
         $of AnonymousSettings anonymousChat
             <p>you're anonymous
         $of LoggedInSettings loggedInChat
-            <ul class="js-channel_list">
+            <ul class="js-channel_list room__channel-list">
                 $forall channel <- loggedInChatChannels loggedInChat
                   $if (channelTitle (entityVal channel) == channelTitle room)
-                    <li class="js-channel_list_item" data-channel="#{unSlug (channelCrSlug (entityVal channel))}" style="color:white;font-size:20px;font-weight:bold;cursor:pointer;">#{channelTitle (entityVal channel)}
+                    <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
                   $else
-                    <li class="js-channel_list_item" data-channel="#{unSlug (channelCrSlug (entityVal channel))}" style="color:white;font-size:20px;cursor:pointer;">#{channelTitle (entityVal channel)}
+                    <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
+
+          <hr class="room__divider-line">
+
+      <section class="room__channels-container-2">
+        <h3 class="room__channel-heading">Favorite Channels
+        $case chatSettings
+          $of AnonymousSettings anonymousChat
+              <p>you're anonymous
+          $of LoggedInSettings loggedInChat
+              <ul class="js-channel_list room__channel-list-2">
+                  $forall channel <- loggedInChatChannels loggedInChat
+                    $if (channelTitle (entityVal channel) == channelTitle room)
+                      <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
+                    $else
+                      <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
+
+
     <main class="room__chat">
       <header class="room__details-bar">
         <div class="room__description">

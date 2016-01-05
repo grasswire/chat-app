@@ -8,9 +8,58 @@
       width: 30%;
    }
 
-   &__likes {
+   &__channels-container {
+      margin: 0;
       margin-top: $masthead-height;
-      padding: 20px 30px;
+      padding: 15px 30px 0px 30px;
+   }
+
+   &__channels-container-2 {
+      margin: 0;
+      margin-top: 30px;
+      padding: 0px 30px 0px 30px;
+   }
+
+   &__channel-heading {
+      margin: 0;
+      padding: 0 0 0 0;
+      @include font-size(16px);
+      font-weight: get-font-weight(bold);
+      color: get-color(white);
+   }
+
+   &__channel-list {
+      list-style: none;
+      @include font-size(15px);
+      padding: 0 30px;
+      margin: 0;
+      font-weight: get-font-weight(semi-bold);
+   }
+
+   &__channel-list-2 {
+      list-style: none;
+      @include font-size(15px);
+      padding: 0;
+      margin: 0;
+      font-weight: get-font-weight(semi-bold);
+   }
+
+   &__channel {
+      color: darken(get-color(white), 45%);
+      cursor: pointer;
+   }
+
+   &__channel-selected {
+      color: get-color(ddd);
+      font-weight: get-font-weight(bold);
+   }
+
+   &__divider-line {
+      display: block;
+      border: 0;
+      border-top: 1px solid darken(get-color(white), 45%);
+      height: 1px;
+      margin: 30px 30px;
    }
 
    &__masthead {

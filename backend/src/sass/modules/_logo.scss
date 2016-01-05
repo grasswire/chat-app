@@ -2,12 +2,13 @@
    @include font-size(30px);
    font-family: get-stack(sans-serif);
    text-decoration: none;
-   padding: 0 10px;
+   padding: 0;
 
 
    &--light {
       @extend .logo;
       color: get-color(white);
+
    }
 
    &--dark {
