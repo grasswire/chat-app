@@ -51,8 +51,12 @@
           <a href="#" class="button">Load More
   <footer class="standard-page__footer">
     <div class="content-container">
-      <a href="/" class="logo--small-dark">Tap
-        <strong>Like
+      <ul class="footer__links-list">
+        <li class="footer__link"><a href="/" class="logo--small-dark">Tap
+         <strong>Like
+        <li class="footer__link"><a href="mailto:austen.allred@gmail.com"> Contact us
+        <li class="footer__link"><a href="http://google.com">Google
+        <a href="#" class="js-trigger-modal" data-modal-trigger="signup">Signup
 
 
   ^{modalCreate}
