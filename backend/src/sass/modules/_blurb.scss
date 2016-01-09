@@ -53,6 +53,9 @@
       padding-right: 10px;
       display: none;
 
+      &:hover {
+         color: get-color(persimmon);
+   }
 
       &--liked {
          @extend .blurb__like-button;
@@ -82,11 +85,32 @@
 
             &:hover {
             background-color: #f9f9f9;
+               .blurb__info {
+                  display: flex;
+               }
             }
 
          }
 
-         
+         &__info {
+            float: left;
+            left: 0px;
+            margin-left: -20px;
+            display: none;
+      
+         }
+
+         &__timestamp {
+            padding: 0;
+            margin-left: -10px;
+         }    
+
+         &__like-button {
+            display:inline-block;
+            padding: 0;
+            float: left;
+            margin-left: 10px;
+         } 
 
          &__text {
             @extend .blurb__text;

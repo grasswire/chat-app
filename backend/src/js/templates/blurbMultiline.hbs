@@ -1,6 +1,10 @@
 <div class="js-blurb blurb--multiline" data-message-id="{{ this.messageId }}" data-user-id="{{this.user.id}}">
    <div class="blurb__content">
-      <p class="blurb__text">
+   	<div class="blurb__info">
+         <a href="#"><span class="blurb__timestamp">{{this.timestamp}}</span></a>
+         <a class="blurb__like-button js-like" href="#" title=""><span class="fa fa-heart-o"></span></a>
+	</div>
+   	 <p class="blurb__text">
          {{this.text}}
       </p>
    </div>
