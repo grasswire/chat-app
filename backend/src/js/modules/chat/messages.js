@@ -9,9 +9,6 @@ App.Modules.Messages = function () {
             message: messageEvent
          });
       };
-        //  $('.js-channel_list_item').click(function(){
-        //    alert('you clicked a channel!')
-        //  })
    };
 
    var sendMessage = function(data) {
