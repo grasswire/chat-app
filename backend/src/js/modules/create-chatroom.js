@@ -4,11 +4,12 @@ App.Modules.CreateChatroom = function () {
    var o = { };
 
    var createNewRoom = function() {
+     console.log($('.js-create-color.js-color-selected').data('color').toString())
       AjaxRoute.as("post")
          .to(App.routes.newChat, {
             title: $('.js-create-title-input').val(),
             topic: $('.js-create-description-input').val(),
-            color: $('.js-create-color.js-color-selected').data('color')
+            color: $('.js-create-color.js-color-selected').data('color').toString()
          })
          .on({
             success: redirectToRoom,
