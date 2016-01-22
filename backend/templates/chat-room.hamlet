@@ -20,9 +20,9 @@
             <ul class="js-channel_list room__channel-list">
                 $forall channel <- loggedInChatChannels loggedInChat
                   $if (channelTitle (entityVal channel) == channelTitle room)
-                    <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
+                    <li class="js-channel_list_item room__channel room__channel-selected" data-channel-title="#{channelTitle (entityVal channel)}" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
                   $else
-                    <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
+                    <li class="js-channel_list_item room__channel" data-channel-title="#{channelTitle (entityVal channel)}" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
     <main class="room__chat">
       <header class="room__details-bar">
         <div class="room__description">

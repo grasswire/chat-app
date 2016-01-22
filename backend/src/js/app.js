@@ -1,5 +1,6 @@
 (function() {
    var App = {
+      channels: { },
       routes: { },
       data: { },
       socket: null,

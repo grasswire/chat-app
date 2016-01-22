@@ -42,6 +42,7 @@ App.Modules.Sidebar = function () {
    var $channelsItems = $('.js-channel_list_item').click(function(){
      $channelsItems.removeClass("room__channel-selected");
      $(this).addClass( "room__channel-selected" );
+     window.history.pushState("object or string", $(this).attr('data-channel-title'), "/room/" + $(this).attr('data-channel'));
    })
 
 

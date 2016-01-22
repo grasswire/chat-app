@@ -2,3 +2,5 @@ App.routes.chatRoom    = "@{ChatR slug}";
 App.routes.rtmStartUrl = "#{rawJS rtmStartUrl}";
 App.routes.likes = "@{MessageLikeR}";
 App.routes.channelLikes = "@{ChannelLikesR}";
+App.channels.current = "#{rawJS (unSlug (channelCrSlug room))}";
+console.log(App.channels.current)
