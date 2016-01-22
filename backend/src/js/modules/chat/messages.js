@@ -11,21 +11,19 @@ App.Modules.Messages = function () {
       });
     };
     
-    trackMessagesByChannel(response)
-    handleChannelSwitch()
+    trackMessagesByChannel(response);
+    handleChannelSwitch();
   };
   
   var trackMessagesByChannel = function(rtmStart) {
-    // console.log(rtmStart);
     var channels = rtmStart.channels;
-    // console.log(channels);
-      App.channels.myChannels = _.map(channels, function(channel) { 
-        return { 
-          channelId: channel.slug, 
-          channelMessages: [],
-          channelMembers: channel.members
-        } 
-      });
+    App.channels.myChannels = _.map(channels, function(channel) { 
+      return { 
+        channelId: channel.slug, 
+        channelMessages: [],
+        channelMembers: channel.members
+      } 
+    });
   };
   
   var handleChannelSwitch = function() {
@@ -34,8 +32,7 @@ App.Modules.Messages = function () {
       messageDisplay.empty();
       var currentChannel = $(this).attr("data-channel")
       App.data.slug = currentChannel;
-      App.channels.current = currentChannel; //  = $(this).attr("data-channel")
-      // console.log("channel is set to " + App.channels.current + " now")            
+      App.channels.current = currentChannel; 
     })
   }
   
