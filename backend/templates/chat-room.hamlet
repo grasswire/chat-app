@@ -23,23 +23,6 @@
                     <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
                   $else
                     <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
-
-          <hr class="room__divider-line">
-
-      <section class="room__channels-container-2">
-        <h3 class="room__channel-heading">Favorite Channels
-        $case chatSettings
-          $of AnonymousSettings anonymousChat
-              <p>you're anonymous
-          $of LoggedInSettings loggedInChat
-              <ul class="js-channel_list room__channel-list-2">
-                  $forall channel <- loggedInChatChannels loggedInChat
-                    $if (channelTitle (entityVal channel) == channelTitle room)
-                      <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
-                    $else
-                      <li class="js-channel_list_item room__channel" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
-
-
     <main class="room__chat">
       <header class="room__details-bar">
         <div class="room__description">
