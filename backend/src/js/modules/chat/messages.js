@@ -19,7 +19,7 @@ App.Modules.Messages = function () {
     var channels = rtmStart.channels;
     App.channels.myChannels = _.map(channels, function(channel) { 
       return { 
-        channelId: channel.slug, 
+        channelId: channel.slug,
         channelMessages: [],
         channelMembers: channel.members
       } 

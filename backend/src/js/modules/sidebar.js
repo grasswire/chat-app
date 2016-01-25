@@ -43,6 +43,7 @@ App.Modules.Sidebar = function () {
      $channelsItems.removeClass("room__channel-selected");
      $(this).addClass( "room__channel-selected" );
      window.history.pushState("object or string", $(this).attr('data-channel-title'), "/room/" + $(this).attr('data-channel'));
+     $("#realtime__input").focus();
    })
 
 
