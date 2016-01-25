@@ -9,7 +9,7 @@ import qualified Server as S
 import qualified Data.Text as T
 import           Types (RtmEvent(..), IncomingMessage(..), ChannelCreatedRp(..), ReplyOk(..))
 import           Taplike.Shared (userFromEntity)
-import           Database.Persist.Sql (fromSqlKey)
+import           Database.Persist.Sql (fromSqlKey, toSqlKey)
 import           Taplike.Schema
 import           Data.Char (toLower)
 import           Data.Text.ICU.Replace
@@ -110,10 +110,10 @@ socketsApp exceptionHandler settings =
             ts <- liftIO getCurrentTime
             let processedMsg = processMessage (entityKey user) inEvent ts
             case processedMsg of 
-              Just event -> do 
-                _ <- liftIO . void $ S.broadcastEvent (NonEmpty.head $ settingsSlugs settings) event chatServer
+              Just event@(RtmMessage message) -> do 
+                _ <- liftIO . void $ S.broadcastEvent (ChannelSlug $ TP.messageChannel message) event chatServer
                 persistEvent (entityKey user) event
-              Nothing    -> return ()
+              _    -> return ()
           pure ()
 
     persistEvent :: UserId -> RtmEvent -> Handler ()

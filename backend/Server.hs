@@ -11,6 +11,7 @@ module Server
   , readMessage 
   , newServer
   , notifyChannelJoin
+  , subscribeToMessages
   ) where
 
 import           ClassyPrelude hiding ((<>))
@@ -33,6 +34,8 @@ import           Data.UUID.V4 (nextRandom)
 import           Data.UUID (UUID)
 import qualified Data.Map.Strict as Map
 import qualified Data.Map as M
+import Data.Monoid ((<>))
+import qualified Data.Text as T
 
 type ClientId = UUID
 
@@ -77,20 +80,32 @@ subscribe chans client@Client{..} server@Server{..} = do
       case Map.lookup c m of  
         Nothing      -> Map.insert c (Set.singleton client) m 
         Just clients -> Map.update (Just . Set.insert client) c m) mMap chans))
-  liftIO (void $ forkIO $ runRedis serverConnection (pubSub (Redis.subscribe (chanId2Bs <$> newSubs)) (messageCallback server)))
+          
+subscribeToMessages :: MonadIO m => Server -> m ()
+subscribeToMessages server@Server{..} = 
+  liftIO (void $ forkIO $ runRedis serverConnection (pubSub (Redis.psubscribe [encodeUtf8 "channel_*"]) (messageCallback server)))
+
   
 readMessage :: MonadIO m => Client -> m RtmEvent  
 readMessage client@Client{..} = liftIO $ Unagi.readChan clientOutChan
 
 messageCallback :: MonadIO m => Server -> Redis.Message -> m PubSub
 messageCallback server@Server{..} msg = do
-  let slug = ChannelSlug $ decodeUtf8 (msgChannel msg)
-  inChans <- fmap clientInChan <$> lookupSubscribers slug server
-  unless (null inChans)
-        (case Aeson.eitherDecode (LC8.fromStrict $ msgMessage msg) :: Either String RtmEvent of
-          Right broadcastMsg -> liftIO $ forM_ inChans (`Unagi.writeChan` broadcastMsg)
-          Left _             -> return ())
-  return mempty
+  case msg of 
+      PMessage pattern chan pMessage -> do
+        liftIO (print (decodeUtf8 chan))
+        case T.split (== '_') (decodeUtf8 chan) of 
+          (_:x:_) -> do
+            let slug = ChannelSlug x
+            inChans <- fmap clientInChan <$> lookupSubscribers slug server
+            unless (null inChans)
+                  (case Aeson.eitherDecode (LC8.fromStrict $ pMessage) :: Either String RtmEvent of
+                    Right broadcastMsg -> liftIO $ forM_ inChans (`Unagi.writeChan` broadcastMsg)
+                    Left _             -> return ())
+          _ -> return ()
+        return mempty
+      _                         -> return mempty 
+
   
 lookupSubscribers :: MonadIO m => ChannelSlug -> Server -> m [Client]
 lookupSubscribers chanSlug server@Server{..} = do 
@@ -98,7 +113,7 @@ lookupSubscribers chanSlug server@Server{..} = do
   (return . maybe [] Set.toList) (Map.lookup chanSlug clientMap)
   
 broadcastEvent :: MonadIO m => ChannelSlug -> RtmEvent -> Server -> m (Either Reply Integer)
-broadcastEvent chanId event server@Server{..} = liftIO $ runRedis serverConnection $ publish (chanId2Bs chanId) 
+broadcastEvent chanId event server@Server{..} = liftIO $ runRedis serverConnection $ publish (channelPattern <> chanId2Bs chanId) 
                                                                                      (BL.toStrict $ Aeson.encode event)
 
 notifyChannelJoin :: MonadIO m => ChannelSlug -> User -> Server -> m (Either Reply Integer)
@@ -107,6 +122,9 @@ notifyChannelJoin slug user server@Server{..} = do
   liftIO $ runRedis serverConnection $ publish (chanId2Bs slug) 
                                        (BL.toStrict $ Aeson.encode 
                                        (RtmChannelJoin (ChannelJoin (Types.ChannelSlug $ unSlug slug) user now)))
+                                       
+channelPattern :: BS.ByteString 
+channelPattern = encodeUtf8 "channel_"
 
 chanId2Bs :: ChannelSlug -> BS.ByteString
 chanId2Bs = encodeUtf8 . unSlug
