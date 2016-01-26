@@ -26,3 +26,5 @@ bower
 backend/src/bower/
 backend/src/js/templates.tpl
 .ghci
+backend/output/
+backend/.pulp-cache/

@@ -5,6 +5,10 @@ module Queries where
 import           Import hiding ((==.), (>=.))
 import qualified Database.Esqueleto as E
 import           Database.Esqueleto ((==.), (^.), (&&.), val, (?.))
+import Database.Persist.Sql (rawSql)
+import Database.Persist.Sql (fromSqlKey)
+
+
           
 -- list of all channels along with their current members for the given user 
 usersChannelsWithMembers :: MonadIO m => Key User -> SqlPersistT m [(Entity Channel, E.Value (Maybe (Key User)))]
@@ -65,3 +69,13 @@ userMemberships userKey = E.select $
                         E.from $ \membership -> do
                         E.where_ (membership ^. MembershipUser ==. val userKey)
                         return   (membership ^. MembershipChannel)
+                        
+messageHistorySql ::  Text
+messageHistorySql  = "select ?? from (select ROW_NUMBER() over (partition by channel order by timestamp desc)" <> 
+                              -- "as r, t.* from message t) message join shouldbechannel c on (c.id = message.channel) where message.r <= ? and message.channel in (" <>  
+                              "as r, t.* from message t) message join shouldbechannel c on (c.id = message.channel) where message.r <= ? and message.channel in ?" -- <>  
+                              -- intercalate "," (pack . show . fromSqlKey <$> channels) <> ");"
+                              
+                              
+messageHistory :: MonadIO m => Int -> [Key Channel] -> ReaderT SqlBackend m [(Entity Message, Entity Channel)]
+messageHistory limit channels = return [] -- rawSql (messageHistorySql) [PersistInt64 $ fromIntegral limit, PersistList (PersistInt64 . fromSqlKey <$> channels)]

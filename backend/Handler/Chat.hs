@@ -54,6 +54,9 @@ getChatR slug = do
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
     renderFunc <- getUrlRenderParams
+    liftIO (print "running this shiz")
+    users   <- runDB (messageHistory 10 [toSqlKey 1, toSqlKey 2])
+    liftIO $ forM_ users print
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
     let rtmStartUrl           = renderFunc RtmStartR [("channel_slug", unSlug slug)]
         signature             = "chatroom" :: Text
@@ -78,6 +81,7 @@ getChatR slug = do
         webSockets $ socketsApp (wsExceptionHandler (redisConn app) chanSlug) chatSettings
         defaultLayout $ do
           setTitle $ toHtml $ makeTitle slug <> " | TapLike"
+          addScriptAttrs (StaticR js_psapp_js) [("defer", "true")]
           $(widgetFile "chat-room")
       Nothing -> getHomeR
 

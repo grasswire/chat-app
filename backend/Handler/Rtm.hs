@@ -34,17 +34,20 @@ getRtmStartR = do
                 Just channel -> do 
                   members <- runDB (membersByChannel (entityKey channel))
                   users   <- runDB (usersByChannel (entityKey channel))
-                  let response = RtmStartRp Nothing ((\u -> userFromEntity u (presenceF u)) <$> users) [chanFromEntity channel (TP.NumberUsersPresent 0) members]
+                  let response = RtmStartRp Nothing ((\u -> userFromEntity u (presenceF u)) <$> users) [chanFromEntity channel (TP.NumberUsersPresent 0) members] []
                   returnJson response  
         authenticatedRtm u = do 
           presenceF <- liftIO presenceFunc
           users      <- runDB (usersInUserChannels (entityKey u))
           myChannels <- runDB (usersChannelsWithMembers (entityKey u))
-          let results = second E.unValue <$> myChannels
+          messageHistory <- runDB (messageHistory 10 (entityKey . fst <$> myChannels))
+          let groupedMessages = (map (\l@((_,t):_) -> (t, map fst l)) . groupBy ((==) `on` snd)) messageHistory :: [(Entity Channel, [Entity Message])]
+              messages = (\(chan, msgs) -> TP.MessageHistory (TP.ChannelSlug $ unSlug $ channelCrSlug $ entityVal chan) (rtmMessageFromEntity chan <$> msgs)) <$> groupedMessages :: [TP.MessageHistory]
+              results = second E.unValue <$> myChannels
               grouped = (map (\l@((h,_):_) -> (h, mapMaybe snd l)) . groupBy ((==) `on` fst)) results
               response = RtmStartRp (Just $ Self (TP.UserId $ fromSqlKey $ entityKey u) 
                                     (userTwitterScreenName $ entityVal u) (userProfileImageUrl $ entityVal u)) 
-                                    ((\user -> userFromEntity user (presenceF user)) <$> users) (uncurry (flip chanFromEntity $ TP.NumberUsersPresent 0) <$> grouped)
+                                    ((\user -> userFromEntity user (presenceF user)) <$> users) (uncurry (flip chanFromEntity $ TP.NumberUsersPresent 0) <$> grouped) messages
           returnJson response
         presenceFunc = do 
           now <- getCurrentTime

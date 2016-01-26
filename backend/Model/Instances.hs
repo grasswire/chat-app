@@ -132,6 +132,7 @@ deriving instance Eq Channel
 deriving instance Eq User
 deriving instance Eq ChannelJoin
 deriving instance Eq ChannelJoined
+deriving instance Eq MessageHistory
 
 deriveTextShow ''RtmStartRp
 deriveTextShow ''Self
@@ -162,18 +163,22 @@ deriveTextShow ''ChannelTitle
 deriveTextShow ''ChannelColor
 deriveTextShow ''ChannelJoin
 deriveTextShow ''ChannelJoined
+deriveTextShow ''MessageHistory
 
 instance FromJSON RtmStartRp where
   parseJSON = withObject "rtm.start reply" $ \ o -> RtmStartRp
     <$> o .:? "self"
     <*> o .: "users"
-    <*> o .: "members"
+    <*> o .: "channels"
+    <*> o .: "message_history"
 
 instance ToJSON RtmStartRp where
-  toJSON (RtmStartRp self users channels) = object
+  toJSON (RtmStartRp self users channels history) = object
     [ "self"  .= self
     , "users" .= users
     , "channels" .= channels
+    , "message_history" .= history
+    
     ]
 
 instance FromJSON Self where
@@ -415,4 +420,15 @@ instance ToJSON ChannelJoined where
     [ "type"       .= ("channel_joined" :: Text)
     , "channel"    .= chan
     , "timestamp" .= ts
+    ]
+    
+instance FromJSON MessageHistory where
+  parseJSON = withObject "message history" $ \o -> MessageHistory
+    <$> o .: "channel"
+    <*> o .: "messages"
+    
+instance ToJSON MessageHistory where 
+  toJSON (MessageHistory channel messages) = object 
+    [ "channel" .= unChannelSlug channel
+    , "messages" .= messages
     ]

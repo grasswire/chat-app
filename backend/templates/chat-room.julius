@@ -1,6 +1,7 @@
 App.routes.chatRoom    = "@{ChatR slug}";
+var rtmStartUrl = "#{rawJS rtmStartUrl}";
 App.routes.rtmStartUrl = "#{rawJS rtmStartUrl}";
 App.routes.likes = "@{MessageLikeR}";
 App.routes.channelLikes = "@{ChannelLikesR}";
 App.channels.current = "#{rawJS (unSlug (channelCrSlug room))}";
-console.log(App.channels.current)
+var currentChannel = "#{rawJS (unSlug (channelCrSlug room))}";

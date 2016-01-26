@@ -64,6 +64,12 @@ data RtmStartRp = RtmStartRp
   { rtmStartSelf     :: Maybe Self
   , rtmStartUsers    :: [User]
   , rtmStartChannels :: [Channel]
+  , rtmMessageHistory :: [MessageHistory]
+  }
+  
+data MessageHistory = MessageHistory 
+  { messageHistoryChannel  :: ChannelSlug
+  , messageHistoryMessages :: [Message]
   }
 
 data Self = Self

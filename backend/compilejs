@@ -1,0 +1,5 @@
+#!/bin/bash
+
+gulp compile
+pulp build --src-path "srcpurs" --to static/js/psapp.js
+touch ./Settings/StaticFiles.hs

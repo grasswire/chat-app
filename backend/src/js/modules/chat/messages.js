@@ -11,6 +11,10 @@ App.Modules.Messages = function () {
       });
     };
     
+    App.socket.onerror = function(error) {
+      console.log(error)
+    };
+    
     trackMessagesByChannel(response);
     handleChannelSwitch();
   };
