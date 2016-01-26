@@ -2,5 +2,6 @@
 
 // module Main
 
-exports.rtmStartUrl = rtmStartUrl;
-exports.currentChannel = currentChannel;
+exports.rtmStartUrl = ChatApp.rtmStartUrl;
+exports.currentChannel = ChatApp.currentChannel;
+exports.websocketUrl = ChatApp.websocketUrl;

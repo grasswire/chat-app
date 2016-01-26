@@ -54,7 +54,6 @@ getChatR slug = do
     channel <- runDB (getBy $ UniqueChannelSlug slug)
     authId <- maybeAuthId
     renderFunc <- getUrlRenderParams
-    liftIO (print "running this shiz")
     users   <- runDB (messageHistory 10 [toSqlKey 1, toSqlKey 2])
     liftIO $ forM_ users print
     chatUser <- maybe (return Nothing) (\userId -> fmap (Entity userId) <$> runDB (get userId)) authId
@@ -69,6 +68,7 @@ getChatR slug = do
         let room = entityVal c
             isLoggedIn = isJust authId
             chanSlug = channelCrSlug room
+            websocketUrl = renderFunc (ChatR slug) []
         chatSettings <- case chatUser of 
           Just user -> do 
             usersChans <- runDB (usersChannels (entityKey user))

@@ -1,7 +1,10 @@
+var ChatApp = {
+  rtmStartUrl: "#{rawJS rtmStartUrl}",
+  currentChannel: "#{rawJS (unSlug (channelCrSlug room))}",
+  websocketUrl: "#{rawJS websocketUrl}"
+}
 App.routes.chatRoom    = "@{ChatR slug}";
-var rtmStartUrl = "#{rawJS rtmStartUrl}";
 App.routes.rtmStartUrl = "#{rawJS rtmStartUrl}";
 App.routes.likes = "@{MessageLikeR}";
 App.routes.channelLikes = "@{ChannelLikesR}";
 App.channels.current = "#{rawJS (unSlug (channelCrSlug room))}";
-var currentChannel = "#{rawJS (unSlug (channelCrSlug room))}";
