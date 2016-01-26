@@ -17,8 +17,8 @@
                 <a href="@{TwitterAuthR}">Log In
     <div class="masthead__content-container">
       <div class="wrapper">
-        <h1>Chat about anything
-        <h2>Join a live community or start your own
+        <h1>Come Together
+        <h2>TapLike is the easiest way to chat with groups of people online
         <p>
           $maybe userId <- authId
             <a href="#" class="js-trigger-modal button" data-modal-trigger="create">Create a Channel

@@ -15,7 +15,39 @@
       max-height: 450px;
       overflow-x: hidden;
       overflow-y: scroll;
-      top: 22px;
+      top: 30px;
       width: 244px;
    }
+
+   &--share {
+      @extend .dropdown;
+      @include font-size(15px);
+      color: get-color(white);
+      left: #{-((244/2) + 49)}px;
+      top: 30px;
+      width: 286px;
+      padding: 10px 15px;
+      font-weight: get-font-weight(bold);
+
+      &-button {
+         width: 246px;
+         height: 46px;
+         margin: 10px auto;
+         background-color: blue;
+         border-radius: 4px;
+         padding-top:12px;
+      }
+   }   
+}
+
+.twitter-share {
+   background-color: #55acee;
+}
+
+.facebook-share {
+   background-color: #3b5998;
+}
+
+.share-icon {
+   margin-right: 5px;
 }
