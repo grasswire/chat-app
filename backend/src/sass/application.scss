@@ -40,7 +40,6 @@
 @import "base/variables";
 @import "base/elements";
 @import "base/inputs";
-@import "base/responsive";
 
 /**
  * Most of your code *should* nicely fit into modules, but I'd the truth is that
@@ -93,4 +92,6 @@
 @import "modules/card";
 @import "modules/room";
 
+
+@import "base/responsive";
 

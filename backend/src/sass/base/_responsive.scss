@@ -6,17 +6,28 @@
 
 /* TABLETS PORTRAIT */
 @media only screen and (max-width: 768px) {
-	.room__sidebar {
-		display: none;
-	}
+	.room {
+
+      &__sidebar {
+       	display: none;
+      }
+
+   	&__buttons {
+   		display: none;
+   	}
+
+      &__description {
+         text-align: center;
+         margin: 0 auto;
+      }
+
+   }
 
 }
 
 /* SMARTPHONES LANDSCAPE */
 @media only screen and (max-width: 480px) {
-	.room__buttons {
-		display: none;
-	}
+	
 }
 
 
