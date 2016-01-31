@@ -1,6 +1,6 @@
 <body class="#{signature}" data-is-logged-in="#{isLoggedIn}" data-channel="#{htmlSlug}">
   <div class="room">
-    <aside class="room__sidebar">
+    <aside class="room__sidebar pushy pushy-left">
       <header class="room__masthead">
         <div class="branding">
           <a href="/" class="logo--light">Tap
@@ -23,9 +23,10 @@
                     <li class="js-channel_list_item room__channel room__channel-selected" data-channel-title="#{channelTitle (entityVal channel)}" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
                   $else
                     <li class="js-channel_list_item room__channel" data-channel-title="#{channelTitle (entityVal channel)}" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
-    <main class="room__chat">
+    <main class="room__chat" id="container">
+
       <header class="room__details-bar">
-        <div class="show-sidebar-left">
+        <div class="menu-btn">
           <a href="#">
             <span class="fa fa-bars">
         <div class="room__description">
@@ -54,6 +55,7 @@
               <li class="room__buttons-item">
                 <a href="#" class="js-star-room" data-room-is-starred="false">
                   <span class="fa fa-star-o">
+      <div class="site-overlay">
       <article class="realtime">
         <div class="realtime__output js-chat-output">
         <form class="js-chat-form realtime__form">
@@ -61,5 +63,6 @@
             <input id="realtime__input" class="realtime__input js-chat-input" name="stopautofillingchrome" placeholder="Type something and press enter..." autofocus>
           $nothing
             <input id="realtime__input" class="realtime__input js-chat-input" placeholder="Sign in to chat">
+
 
   ^{modalSignin}

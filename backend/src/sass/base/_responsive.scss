@@ -1,32 +1,26 @@
 /* TABLET LANDSCAPE / DESKTOP */
 
-.show-sidebar-left, .show-sidebar-right {
+.menu-btn {
    @include font-size(20px);
    color: #acb3bf;
-}
-
-.show-sidebar-left {
-   float:left;
    display: none;
 }
 
-.show-sidebar-right {
-   float:right;
-   display: none;
-}
-
-
-@media only screen and (max-width: 1024px) {
-
-
-}    
-
-/* TABLETS PORTRAIT */
+/* TABLET AND SMALLER*/
 @media only screen and (max-width: 768px) {
 	.room {
 
       &__sidebar {
-       	display: none;
+         position: fixed;
+       	left: 0px;
+         z-index: 999;
+         width: 240px;
+      }
+
+      &__chat {
+         position: absolute;
+         width: 100%;
+         z-index:1000;
       }
 
    	&__buttons {
@@ -48,24 +42,11 @@
       padding: 10px 20px;
    }
 
-   .show-sidebar-left, .show-sidebar-right {
+   .menu-btn {
       display: inline;
    }
 
 }
-
-/* SMARTPHONES LANDSCAPE */
-@media only screen and (max-width: 480px) {
-	
-}
-
-
-/* SMARTPHONES PORTRAIT */
-@media only screen and (max-width: 300px) {
-
-
-}
-
 
 
 
