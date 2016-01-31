@@ -25,6 +25,9 @@
                     <li class="js-channel_list_item room__channel" data-channel-title="#{channelTitle (entityVal channel)}" data-channel="#{unSlug (channelCrSlug (entityVal channel))}">#{channelTitle (entityVal channel)}
     <main class="room__chat">
       <header class="room__details-bar">
+        <div class="show-sidebar-left">
+          <a href="#">
+            <span class="fa fa-bars">
         <div class="room__description">
           <h1>#{channelTitle room}
             <a href="#" class="js-dropdown room__search" data-dropdown-name="search">

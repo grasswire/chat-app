@@ -1,4 +1,21 @@
 /* TABLET LANDSCAPE / DESKTOP */
+
+.show-sidebar-left, .show-sidebar-right {
+   @include font-size(20px);
+   color: #acb3bf;
+}
+
+.show-sidebar-left {
+   float:left;
+   display: none;
+}
+
+.show-sidebar-right {
+   float:right;
+   display: none;
+}
+
+
 @media only screen and (max-width: 1024px) {
 
 
@@ -21,6 +38,10 @@
          margin: 0 auto;
       }
 
+   }
+
+   .show-sidebar-left, .show-sidebar-right {
+      display: inline;
    }
 
 }
